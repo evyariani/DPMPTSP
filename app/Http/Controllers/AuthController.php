@@ -10,15 +10,9 @@ class AuthController extends Controller
 {
     public function login()
     {
-        // Jika sudah login, redirect sesuai level
+        // Jika sudah login, redirect ke user
         if (session()->has('user')) {
-            $level = session('user')['level'];
-            
-            if (in_array($level, ['admin', 'pemimpin', 'admin_keuangan'])) {
-                return redirect('/user');
-            }
-            
-            return redirect('/dashboard-user');
+            return redirect('/user');
         }
         
         return view('auth.login');
@@ -50,13 +44,8 @@ class AuthController extends Controller
             ]
         ]);
 
-        // Redirect berdasarkan level
-        if (in_array($user->level, ['admin', 'pemimpin', 'admin_keuangan'])) {
-            return redirect('/user'); // Langsung ke Data User
-        }
-
-        // Untuk pegawai biasa
-        return redirect('/dashboard-user');
+        // Redirect ke user management
+        return redirect('/user');
     }
 
     public function logout()

@@ -1,4 +1,5 @@
-@extends('admin')
+{{-- resources/views/admin/user.blade.php --}}
+@extends('layouts.admin') {{-- PERUBAHAN DI SINI: dari 'admin' ke 'layouts.admin' --}}
 
 @section('title', 'Data User')
 
@@ -126,7 +127,6 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <!-- PERBAIKAN DI SINI: Gunakan null-safe operator -->
                         {{ $user->created_at?->format('d/m/Y H:i') ?? '-' }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
