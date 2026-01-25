@@ -1,7 +1,7 @@
 {{-- resources/views/admin/user.blade.php --}}
 @extends('layouts.admin') {{-- PERUBAHAN DI SINI: dari 'admin' ke 'layouts.admin' --}}
 
-@section('title', 'Data User')
+@section('title', 'User')
 
 @section('content')
 <div class="mb-6">

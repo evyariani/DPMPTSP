@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PegawaiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,8 +57,28 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         });
     });
     
+    // PEGAWAI MANAGEMENT - SUDAH ADA
+    Route::prefix('pegawai')->group(function () {
+        // Semua user yang login bisa melihat data pegawai
+        Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
+        
+        // CREATE, EDIT, DELETE hanya untuk admin roles
+        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+            Route::get('/create', [PegawaiController::class, 'create'])->name('pegawai.create');
+            Route::post('/', [PegawaiController::class, 'store'])->name('pegawai.store');
+            Route::get('/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
+            Route::put('/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
+            Route::delete('/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
+        });
+    });
+    
     // MODUL LAINNYA hanya untuk admin roles
     Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+        // HAPUS SEMUA BARIS INI YANG TERKAIT PEGAWAI:
+        // Route::get('/pegawai', function () {
+        //     return view('admin.pegawai');
+        // })->name('pegawai.index');
+        
         Route::get('/unit', function () {
             return view('admin.unit');
         })->name('unit.index');
