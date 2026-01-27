@@ -77,16 +77,23 @@ class PegawaiController extends Controller
             'pangkat' => 'nullable|string|max:50',
             'gol' => 'nullable|string|max:10',
             'jabatan' => 'nullable|string|max:100',
-            'tk_jalan' => 'nullable|string|max:50' // DIUBAH: numeric -> string
+            'tk_jalan' => 'nullable|string|max:50'
         ], [
             'nama.required' => 'Nama pegawai harus diisi',
             'nip.unique' => 'NIP sudah terdaftar'
-            // DIHAPUS: 'tk_jalan.numeric' => 'Tunjangan jalan harus berupa angka'
         ]);
         
         // Format NIP hapus spasi
         if ($request->nip) {
             $validated['nip'] = str_replace(' ', '', $request->nip);
+        }
+        
+        // Format tk_jalan (uppercase jika huruf)
+        if ($request->tk_jalan) {
+            $validated['tk_jalan'] = trim($request->tk_jalan);
+            if (!is_numeric($validated['tk_jalan'])) {
+                $validated['tk_jalan'] = strtoupper($validated['tk_jalan']);
+            }
         }
         
         Pegawai::create($validated);
@@ -97,7 +104,7 @@ class PegawaiController extends Controller
     public function edit($id)
     {
         $pegawai = Pegawai::findOrFail($id);
-        return view('admin.pegawai.edit', compact('pegawai'));
+        return view('admin.edit-pegawai', compact('pegawai')); // UBAH INI
     }
     
     public function update(Request $request, $id)
@@ -110,16 +117,23 @@ class PegawaiController extends Controller
             'pangkat' => 'nullable|string|max:50',
             'gol' => 'nullable|string|max:10',
             'jabatan' => 'nullable|string|max:100',
-            'tk_jalan' => 'nullable|string|max:50' // DIUBAH: numeric -> string
+            'tk_jalan' => 'nullable|string|max:50'
         ], [
             'nama.required' => 'Nama pegawai harus diisi',
             'nip.unique' => 'NIP sudah terdaftar'
-            // DIHAPUS: 'tk_jalan.numeric' => 'Tunjangan jalan harus berupa angka'
         ]);
         
         // Format NIP hapus spasi
         if ($request->nip) {
             $validated['nip'] = str_replace(' ', '', $request->nip);
+        }
+        
+        // Format tk_jalan (uppercase jika huruf)
+        if ($request->tk_jalan) {
+            $validated['tk_jalan'] = trim($request->tk_jalan);
+            if (!is_numeric($validated['tk_jalan'])) {
+                $validated['tk_jalan'] = strtoupper($validated['tk_jalan']);
+            }
         }
         
         $pegawai->update($validated);

@@ -100,7 +100,7 @@
                         <!-- DATA MASTER -->
                         <a href="/user" 
                            class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('user*', 'pegawai*', 'barang*', 'penyedia*', 'data-stok*', 'plat*', 'rekening*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
+                                  {{ request()->is('user*', 'pegawai*', 'transportasi*', 'penyedia*', 'data-stok*', 'plat*', 'rekening*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
                             <i class="fas fa-database text-teal-600 text-lg"></i>
                             <span class="font-medium">Data Master</span>
                         </a>
@@ -209,7 +209,7 @@
 
             <!-- SUBMENU BAR - TAMPIL DI BAWAH MENU UTAMA -->
             <!-- Submenu Data Master - RATA TENGAH -->
-            <div x-show="{{ request()->is('user*', 'pegawai*', 'barang*', 'penyedia*', 'data-stok*', 'plat*', 'rekening*') }}"
+            <div x-show="{{ request()->is('user*', 'pegawai*', 'transportasi*', 'penyedia*', 'data-stok*', 'plat*', 'rekening*') }}"
                  class="bg-gradient-to-r from-teal-50 to-emerald-50 border-t border-teal-100 px-6 py-3">
                 <div class="max-w-7xl mx-auto">
                     <div class="flex justify-center items-center">
@@ -228,10 +228,10 @@
                                 <i class="fas fa-building text-teal-500"></i> Pegawai
                             </a>
                             
-                            <!-- Data Barang -->
-                            <a href="/barang" 
+                            <!-- Data transportasi -->
+                            <a href="/transportasi" 
                                class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('barang*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
+                                      {{ request()->is('transportasi*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
                                 <i class="fas fa-box text-teal-500"></i> Transportasi
                             </a>
                             
@@ -280,6 +280,10 @@
 
             <!-- CONTENT -->
             <div class="p-6">
+                {{-- // NOTIFIKASI DIATAS DIMATIKAN --}}
+                {{-- // KARENA SUDAH ADA NOTIFIKASI KUSTOM DI BAWAH DI FILE pegawai.blade.php --}}
+                {{-- // JADI HAPUS AJA BLOK INI: --}}
+                {{--
                 @if(session('success'))
                     <div class="bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg shadow-sm">
                         <div class="flex items-center">
@@ -305,6 +309,7 @@
                         </div>
                     </div>
                 @endif
+                --}}
                 
                 @yield('content')
             </div>

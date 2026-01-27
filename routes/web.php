@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PegawaiController;
+use App\Http\Controllers\TransportasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,6 +70,21 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
             Route::get('/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
             Route::put('/{id}', [PegawaiController::class, 'update'])->name('pegawai.update');
             Route::delete('/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
+        });
+    });
+    
+    // TRANSPORTASI MANAGEMENT - TAMBAHAN BARU
+    Route::prefix('transportasi')->group(function () {
+        // Semua user yang login bisa melihat data transportasi
+        Route::get('/', [TransportasiController::class, 'index'])->name('transportasi.index');
+        
+        // CREATE, EDIT, DELETE hanya untuk admin roles
+        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+            Route::get('/create', [TransportasiController::class, 'create'])->name('transportasi.create');
+            Route::post('/', [TransportasiController::class, 'store'])->name('transportasi.store');
+            Route::get('/{id}/edit', [TransportasiController::class, 'edit'])->name('transportasi.edit');
+            Route::put('/{id}', [TransportasiController::class, 'update'])->name('transportasi.update');
+            Route::delete('/{id}', [TransportasiController::class, 'destroy'])->name('transportasi.destroy');
         });
     });
     
