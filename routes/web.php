@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\TransportasiController;
+use App\Http\Controllers\RekeningController; // IMPORT BARU
 
 /*
 |--------------------------------------------------------------------------
@@ -58,7 +59,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         });
     });
     
-    // PEGAWAI MANAGEMENT - SUDAH ADA
+    // PEGAWAI MANAGEMENT
     Route::prefix('pegawai')->group(function () {
         // Semua user yang login bisa melihat data pegawai
         Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
@@ -73,7 +74,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         });
     });
     
-    // TRANSPORTASI MANAGEMENT - TAMBAHAN BARU
+    // TRANSPORTASI MANAGEMENT
     Route::prefix('transportasi')->group(function () {
         // Semua user yang login bisa melihat data transportasi
         Route::get('/', [TransportasiController::class, 'index'])->name('transportasi.index');
@@ -88,13 +89,23 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         });
     });
     
+    // REKENING MANAGEMENT - TAMBAHAN BARU
+    Route::prefix('rekening')->group(function () {
+        // Semua user yang login bisa melihat data rekening
+        Route::get('/', [RekeningController::class, 'index'])->name('rekening.index');
+        
+        // CREATE, EDIT, DELETE hanya untuk admin roles
+        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+            Route::get('/create', [RekeningController::class, 'create'])->name('rekening.create');
+            Route::post('/', [RekeningController::class, 'store'])->name('rekening.store');
+            Route::get('/{id}/edit', [RekeningController::class, 'edit'])->name('rekening.edit');
+            Route::put('/{id}', [RekeningController::class, 'update'])->name('rekening.update');
+            Route::delete('/{id}', [RekeningController::class, 'destroy'])->name('rekening.destroy');
+        });
+    });
+    
     // MODUL LAINNYA hanya untuk admin roles
     Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
-        // HAPUS SEMUA BARIS INI YANG TERKAIT PEGAWAI:
-        // Route::get('/pegawai', function () {
-        //     return view('admin.pegawai');
-        // })->name('pegawai.index');
-        
         Route::get('/unit', function () {
             return view('admin.unit');
         })->name('unit.index');
