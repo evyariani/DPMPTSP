@@ -10,27 +10,27 @@
         .bg-gradient-teal {
             background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #14b8a6 100%);
         }
-        
+
         /* Animasi untuk logo */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .animate-fade-in {
             animation: fadeIn 0.5s ease-out;
         }
-        
+
         /* Hover effect untuk button */
         .btn-hover-effect {
             transition: all 0.3s ease;
         }
-        
+
         .btn-hover-effect:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(13, 148, 136, 0.2);
         }
-        
+
         /* Smooth transition untuk input */
         .smooth-transition {
             transition: all 0.3s ease;
@@ -46,8 +46,8 @@
             <div class="mb-5 text-center">
                 <!-- Logo DPMPTSP - ukuran seperti referensi -->
                 <div class="flex justify-center mb-2">
-                    <img src="{{ asset('image/dpm.png') }}" 
-                         alt="Logo DPMPTSP" 
+                    <img src="{{ asset('image/dpm.png') }}"
+                         alt="Logo DPMPTSP"
                          class="h-36 w-auto object-contain">
                 </div>
                 <h1 class="text-2xl font-extrabold text-gray-800 mb-1">Selamat Datang</h1>
@@ -115,8 +115,8 @@
                             required
                             autocomplete="current-password"
                         >
-                        <button type="button" 
-                                id="togglePassword" 
+                        <button type="button"
+                                id="togglePassword"
                                 class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-teal-600 smooth-transition">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -170,7 +170,7 @@
         document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
             const icon = this.querySelector('i');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -198,13 +198,13 @@
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            
+
             if (!username || !password) {
                 e.preventDefault();
-                
+
                 // Animasi shake untuk input kosong
                 const shake = 'animate-shake';
-                
+
                 if (!username) {
                     const usernameInput = document.getElementById('username');
                     usernameInput.classList.add('border-red-500', shake);
@@ -212,7 +212,7 @@
                         usernameInput.classList.remove(shake);
                     }, 500);
                 }
-                
+
                 if (!password) {
                     const passwordInput = document.getElementById('password');
                     passwordInput.classList.add('border-red-500', shake);
@@ -227,7 +227,7 @@
         document.getElementById('username').addEventListener('input', function() {
             this.classList.remove('border-red-500');
         });
-        
+
         document.getElementById('password').addEventListener('input', function() {
             this.classList.remove('border-red-500');
         });
@@ -236,11 +236,11 @@
         document.getElementById('loginForm').addEventListener('submit', function() {
             const button = this.querySelector('button[type="submit"]');
             const originalHTML = button.innerHTML;
-            
+
             button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
             button.disabled = true;
             button.classList.add('opacity-75', 'cursor-not-allowed');
-            
+
             // Reset button after 5 seconds (safety timeout)
             setTimeout(() => {
                 button.innerHTML = originalHTML;
