@@ -100,15 +100,15 @@
                         <!-- DATA MASTER -->
                         <a href="/user" 
                            class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('user*', 'pegawai*', 'transportasi*', 'rekening*', 'data-stok*', 'plat*', 'rekening*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
+                                  {{ request()->is('user*', 'pegawai*', 'program*', 'uang-harian*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
                             <i class="fas fa-database text-teal-600 text-lg"></i>
                             <span class="font-medium">Data Master</span>
                         </a>
 
-                        <!-- SPPD -->
-                        <a href="/sppd" 
+                        <!-- SPT -->
+                        <a href="/spt" 
                            class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('sppd*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
+                                  {{ request()->is('spt*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
                             <i class="fas fa-file-invoice-dollar text-teal-600 text-lg"></i>
                             <span class="font-medium">SPT</span>
                         </a>
@@ -137,7 +137,7 @@
                             <span class="font-medium">Rincian Bidang</span>
                         </a>
 
-                                                <!-- PENGATURAN -->
+                        <!-- PENGATURAN -->
                         <a href="/pengaturan" 
                            class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
                                   {{ request()->is('pengaturan*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
@@ -209,7 +209,7 @@
 
             <!-- SUBMENU BAR - TAMPIL DI BAWAH MENU UTAMA -->
             <!-- Submenu Data Master - RATA TENGAH -->
-            <div x-show="{{ request()->is('user*', 'pegawai*', 'transportasi*', 'rekening*', 'data-stok*', 'plat*', 'rekening*') }}"
+            <div x-show="{{ request()->is('user*', 'pegawai*', 'program*', 'uang-harian*') }}"
                  class="bg-gradient-to-r from-teal-50 to-emerald-50 border-t border-teal-100 px-6 py-3">
                 <div class="max-w-7xl mx-auto">
                     <div class="flex justify-center items-center">
@@ -229,31 +229,31 @@
                             </a>
                             
                             <!-- Data transportasi -->
-                            <a href="/transportasi" 
+                            {{-- <a href="/transportasi" 
                                class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
                                       {{ request()->is('transportasi*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-box text-teal-500"></i> Transportasi
-                            </a>
+                                <i class="fas fa-car text-teal-500"></i> Transportasi
+                            </a> --}}
                             
                             <!-- Data rekening -->
-                            <a href="/rekening" 
+                            {{-- <a href="/rekening" 
                                class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
                                       {{ request()->is('rekening*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-address-book text-teal-500"></i> Rekening
-                            </a>
+                                <i class="fas fa-credit-card text-teal-500"></i> Rekening
+                            </a> --}}
                             
                             <!-- Data Stok -->
-                            <a href="/data-stok" 
+                            <a href="/program" 
                                class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('data-stok*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
+                                      {{ request()->is('program*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
                                 <i class="fas fa-boxes text-teal-500"></i> Program
                             </a>
                             
-                            <!-- Plat -->
-                            <a href="/plat" 
+                            <!-- Uang Harian -->
+                            <a href="/uang-harian" 
                                class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('plat*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-car text-teal-500"></i> Dana
+                                      {{ request()->is('uang-harian*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
+                                <i class="fas fa-money-bill-wave text-teal-500"></i> Uang Harian
                             </a>
                         </div>
                     </div>
@@ -266,10 +266,6 @@
             <!-- PAGE HEADER -->
             <div class="bg-gradient-to-r from-white to-teal-50 border-b border-teal-100 px-6 py-5 shadow-sm">
                 <div class="max-w-7xl mx-auto">
-                    {{-- <h1 class="text-2xl font-bold text-teal-800 flex items-center gap-3">
-                        <i class="fas @yield('icon', 'fa-cog') text-teal-600"></i>
-                        @yield('title')
-                    </h1> --}}
                     @hasSection('subtitle')
                         <p class="text-gray-600 mt-2 text-sm bg-white/50 inline-block px-3 py-1.5 rounded-lg border border-teal-100">
                             <i class="fas fa-info-circle text-teal-500 mr-2"></i>@yield('subtitle')
@@ -280,37 +276,6 @@
 
             <!-- CONTENT -->
             <div class="p-6">
-                {{-- // NOTIFIKASI DIATAS DIMATIKAN --}}
-                {{-- // KARENA SUDAH ADA NOTIFIKASI KUSTOM DI BAWAH DI FILE pegawai.blade.php --}}
-                {{-- // JADI HAPUS AJA BLOK INI: --}}
-                {{--
-                @if(session('success'))
-                    <div class="bg-gradient-to-r from-emerald-50 to-green-50 border-l-4 border-emerald-500 p-4 mb-6 rounded-r-lg shadow-sm">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-check-circle text-emerald-500 text-lg"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-emerald-700 font-medium">{{ session('success') }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                
-                @if(session('error'))
-                    <div class="bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg shadow-sm">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-circle text-red-500 text-lg"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-red-700 font-medium">{{ session('error') }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-                --}}
-                
                 @yield('content')
             </div>
         </main>

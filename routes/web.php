@@ -5,7 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\TransportasiController;
-use App\Http\Controllers\RekeningController; // IMPORT BARU
+use App\Http\Controllers\RekeningController;
+use App\Http\Controllers\UangHarianController;
+use App\Http\Controllers\ProgramController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,13 +45,11 @@ Route::get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(function () {
-    // RoleMiddleware akan menangani cek session dan role
     
-    // USER MANAGEMENT (SEMUA USER YANG LOGIN BISA LIHAT)
+    // USER MANAGEMENT
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('user.index');
         
-        // CREATE, EDIT, DELETE hanya untuk admin roles
         Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
             Route::get('/create', [UserController::class, 'create'])->name('user.create');
             Route::post('/', [UserController::class, 'store'])->name('user.store');
@@ -61,10 +61,8 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
     
     // PEGAWAI MANAGEMENT
     Route::prefix('pegawai')->group(function () {
-        // Semua user yang login bisa melihat data pegawai
         Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
         
-        // CREATE, EDIT, DELETE hanya untuk admin roles
         Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
             Route::get('/create', [PegawaiController::class, 'create'])->name('pegawai.create');
             Route::post('/', [PegawaiController::class, 'store'])->name('pegawai.store');
@@ -74,12 +72,23 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         });
     });
     
+    // PROGRAM MANAGEMENT
+    Route::prefix('program')->group(function () {
+        Route::get('/', [ProgramController::class, 'index'])->name('program.index');
+        
+        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+            Route::get('/create', [ProgramController::class, 'create'])->name('program.create');
+            Route::post('/', [ProgramController::class, 'store'])->name('program.store');
+            Route::get('/{id}/edit', [ProgramController::class, 'edit'])->name('program.edit');
+            Route::put('/{id}', [ProgramController::class, 'update'])->name('program.update');
+            Route::delete('/{id}', [ProgramController::class, 'destroy'])->name('program.destroy');
+        });
+    });
+    
     // TRANSPORTASI MANAGEMENT
     Route::prefix('transportasi')->group(function () {
-        // Semua user yang login bisa melihat data transportasi
         Route::get('/', [TransportasiController::class, 'index'])->name('transportasi.index');
         
-        // CREATE, EDIT, DELETE hanya untuk admin roles
         Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
             Route::get('/create', [TransportasiController::class, 'create'])->name('transportasi.create');
             Route::post('/', [TransportasiController::class, 'store'])->name('transportasi.store');
@@ -89,12 +98,10 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         });
     });
     
-    // REKENING MANAGEMENT - TAMBAHAN BARU
+    // REKENING MANAGEMENT
     Route::prefix('rekening')->group(function () {
-        // Semua user yang login bisa melihat data rekening
         Route::get('/', [RekeningController::class, 'index'])->name('rekening.index');
         
-        // CREATE, EDIT, DELETE hanya untuk admin roles
         Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
             Route::get('/create', [RekeningController::class, 'create'])->name('rekening.create');
             Route::post('/', [RekeningController::class, 'store'])->name('rekening.store');
@@ -104,7 +111,32 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         });
     });
     
-    // MODUL LAINNYA hanya untuk admin roles
+    // ============================================
+    // UANG HARIAN MANAGEMENT - LENGKAP DENGAN API
+    // ============================================
+    Route::prefix('uang-harian')->group(function () {
+        // CRUD Routes
+        Route::get('/', [UangHarianController::class, 'index'])->name('uang-harian.index');
+        
+        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+            Route::get('/create', [UangHarianController::class, 'create'])->name('uang-harian.create');
+            Route::post('/', [UangHarianController::class, 'store'])->name('uang-harian.store');
+            Route::get('/{id}/edit', [UangHarianController::class, 'edit'])->name('uang-harian.edit');
+            Route::put('/{id}', [UangHarianController::class, 'update'])->name('uang-harian.update');
+            Route::delete('/{id}', [UangHarianController::class, 'destroy'])->name('uang-harian.destroy');
+        });
+        
+        // ========== API ROUTES UNTUK AJAX ==========
+        // Ambil kabupaten berdasarkan provinsi (query string)
+        Route::get('/get-kabupaten', [UangHarianController::class, 'getKabupaten'])
+            ->name('uang-harian.get-kabupaten');
+        
+        // Ambil kecamatan berdasarkan kabupaten (query string)
+        Route::get('/get-kecamatan', [UangHarianController::class, 'getKecamatan'])
+            ->name('uang-harian.get-kecamatan');
+    });
+    
+    // MODUL LAINNYA
     Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
         Route::get('/unit', function () {
             return view('admin.unit');
@@ -118,7 +150,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
 
 /*
 |--------------------------------------------------------------------------
-| TESTING ROUTES (Opsional)
+| TESTING ROUTES
 |--------------------------------------------------------------------------
 */
 Route::get('/check-session', function () {

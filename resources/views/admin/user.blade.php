@@ -175,7 +175,7 @@
 </div>
 
 <!-- Pagination -->
-@if($users->hasPages())
+@if($users->count()>0)
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
