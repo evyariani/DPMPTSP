@@ -18,36 +18,137 @@ class UangHarianController extends Controller
         try {
             $query = UangHarian::with('daerah');
             
-            // Search
+            // ========== SEARCH ==========
             if ($request->has('search') && $request->search != '') {
-                $query->search($request->search);
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('tempat_tujuan', 'like', "%{$search}%")
+                      ->orWhere('uang_harian', 'like', "%{$search}%")
+                      ->orWhere('uang_transport', 'like', "%{$search}%")
+                      ->orWhereHas('daerah', function($q2) use ($search) {
+                          $q2->where('nama', 'like', "%{$search}%");
+                      });
+                });
             }
             
-            // Filter daerah
-            if ($request->has('daerah_id') && $request->daerah_id != '') {
-                $query->where('daerah_id', $request->daerah_id);
+            // ========== FILTER TINGKAT DAERAH ==========
+            if ($request->has('tingkat') && $request->tingkat != '') {
+                $query->whereHas('daerah', function($q) use ($request) {
+                    $q->where('tingkat', $request->tingkat);
+                });
             }
             
-            // Order by created_at desc (data terbaru di atas)
+            // ========== FILTER PROVINSI ==========
+            if ($request->has('provinsi_id') && $request->provinsi_id != '') {
+                $query->whereHas('daerah', function($q) use ($request) {
+                    $q->where('id', $request->provinsi_id);
+                });
+            }
+            
+            // ========== FILTER KABUPATEN ==========
+            if ($request->has('kabupaten_id') && $request->kabupaten_id != '') {
+                $query->whereHas('daerah', function($q) use ($request) {
+                    $q->where('id', $request->kabupaten_id);
+                });
+            }
+            
+            // ========== FILTER KECAMATAN ==========
+            if ($request->has('kecamatan_id') && $request->kecamatan_id != '') {
+                $query->whereHas('daerah', function($q) use ($request) {
+                    $q->where('id', $request->kecamatan_id);
+                });
+            }
+            
+            // ========== FILTER TEMPAT TUJUAN ==========
+            if ($request->has('tempat') && $request->tempat != '') {
+                $query->where('tempat_tujuan', $request->tempat);
+            }
+            
+            // ========== ORDER BY ==========
+            // Prioritas 1: Tingkat daerah (Kecamatan > Kabupaten > Provinsi)
+            $query->orderByRaw("
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM tb_daerah d 
+                        WHERE d.id = tb_uang_harian.daerah_id 
+                        AND d.tingkat = 'kecamatan'
+                    ) THEN 1
+                    WHEN EXISTS (
+                        SELECT 1 FROM tb_daerah d 
+                        WHERE d.id = tb_uang_harian.daerah_id 
+                        AND d.tingkat = 'kabupaten'
+                    ) THEN 2
+                    ELSE 3
+                END ASC
+            ");
+            
+            // Prioritas 2: Created_at terbaru
             $query->orderBy('created_at', 'desc');
             
-            // Paginate
-            $uangHarians = $query->paginate(10);
+            // Paginate dengan query string
+            $uangHarians = $query->paginate(10)->withQueryString();
             
-            // Get unique daerah untuk filter
-            $daerahList = UangHarian::with('daerah')
-                ->get()
-                ->pluck('daerah.nama', 'daerah_id')
-                ->filter()
-                ->unique()
+            // ========== DATA UNTUK FILTER DROPDOWN ==========
+            // Ambil semua provinsi
+            $provinsiList = Daerah::where('tingkat', 'provinsi')
+                ->orderBy('nama')
+                ->pluck('nama', 'id')
                 ->toArray();
+            
+            // Ambil semua kabupaten
+            $kabupatenList = Daerah::where('tingkat', 'kabupaten')
+                ->orderBy('nama')
+                ->pluck('nama', 'id')
+                ->toArray();
+            
+            // Ambil semua kecamatan
+            $kecamatanList = Daerah::where('tingkat', 'kecamatan')
+                ->orderBy('nama')
+                ->pluck('nama', 'id')
+                ->toArray();
+            
+            // Ambil tempat tujuan unik
+            $tempatList = UangHarian::distinct()
+                ->orderBy('tempat_tujuan')
+                ->pluck('tempat_tujuan')
+                ->toArray();
+            
+            // ========== STATISTIK ==========
+            $totalData = UangHarian::count();
+            $totalKecamatan = UangHarian::whereHas('daerah', function($q) {
+                $q->where('tingkat', 'kecamatan');
+            })->count();
+            $totalKabupaten = UangHarian::whereHas('daerah', function($q) {
+                $q->where('tingkat', 'kabupaten');
+            })->count();
+            $totalProvinsi = UangHarian::whereHas('daerah', function($q) {
+                $q->where('tingkat', 'provinsi');
+            })->count();
                 
         } catch (\Exception $e) {
+            // Jika terjadi error, buat paginator kosong
             $uangHarians = new LengthAwarePaginator([], 0, 10);
-            $daerahList = [];
+            $provinsiList = [];
+            $kabupatenList = [];
+            $kecamatanList = [];
+            $tempatList = [];
+            $totalData = 0;
+            $totalKecamatan = 0;
+            $totalKabupaten = 0;
+            $totalProvinsi = 0;
         }
         
-        return view('admin.uang-harian', compact('uangHarians', 'daerahList'));
+        return view('admin.uang-harian', compact(
+            'uangHarians',
+            'provinsiList',
+            'kabupatenList',
+            'kecamatanList',
+            'tempatList',
+            'totalData',
+            'totalKecamatan',
+            'totalKabupaten',
+            'totalProvinsi'
+        ));
     }
 
     /**
@@ -64,102 +165,98 @@ class UangHarianController extends Controller
     }
 
     /**
- * API: Get kabupaten/kota berdasarkan provinsi
- */
-public function getKabupaten(Request $request)
-{
-    $provinsiId = $request->provinsi_id;
-    
-    if (!$provinsiId) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Provinsi ID tidak ditemukan',
-            'data' => [],
-            'can_select_kabupaten' => false
-        ]);
-    }
-    
-    $provinsi = Daerah::find($provinsiId);
-    
-    if (!$provinsi) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Provinsi tidak ditemukan',
-            'data' => [],
-            'can_select_kabupaten' => false
-        ]);
-    }
-    
-    // Cek apakah ini Kalimantan Selatan (kode 63)
-    $isKalsel = trim($provinsi->kode) == '63';
-    
-    // PERBAIKAN: HANYA KIRIM DATA KABUPATEN JIKA KALSEL!
-    if ($isKalsel) {
-        // Ambil kabupaten/kota
-        $kabupatens = Daerah::where('parent_id', $provinsiId)
-            ->where('tingkat', 'kabupaten')
-            ->orderBy('nama')
-            ->get();
-    } else {
-        // KALAU BUKAN KALSEL, KIRIM ARRAY KOSONG
+     * API: Get kabupaten/kota berdasarkan provinsi
+     */
+    public function getKabupaten(Request $request)
+    {
+        $provinsiId = $request->provinsi_id;
+        
+        if (!$provinsiId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Provinsi ID tidak ditemukan',
+                'data' => [],
+                'can_select_kabupaten' => false
+            ]);
+        }
+        
+        $provinsi = Daerah::find($provinsiId);
+        
+        if (!$provinsi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Provinsi tidak ditemukan',
+                'data' => [],
+                'can_select_kabupaten' => false
+            ]);
+        }
+        
+        // Cek apakah ini Kalimantan Selatan (kode 63)
+        $isKalsel = trim($provinsi->kode) == '63';
+        
+        // HANYA KIRIM DATA KABUPATEN JIKA KALSEL
         $kabupatens = [];
+        if ($isKalsel) {
+            $kabupatens = Daerah::where('parent_id', $provinsiId)
+                ->where('tingkat', 'kabupaten')
+                ->orderBy('nama')
+                ->get();
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => $kabupatens,
+            'can_select_kabupaten' => $isKalsel,
+            'is_kalsel' => $isKalsel
+        ]);
     }
-    
-    return response()->json([
-        'success' => true,
-        'data' => $kabupatens,
-        'can_select_kabupaten' => $isKalsel,
-        'is_kalsel' => $isKalsel
-    ]);
-}
 
     /**
- * API: Get kecamatan berdasarkan kabupaten
- */
-public function getKecamatan(Request $request)
-{
-    $kabupatenId = $request->kabupaten_id;
-    
-    if (!$kabupatenId) {
+     * API: Get kecamatan berdasarkan kabupaten
+     */
+    public function getKecamatan(Request $request)
+    {
+        $kabupatenId = $request->kabupaten_id;
+        
+        if (!$kabupatenId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kabupaten ID tidak ditemukan',
+                'data' => [],
+                'can_select_kecamatan' => false
+            ]);
+        }
+        
+        $kabupaten = Daerah::find($kabupatenId);
+        
+        if (!$kabupaten) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kabupaten tidak ditemukan',
+                'data' => [],
+                'can_select_kecamatan' => false
+            ]);
+        }
+        
+        // Cek apakah ini Tanah Laut
+        $isTanahLaut = strtolower(trim($kabupaten->nama)) == 'tanah laut';
+        
+        // HANYA KIRIM DATA JIKA TANAH LAUT
+        $kecamatans = [];
+        if ($isTanahLaut) {
+            $kecamatans = Daerah::where('parent_id', $kabupatenId)
+                ->where('tingkat', 'kecamatan')
+                ->orderBy('nama')
+                ->get();
+        }
+        
         return response()->json([
-            'success' => false,
-            'message' => 'Kabupaten ID tidak ditemukan',
-            'data' => [],
-            'can_select_kecamatan' => false
+            'success' => true,
+            'data' => $kecamatans,
+            'can_select_kecamatan' => $isTanahLaut,
+            'is_tanah_laut' => $isTanahLaut
         ]);
     }
-    
-    $kabupaten = Daerah::find($kabupatenId);
-    
-    if (!$kabupaten) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Kabupaten tidak ditemukan',
-            'data' => [],
-            'can_select_kecamatan' => false
-        ]);
-    }
-    
-    // Cek apakah ini Tanah Laut
-    $isTanahLaut = strtolower(trim($kabupaten->nama)) == 'tanah laut';
-    
-    // HANYA KIRIM DATA JIKA TANAH LAUT!
-    $kecamatans = [];
-    if ($isTanahLaut) {
-        $kecamatans = Daerah::where('parent_id', $kabupatenId)
-            ->where('tingkat', 'kecamatan')
-            ->orderBy('nama')
-            ->get();
-    }
-    
-    return response()->json([
-        'success' => true,
-        'data' => $kecamatans,
-        'can_select_kecamatan' => $isTanahLaut,
-        'is_tanah_laut' => $isTanahLaut,
-        'kabupaten_nama' => $kabupaten->nama
-    ]);
-}
 
     /**
      * Menyimpan data baru ke database

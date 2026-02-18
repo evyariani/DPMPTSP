@@ -50,12 +50,12 @@ class UangHarianSeeder extends Seeder
                     'tempat_tujuan' => $kecamatan->nama,
                     'uang_harian' => $data['uang_harian'],
                     'uang_transport' => $data['transport'],
-                    'total' => $data['uang_harian'] + $data['transport'],
+                    'total' => $data['uang_harian'] + $data['transport'], // INI TETAP DIISI, TAPI TIDAK DITAMPILKAN DI ECHO
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
                 $total++;
-                echo "  ✅ {$kecamatan->nama}: Rp " . number_format($data['uang_harian']) . " + Rp " . number_format($data['transport']) . " = Rp " . number_format($data['uang_harian'] + $data['transport']) . "\n";
+                echo "  ✅ {$kecamatan->nama}: Rp " . number_format($data['uang_harian']) . " | Transport: Rp " . number_format($data['transport']) . "\n";
             } else {
                 echo "  ❌ Kecamatan {$data['nama']} tidak ditemukan\n";
             }
@@ -88,7 +88,6 @@ class UangHarianSeeder extends Seeder
                 ->first();
 
             if ($kabupaten) {
-                // Cek apakah sudah ada data
                 $exists = DB::table('tb_uang_harian')
                     ->where('daerah_id', $kabupaten->id)
                     ->exists();
@@ -104,7 +103,7 @@ class UangHarianSeeder extends Seeder
                         'updated_at' => now()
                     ]);
                     $total++;
-                    echo "  ✅ {$kabupaten->nama}: Rp " . number_format($data['uang_harian']) . " + Rp " . number_format($data['transport']) . " = Rp " . number_format($data['uang_harian'] + $data['transport']) . "\n";
+                    echo "  ✅ {$kabupaten->nama}: Rp " . number_format($data['uang_harian']) . " | Transport: Rp " . number_format($data['transport']) . "\n";
                 }
             } else {
                 echo "  ❌ Kabupaten {$data['nama']} tidak ditemukan\n";
@@ -146,7 +145,6 @@ class UangHarianSeeder extends Seeder
                 ->first();
 
             if ($provinsi) {
-                // Cek apakah sudah ada data
                 $exists = DB::table('tb_uang_harian')
                     ->where('daerah_id', $provinsi->id)
                     ->exists();
@@ -162,7 +160,7 @@ class UangHarianSeeder extends Seeder
                         'updated_at' => now()
                     ]);
                     $total++;
-                    echo "  ✅ {$provinsi->nama}: Rp " . number_format($data['uang_harian']) . " + Rp " . number_format($data['transport']) . " = Rp " . number_format($data['uang_harian'] + $data['transport']) . "\n";
+                    echo "  ✅ {$provinsi->nama}: Rp " . number_format($data['uang_harian']) . " | Transport: Rp " . number_format($data['transport']) . "\n";
                 }
             } else {
                 echo "  ❌ Provinsi {$data['nama']} tidak ditemukan\n";
@@ -185,7 +183,6 @@ class UangHarianSeeder extends Seeder
                 ->first();
 
             if ($kota) {
-                // Cek apakah sudah ada data
                 $exists = DB::table('tb_uang_harian')
                     ->where('daerah_id', $kota->id)
                     ->exists();
@@ -201,7 +198,7 @@ class UangHarianSeeder extends Seeder
                         'updated_at' => now()
                     ]);
                     $total++;
-                    echo "  ✅ {$kota->nama}: Rp " . number_format($data['uang_harian']) . " + Rp " . number_format($data['transport']) . " = Rp " . number_format($data['uang_harian'] + $data['transport']) . "\n";
+                    echo "  ✅ {$kota->nama}: Rp " . number_format($data['uang_harian']) . " | Transport: Rp " . number_format($data['transport']) . "\n";
                 }
             } else {
                 echo "  ❌ Kota {$data['nama']} tidak ditemukan\n";

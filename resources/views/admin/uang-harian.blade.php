@@ -82,8 +82,32 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
+
+.badge-provinsi {
+    background-color: #4299e1;
+    color: white;
+}
+
+.badge-kabupaten {
+    background-color: #48bb78;
+    color: white;
+}
+
+.badge-kecamatan {
+    background-color: #ed8936;
+    color: white;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+    display: block;
+}
 </style>
 
+<!-- HEADER -->
 <div class="mb-6">
     <div class="flex justify-between items-center">
         <div>
@@ -96,7 +120,7 @@
     </div>
 </div>
 
-<!-- Notifikasi Toast - POSISI DI BAWAH -->
+<!-- NOTIFIKASI -->
 @if(session('success'))
 <div id="success-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg">
@@ -141,7 +165,7 @@
 </div>
 @endif
 
-<!-- Notifikasi Hapus - POSISI DI BAWAH -->
+<!-- NOTIFIKASI HAPUS -->
 <div id="delete-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -162,20 +186,17 @@
     </div>
 </div>
 
-<!-- Modal Konfirmasi Hapus -->
+<!-- MODAL KONFIRMASI HAPUS -->
 <div id="delete-confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
             <div class="p-6 text-center">
-                <!-- Icon Warning -->
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
                     <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                 </div>
                 
-                <!-- Title -->
                 <h3 class="text-xl font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
                 
-                <!-- Message -->
                 <div class="mb-6 text-left">
                     <p class="text-gray-600 mb-3">Anda akan menghapus data uang harian:</p>
                     
@@ -200,11 +221,10 @@
                     </div>
                 </div>
                 
-                <!-- Action Buttons -->
                 <div class="flex justify-center space-x-4">
                     <button type="button" 
                             onclick="hideDeleteModal()"
-                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center">
                         <i class="fas fa-times mr-2"></i> Batal
                     </button>
                     
@@ -212,7 +232,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" 
-                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center">
                             <i class="fas fa-trash mr-2"></i> Hapus
                         </button>
                     </form>
@@ -222,7 +242,7 @@
     </div>
 </div>
 
-<!-- Filter dan Search -->
+<!-- FILTER - SEARCH & TINGKAT DAERAH (SEPERTI PROGRAM) -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
     <form method="GET" action="/uang-harian" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
         <div class="flex-1">
@@ -231,107 +251,137 @@
                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         </div>
         <div class="flex flex-wrap gap-2">
-            <select name="tempat" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Tempat</option>
-                @foreach($tempatList ?? [] as $tempat)
-                    <option value="{{ $tempat }}" {{ request('tempat') == $tempat ? 'selected' : '' }}>
-                        {{ $tempat }}
-                    </option>
-                @endforeach
+            <select name="tingkat" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Tingkat</option>
+                <option value="provinsi" {{ request('tingkat') == 'provinsi' ? 'selected' : '' }}>Provinsi</option>
+                <option value="kabupaten" {{ request('tingkat') == 'kabupaten' ? 'selected' : '' }}>Kabupaten/Kota</option>
+                <option value="kecamatan" {{ request('tingkat') == 'kecamatan' ? 'selected' : '' }}>Kecamatan</option>
             </select>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-filter mr-2"></i> Filter
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                <i class="fas fa-search mr-2"></i> Cari
             </button>
-            @if(request()->has('search') || request()->has('tempat'))
-                <a href="/uang-harian" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+            @if(request()->hasAny(['search', 'tingkat']))
+                <a href="/uang-harian" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200 flex items-center">
                     <i class="fas fa-redo mr-2"></i> Reset
                 </a>
             @endif
         </div>
     </form>
+    
+    <!-- ACTIVE FILTERS -->
+    @if(request()->hasAny(['search', 'tingkat']))
+    <div class="mt-4 pt-3 border-t border-gray-200">
+        <div class="flex items-center flex-wrap gap-2">
+            <span class="text-sm text-gray-600">Filter aktif:</span>
+            
+            @if(request('search'))
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <i class="fas fa-search mr-1"></i> {{ request('search') }}
+                <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="ml-2 text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-times"></i>
+                </a>
+            </span>
+            @endif
+            
+            @if(request('tingkat'))
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                <i class="fas fa-tag mr-1"></i> {{ ucfirst(request('tingkat')) }}
+                <a href="{{ request()->fullUrlWithQuery(['tingkat' => null]) }}" class="ml-2 text-purple-600 hover:text-purple-800">
+                    <i class="fas fa-times"></i>
+                </a>
+            </span>
+            @endif
+        </div>
+    </div>
+    @endif
 </div>
 
-<!-- Tabel Uang Harian -->
+<!-- INFO URUTAN DATA -->
+{{-- <div class="mb-3 flex justify-between items-center">
+    <div class="text-sm text-gray-600">
+        <i class="fas fa-info-circle mr-1"></i> 
+        Menampilkan <span class="font-semibold">Kecamatan</span> terlebih dahulu, diikuti Kabupaten/Kota, lalu Provinsi
+    </div>
+    <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium badge-kecamatan">
+            <i class="fas fa-map-marker-alt mr-1"></i> Kecamatan
+        </span>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium badge-kabupaten">
+            <i class="fas fa-city mr-1"></i> Kabupaten/Kota
+        </span>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium badge-provinsi">
+            <i class="fas fa-flag mr-1"></i> Provinsi
+        </span>
+    </div>
+</div> --}}
+
+<!-- TABEL UANG HARIAN -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tempat Tujuan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uang Harian</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uang Transport</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tempat Tujuan</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tingkat</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uang Harian</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uang Transport</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @php
-                    $uangHarians = $uangHarians ?? collect([]);
-                    $isPaginated = method_exists($uangHarians, 'currentPage');
-                @endphp
-                
                 @forelse($uangHarians as $index => $uang)
                 @php
                     $total = $uang->uang_harian + $uang->uang_transport;
+                    $tingkat = $uang->daerah->tingkat ?? 'unknown';
+                    $badgeClass = $tingkat == 'provinsi' ? 'badge-provinsi' : ($tingkat == 'kabupaten' ? 'badge-kabupaten' : 'badge-kecamatan');
+                    $icon = $tingkat == 'provinsi' ? 'fa-flag' : ($tingkat == 'kabupaten' ? 'fa-city' : 'fa-map-marker-alt');
                 @endphp
                 <tr class="hover:bg-gray-50 transition duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @if($isPaginated)
-                            {{ ($uangHarians->currentPage() - 1) * $uangHarians->perPage() + $index + 1 }}
-                        @else
-                            {{ $index + 1 }}
-                        @endif
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ ($uangHarians->currentPage() - 1) * $uangHarians->perPage() + $index + 1 }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10">
-                                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <i class="fas fa-map-marker-alt text-indigo-600"></i>
+                            <div class="flex-shrink-0 h-8 w-8">
+                                <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                    <i class="fas {{ $icon }} text-indigo-600 text-sm"></i>
                                 </div>
                             </div>
-                            <div class="ml-4">
+                            <div class="ml-3">
                                 <div class="text-sm font-medium text-gray-900">{{ $uang->tempat_tujuan ?? '-' }}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        @if(!empty($uang->uang_harian) && is_numeric($uang->uang_harian))
-                            <span class="text-green-600 font-medium">
-                                Rp {{ number_format($uang->uang_harian, 0, ',', '.') }}
-                            </span>
-                        @else
-                            <span class="text-gray-400">-</span>
-                        @endif
+                        <span class="px-2 py-1 rounded-full text-xs font-medium {{ $badgeClass }}">
+                            {{ ucfirst($tingkat) }}
+                        </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        @if(!empty($uang->uang_transport) && is_numeric($uang->uang_transport))
-                            <span class="text-blue-600 font-medium">
-                                Rp {{ number_format($uang->uang_transport, 0, ',', '.') }}
-                            </span>
-                        @else
-                            <span class="text-gray-400">-</span>
-                        @endif
+                        <span class="text-green-600 font-medium">
+                            Rp {{ number_format($uang->uang_harian, 0, ',', '.') }}
+                        </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        @if(is_numeric($uang->uang_harian) && is_numeric($uang->uang_transport))
-                            <span class="px-3 py-1 rounded-full text-xs font-medium badge-total">
-                                Rp {{ number_format($total, 0, ',', '.') }}
-                            </span>
-                        @else
-                            <span class="text-gray-400">-</span>
-                        @endif
+                        <span class="text-blue-600 font-medium">
+                            Rp {{ number_format($uang->uang_transport, 0, ',', '.') }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium badge-total">
+                            Rp {{ number_format($total, 0, ',', '.') }}
+                        </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
-                            @if(isset($uang->id_uang_harian))
                             <a href="/uang-harian/{{ $uang->id_uang_harian }}/edit" 
-                               class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
+                               class="text-green-600 hover:text-green-900 px-3 py-1 rounded hover:bg-green-50 transition duration-150"
                                title="Edit Uang Harian">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
                             
-                            <!-- Tombol Hapus dengan Modal -->
                             <button type="button" 
                                     onclick="showDeleteConfirmation(
                                         {{ $uang->id_uang_harian }}, 
@@ -344,16 +394,12 @@
                                     title="Hapus Uang Harian">
                                 <i class="fas fa-trash mr-1"></i> Hapus
                             </button>
-                            @else
-                            <span class="text-gray-400 px-3 py-1">Edit</span>
-                            <span class="text-gray-400 px-3 py-1">Hapus</span>
-                            @endif
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <i class="fas fa-money-bill-wave text-gray-300 text-4xl mb-3"></i>
                             <p class="text-lg">Tidak ada data uang harian</p>
@@ -370,15 +416,8 @@
     </div>
 </div>
 
-<!-- Pagination -->
-@php
-    $showPagination = true;
-    if (isset($uangHarians) && method_exists($uangHarians, 'hasPages') && $uangHarians->hasPages()) {
-        $showPagination = true;
-    }
-@endphp
-
-@if($showPagination)
+<!-- PAGINATION -->
+@if($uangHarians->hasPages())
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
@@ -391,55 +430,26 @@
     </div>
     
     <div class="flex items-center space-x-1">
-        {{-- Previous Page Link --}}
         @if ($uangHarians->onFirstPage())
             <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
                 <i class="fas fa-chevron-left text-xs"></i>
             </span>
         @else
-            <a href="{{ $uangHarians->previousPageUrl() }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
+            <a href="{{ $uangHarians->previousPageUrl() }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-left text-xs"></i>
             </a>
         @endif
         
-        {{-- Pagination Elements --}}
-        @php
-            $current = $uangHarians->currentPage();
-            $last = $uangHarians->lastPage();
-            $start = max($current - 2, 1);
-            $end = min($current + 2, $last);
-        @endphp
-        
-        @if($start > 1)
-            <a href="{{ $uangHarians->url(1) }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
-            @if($start > 2)
-                <span class="px-3 py-1.5 text-gray-500">...</span>
-            @endif
-        @endif
-        
-        @for ($page = $start; $page <= $end; $page++)
-            @if ($page == $current)
+        @foreach ($uangHarians->getUrlRange(max($uangHarians->currentPage() - 2, 1), min($uangHarians->currentPage() + 2, $uangHarians->lastPage())) as $page => $url)
+            @if ($page == $uangHarians->currentPage())
                 <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
             @else
-                <a href="{{ $uangHarians->url($page) }}" 
-                   class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
+                <a href="{{ $url }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
             @endif
-        @endfor
+        @endforeach
         
-        @if($end < $last)
-            @if($end < $last - 1)
-                <span class="px-3 py-1.5 text-gray-500">...</span>
-            @endif
-            <a href="{{ $uangHarians->url($last) }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
-        @endif
-        
-        {{-- Next Page Link --}}
         @if ($uangHarians->hasMorePages())
-            <a href="{{ $uangHarians->nextPageUrl() }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
+            <a href="{{ $uangHarians->nextPageUrl() }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
         @else
@@ -450,6 +460,13 @@
     </div>
 </div>
 @endif
+
+<!-- FOOTER INFO -->
+<div class="mt-4 text-xs text-gray-400 text-center">
+    <i class="fas fa-database mr-1"></i> Total {{ $totalData ?? 0 }} data • 
+    <i class="fas fa-sort-amount-down ml-2 mr-1"></i> Kecamatan → Kabupaten → Provinsi • 
+    <i class="fas fa-clock ml-2 mr-1"></i> Terbaru di atas
+</div>
 @endsection
 
 @section('scripts')
@@ -466,9 +483,7 @@ function hideNotification(type) {
     }
 }
 
-// Auto-hide notifications after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto hide success/error notifications
     setTimeout(() => {
         const successNotif = document.getElementById('success-notification');
         const errorNotif = document.getElementById('error-notification');
@@ -486,22 +501,18 @@ function showDeleteConfirmation(id, tempat, uangHarian, uangTransport, total) {
     currentDeleteId = id;
     currentDeleteNama = tempat;
     
-    // Update modal content
     document.getElementById('delete-tempat').textContent = tempat;
     document.getElementById('delete-harian').textContent = uangHarian;
     document.getElementById('delete-transport').textContent = uangTransport;
     document.getElementById('delete-total').textContent = total;
     
-    // Update form action
     const form = document.getElementById('delete-form');
     form.action = `/uang-harian/${id}`;
     
-    // Show modal with animation
     const modal = document.getElementById('delete-confirm-modal');
     modal.classList.remove('hidden');
     modal.style.display = 'block';
     
-    // Add animation class to modal content
     const modalContent = modal.querySelector('.bg-white');
     modalContent.classList.add('animate-fade-in');
 }
@@ -510,11 +521,9 @@ function hideDeleteModal() {
     const modal = document.getElementById('delete-confirm-modal');
     const modalContent = modal.querySelector('.bg-white');
     
-    // Add fade out animation
     modalContent.classList.remove('animate-fade-in');
     modalContent.classList.add('animate-fade-out');
     
-    // Hide modal after animation
     setTimeout(() => {
         modal.classList.add('hidden');
         modal.style.display = 'none';
@@ -524,20 +533,17 @@ function hideDeleteModal() {
     }, 300);
 }
 
-// Handle form submission dengan AJAX untuk notifikasi lebih baik
 document.getElementById('delete-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const form = this;
     const formData = new FormData(form);
     
-    // Tampilkan loading
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
     submitBtn.disabled = true;
     
-    // Kirim request DELETE
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -549,11 +555,8 @@ document.getElementById('delete-form').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Tampilkan notifikasi hapus sukses
             showDeleteSuccess(currentDeleteNama);
-            // Sembunyikan modal
             hideDeleteModal();
-            // Refresh halaman setelah 2 detik
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -563,47 +566,39 @@ document.getElementById('delete-form').addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        // Jika error, tampilkan alert biasa
         alert('Terjadi kesalahan saat menghapus data: ' + error.message);
-        // Reset tombol
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
 });
 
-// Tampilkan notifikasi hapus sukses
 function showDeleteSuccess(tempat) {
     const notification = document.getElementById('delete-notification');
     const message = document.getElementById('delete-message');
     
     message.textContent = `Data uang harian "${tempat}" berhasil dihapus.`;
     
-    // Reset progress bar
     const progress = document.getElementById('delete-progress');
     progress.style.width = '100%';
     progress.style.animation = 'none';
-    void progress.offsetWidth; // Trigger reflow
+    void progress.offsetWidth;
     progress.style.animation = 'progressBar 5s linear forwards';
     
-    // Show notification dengan animasi bawah
     notification.classList.remove('hidden');
     notification.style.display = 'block';
     notification.classList.add('animate-slide-in-bottom');
     
-    // Auto hide after 5 seconds
     setTimeout(() => {
         hideNotification('delete');
     }, 5000);
 }
 
-// Close modal when clicking outside
 document.getElementById('delete-confirm-modal').addEventListener('click', function(e) {
     if (e.target === this) {
         hideDeleteModal();
     }
 });
 
-// Close modal with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideDeleteModal();

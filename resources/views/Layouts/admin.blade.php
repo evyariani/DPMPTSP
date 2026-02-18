@@ -28,18 +28,16 @@
         .dropdown-shadow {
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
-        .nav-link-active {
+        .sidebar-link-active {
             background-color: #f0fdfa;
             color: #0f766e;
-            border-radius: 0.5rem;
+            border-left: 4px solid #0d9488;
             font-weight: 600;
         }
         .submenu-active {
-            background-color: white;
+            background-color: #ccfbf1;
             color: #0f766e;
             font-weight: 600;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            border: 1px solid #99f6e4;
         }
         /* Warna tema Teal */
         .bg-teal-50 {
@@ -64,7 +62,8 @@
 </head>
 <body class="bg-gray-50" x-data="{ 
     isMobile: window.innerWidth <= 768,
-    isProfileOpen: false
+    isProfileOpen: false,
+    sidebarOpen: true
 }">
     <!-- Mobile Warning -->
     <div x-show="isMobile" class="bg-gradient-to-r from-teal-600 to-emerald-600 min-h-screen text-white flex justify-center items-center text-lg text-center p-20">
@@ -76,209 +75,186 @@
     </div>
 
     <!-- Desktop Layout -->
-    <div x-show="!isMobile" class="min-h-screen flex flex-col">
-        <!-- TOP NAVBAR - MENU UTAMA -->
-        <nav class="bg-gradient-to-r from-white to-teal-50 shadow-lg sticky top-0 z-50 border-b border-teal-100">
-            <div class="px-6 py-3">
-                <div class="flex items-center justify-between">
-                    <!-- LOGO & BRAND - UKURAN DIPERBESAR -->
-                    <div class="flex items-center gap-4">
-                        <!-- Logo DPMPTSP - UKURAN BESAR -->
-                        <div class="flex items-center">
-                            <img src="{{ asset('image/dpm.png') }}" 
-                                 alt="Logo DPMPTSP" 
-                                 class="h-20 w-auto object-contain drop-shadow-md">
-                        </div>
-                        <div class="border-l border-teal-200 pl-4">
-                            <h1 class="text-xl font-bold text-teal-800">DPMPTSP</h1>
-                            <p class="text-sm text-teal-700 font-medium">Management System</p>
-                        </div>
+    <div x-show="!isMobile" class="min-h-screen flex">
+        <!-- SIDEBAR -->
+        <aside class="w-72 bg-gradient-to-b from-white to-teal-50 shadow-lg border-r border-teal-100 flex flex-col h-screen sticky top-0" 
+               :class="{'w-20': !sidebarOpen}">
+            
+            <!-- Logo Area - Collapsible -->
+            <div class="p-4 border-b border-teal-100" :class="{'p-2': !sidebarOpen}">
+                <div class="flex items-center gap-3" :class="{'justify-center': !sidebarOpen}">
+                    <img src="{{ asset('image/dpm.png') }}" 
+                         alt="Logo DPMPTSP" 
+                         class="h-12 w-auto object-contain drop-shadow-md">
+                    <div x-show="sidebarOpen" class="overflow-hidden transition-all">
+                        <h1 class="text-lg font-bold text-teal-800 leading-tight">DPMPTSP</h1>
+                        <p class="text-xs text-teal-700 font-medium">Management System</p>
                     </div>
+                </div>
+            </div>
 
-                    <!-- NAVIGATION MENUS UTAMA -->
-                    <div class="flex items-center gap-2">
-                        <!-- DATA MASTER -->
+            <!-- Toggle Sidebar Button -->
+            <button @click="sidebarOpen = !sidebarOpen" 
+                    class="absolute -right-3 top-20 bg-white border border-teal-200 rounded-full p-1.5 shadow-md hover:bg-teal-50 transition-colors z-10">
+                <i class="fas fa-chevron-left text-teal-600 text-sm" 
+                   :class="{'rotate-180': !sidebarOpen}"></i>
+            </button>
+
+            <!-- User Profile in Sidebar -->
+            <div class="p-4 border-b border-teal-100" :class="{'p-2': !sidebarOpen}">
+                <div class="flex items-center gap-3" :class="{'justify-center': !sidebarOpen}">
+                    <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-400 rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                    <div x-show="sidebarOpen" class="overflow-hidden">
+                        <div class="font-semibold text-teal-800 text-sm truncate">{{ session('user')['username'] ?? 'Admin' }}</div>
+                        <div class="text-xs text-teal-700 capitalize">{{ session('user')['level'] ?? 'Admin' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 overflow-y-auto scrollbar-thin py-4">
+                <ul class="space-y-1 px-3">
+                    <!-- DATA MASTER -->
+                    <li>
                         <a href="/user" 
-                           class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('user*', 'pegawai*', 'program*', 'uang-harian*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
-                            <i class="fas fa-database text-teal-600 text-lg"></i>
-                            <span class="font-medium">Data Master</span>
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+                                  {{ request()->is('user*', 'pegawai*', 'program*', 'uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}"
+                           :class="{'justify-center': !sidebarOpen}">
+                            <i class="fas fa-database text-teal-600 text-lg w-6"></i>
+                            <span x-show="sidebarOpen" class="text-sm font-medium">Data Master</span>
                         </a>
-
-                        <!-- SPT -->
-                        <a href="/spt" 
-                           class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('spt*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
-                            <i class="fas fa-file-invoice-dollar text-teal-600 text-lg"></i>
-                            <span class="font-medium">SPT</span>
-                        </a>
-
-                        <!-- TRANSAKSI -->
-                        <a href="/transaksi" 
-                           class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('transaksi*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
-                            <i class="fas fa-exchange-alt text-teal-600 text-lg"></i>
-                            <span class="font-medium">Spd Depan</span>
-                        </a>
-
-                        <!-- LAPORAN -->
-                        <a href="/laporan" 
-                           class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('laporan*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
-                            <i class="fas fa-chart-bar text-teal-600 text-lg"></i>
-                            <span class="font-medium">Spd Belakang</span>
-                        </a>
-
-                        <!-- PENGATURAN -->
-                        <a href="/pengaturan" 
-                           class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('pengaturan*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
-                            <i class="fas fa-cog text-teal-600 text-lg"></i>
-                            <span class="font-medium">Rincian Bidang</span>
-                        </a>
-
-                        <!-- PENGATURAN -->
-                        <a href="/pengaturan" 
-                           class="flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200
-                                  {{ request()->is('pengaturan*') ? 'nav-link-active bg-teal-50 text-teal-700 font-semibold shadow-sm' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700 hover:shadow-sm' }}">
-                            <i class="fas fa-cog text-teal-600 text-lg"></i>
-                            <span class="font-medium">Kwitansi Bidang</span>
-                        </a>
-                    </div>
-
-                    <!-- RIGHT SIDE: PROFILE -->
-                    <div class="flex items-center gap-4">
-                        <!-- Notifications -->
-                        <button class="relative p-3 rounded-lg hover:bg-teal-50 transition-colors group">
-                            <i class="fas fa-bell text-teal-600 text-xl"></i>
-                            <span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></span>
-                        </button>
-
-                        <!-- Profile Dropdown -->
-                        <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                            <button @click="open = !open" 
-                                    class="flex items-center gap-3 p-2 rounded-lg hover:bg-teal-50 transition-all duration-200 group">
-                                <div class="text-right">
-                                    <div class="font-semibold text-teal-800">{{ session('user')['username'] ?? 'Admin' }}</div>
-                                    <div class="text-xs text-teal-700 capitalize font-medium">{{ session('user')['level'] ?? 'Admin' }}</div>
-                                </div>
-                                <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-400 rounded-full flex items-center justify-center shadow-sm group-hover:shadow">
-                                    <i class="fas fa-user text-white"></i>
-                                </div>
-                                <i class="fas fa-chevron-down text-sm text-teal-600" 
-                                   :class="{'rotate-180': open}"></i>
-                            </button>
-                            
-                            <!-- Profile Dropdown Menu -->
-                            <div x-show="open" 
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-56 bg-white rounded-lg dropdown-shadow py-2 z-50 border border-teal-100">
-                                <!-- User Info -->
-                                <div class="px-4 py-3 border-b border-teal-50">
-                                    <div class="font-semibold text-teal-800">{{ session('user')['username'] ?? 'Admin' }}</div>
-                                    <div class="text-xs text-teal-700 font-medium">{{ session('user')['level'] ?? 'Admin' }}</div>
-                                </div>
-
-                                <!-- Menu Items -->
-                                <a href="/profile" 
-                                   class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition duration-150">
-                                    <i class="fas fa-user-circle mr-3 text-teal-500 w-5 text-center"></i> Profil Saya
-                                </a>
-                                <a href="/settings" 
-                                   class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 transition duration-150">
-                                    <i class="fas fa-cog mr-3 text-teal-500 w-5 text-center"></i> Pengaturan
-                                </a>
-                                
-                                <div class="border-t border-teal-50 my-1"></div>
-                                
-                                <!-- Logout Button -->
-                                <a href="/logout" 
-                                   class="flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition duration-150">
-                                    <i class="fas fa-sign-out-alt mr-3 w-5 text-center"></i> Logout
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SUBMENU BAR - TAMPIL DI BAWAH MENU UTAMA -->
-            <!-- Submenu Data Master - RATA TENGAH -->
-            <div x-show="{{ request()->is('user*', 'pegawai*', 'program*', 'uang-harian*') }}"
-                 class="bg-gradient-to-r from-teal-50 to-emerald-50 border-t border-teal-100 px-6 py-3">
-                <div class="max-w-7xl mx-auto">
-                    <div class="flex justify-center items-center">
-                        <div class="flex flex-wrap justify-center gap-3">
-                            <!-- Data User -->
+                        
+                        <!-- Submenu Data Master -->
+                        <div x-show="sidebarOpen && {{ request()->is('user*', 'pegawai*', 'program*', 'uang-harian*') ? 1 : 0 }}" 
+                             class="ml-9 mt-1 space-y-1">
                             <a href="/user" 
-                               class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('user*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-users text-teal-500"></i> User
+                               class="block px-3 py-2 text-sm rounded-md transition-colors {{ request()->is('user*') ? 'submenu-active' : 'text-gray-600 hover:bg-teal-50' }}">
+                                <i class="fas fa-users text-teal-500 mr-2 w-4"></i> User
                             </a>
-                            
-                            <!-- Data pegawai -->
                             <a href="/pegawai" 
-                               class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('pegawai*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-building text-teal-500"></i> Pegawai
+                               class="block px-3 py-2 text-sm rounded-md transition-colors {{ request()->is('pegawai*') ? 'submenu-active' : 'text-gray-600 hover:bg-teal-50' }}">
+                                <i class="fas fa-building text-teal-500 mr-2 w-4"></i> Pegawai
                             </a>
-                            
-                            <!-- Data transportasi -->
-                            {{-- <a href="/transportasi" 
-                               class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('transportasi*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-car text-teal-500"></i> Transportasi
-                            </a> --}}
-                            
-                            <!-- Data rekening -->
-                            {{-- <a href="/rekening" 
-                               class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('rekening*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-credit-card text-teal-500"></i> Rekening
-                            </a> --}}
-                            
-                            <!-- Data Stok -->
                             <a href="/program" 
-                               class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('program*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-boxes text-teal-500"></i> Program
+                               class="block px-3 py-2 text-sm rounded-md transition-colors {{ request()->is('program*') ? 'submenu-active' : 'text-gray-600 hover:bg-teal-50' }}">
+                                <i class="fas fa-boxes text-teal-500 mr-2 w-4"></i> Program
                             </a>
-                            
-                            <!-- Uang Harian -->
                             <a href="/uang-harian" 
-                               class="px-4 py-2.5 rounded-lg text-sm transition-all duration-200 flex items-center gap-2
-                                      {{ request()->is('uang-harian*') ? 'submenu-active bg-white text-teal-700 shadow-sm' : 'text-gray-700 hover:bg-white hover:text-teal-700 hover:shadow-sm border border-transparent hover:border-teal-100' }}">
-                                <i class="fas fa-money-bill-wave text-teal-500"></i> Uang Harian
+                               class="block px-3 py-2 text-sm rounded-md transition-colors {{ request()->is('uang-harian*') ? 'submenu-active' : 'text-gray-600 hover:bg-teal-50' }}">
+                                <i class="fas fa-money-bill-wave text-teal-500 mr-2 w-4"></i> Uang Harian
                             </a>
                         </div>
-                    </div>
-                </div>
+                    </li>
+
+                    <!-- SPT -->
+                    <li>
+                        <a href="/spt" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+                                  {{ request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}"
+                           :class="{'justify-center': !sidebarOpen}">
+                            <i class="fas fa-file-invoice-dollar text-teal-600 text-lg w-6"></i>
+                            <span x-show="sidebarOpen" class="text-sm font-medium">SPT</span>
+                        </a>
+                    </li>
+
+                    <!-- SPD DEPAN -->
+                    <li>
+                        <a href="/transaksi" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+                                  {{ request()->is('transaksi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}"
+                           :class="{'justify-center': !sidebarOpen}">
+                            <i class="fas fa-exchange-alt text-teal-600 text-lg w-6"></i>
+                            <span x-show="sidebarOpen" class="text-sm font-medium">Spd Depan</span>
+                        </a>
+                    </li>
+
+                    <!-- SPD BELAKANG -->
+                    <li>
+                        <a href="/laporan" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+                                  {{ request()->is('laporan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}"
+                           :class="{'justify-center': !sidebarOpen}">
+                            <i class="fas fa-chart-bar text-teal-600 text-lg w-6"></i>
+                            <span x-show="sidebarOpen" class="text-sm font-medium">Spd Belakang</span>
+                        </a>
+                    </li>
+
+                    <!-- RINCIAN BIDANG -->
+                    <li>
+                        <a href="/pengaturan" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+                                  {{ request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}"
+                           :class="{'justify-center': !sidebarOpen}">
+                            <i class="fas fa-cog text-teal-600 text-lg w-6"></i>
+                            <span x-show="sidebarOpen" class="text-sm font-medium">Rincian Bidang</span>
+                        </a>
+                    </li>
+
+                    <!-- KWITANSI BIDANG -->
+                    <li>
+                        <a href="/kwitansi" 
+                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group
+                                  {{ request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-teal-50 hover:text-teal-700' }}"
+                           :class="{'justify-center': !sidebarOpen}">
+                            <i class="fas fa-file-invoice text-teal-600 text-lg w-6"></i>
+                            <span x-show="sidebarOpen" class="text-sm font-medium">Kwitansi Bidang</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Logout Button at Bottom -->
+            <div class="p-4 border-t border-teal-100" :class="{'p-2': !sidebarOpen}">
+                <a href="/logout" 
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all duration-200"
+                   :class="{'justify-center': !sidebarOpen}">
+                    <i class="fas fa-sign-out-alt text-lg w-6"></i>
+                    <span x-show="sidebarOpen" class="text-sm font-medium">Logout</span>
+                </a>
             </div>
-        </nav>
+        </aside>
 
         <!-- MAIN CONTENT AREA -->
-        <main class="flex-1 overflow-y-auto">
-            <!-- PAGE HEADER -->
-            <div class="bg-gradient-to-r from-white to-teal-50 border-b border-teal-100 px-6 py-5 shadow-sm">
-                <div class="max-w-7xl mx-auto">
-                    @hasSection('subtitle')
-                        <p class="text-gray-600 mt-2 text-sm bg-white/50 inline-block px-3 py-1.5 rounded-lg border border-teal-100">
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- TOP NAVBAR (simplified) -->
+            <header class="bg-white shadow-sm border-b border-teal-100 sticky top-0 z-40">
+                <div class="px-6 py-3">
+                    <div class="flex items-center justify-between">
+                        <!-- Page Title -->
+                        <h2 class="text-lg font-semibold text-teal-800">@yield('title')</h2>
+
+                        <!-- Notifications -->
+                        <div class="flex items-center gap-3">
+                            <button class="relative p-2 rounded-lg hover:bg-teal-50 transition-colors">
+                                <i class="fas fa-bell text-teal-600 text-lg"></i>
+                                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- MAIN CONTENT -->
+            <main class="flex-1 overflow-y-auto bg-gray-50">
+                <!-- PAGE HEADER (if needed) -->
+                @hasSection('subtitle')
+                <div class="bg-gradient-to-r from-white to-teal-50 border-b border-teal-100 px-6 py-4">
+                    <div class="max-w-7xl mx-auto">
+                        <p class="text-gray-600 text-sm bg-white/50 inline-block px-3 py-1.5 rounded-lg border border-teal-100">
                             <i class="fas fa-info-circle text-teal-500 mr-2"></i>@yield('subtitle')
                         </p>
-                    @endif
+                    </div>
                 </div>
-            </div>
+                @endif
 
-            <!-- CONTENT -->
-            <div class="p-6">
-                @yield('content')
-            </div>
-        </main>
+                <!-- CONTENT -->
+                <div class="p-6">
+                    @yield('content')
+                </div>
+            </main>
+        </div>
     </div>
 
     <script>
