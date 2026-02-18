@@ -1,7 +1,6 @@
-{{-- resources/views/admin/pegawai.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Pegawai')
+@section('title', 'Program')
 
 @section('content')
 <style>
@@ -78,16 +77,72 @@
 .progress-bar {
     animation: progressBar 5s linear forwards;
 }
+
+/* Custom untuk tabel program */
+.program-badge {
+    @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.program-badge-0001 {
+    @apply bg-blue-100 text-blue-800 border border-blue-200;
+}
+
+.program-badge-0003 {
+    @apply bg-green-100 text-green-800 border border-green-200;
+}
+
+/* Wrapping untuk teks panjang */
+.text-wrap-cell {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal !important;
+}
+
+/* Fixed width untuk kolom */
+.fixed-col-nama {
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.fixed-col-nip {
+    min-width: 150px;
+    max-width: 180px;
+}
+
+.fixed-col-jabatan {
+    min-width: 180px;
+    max-width: 250px;
+}
+
+.fixed-col-program {
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.fixed-col-kegiatan {
+    min-width: 250px;
+    max-width: 350px;
+}
+
+.fixed-col-subkegiatan {
+    min-width: 200px;
+    max-width: 300px;
+}
+
+/* Hover effect untuk sel tabel */
+.table-cell-hover:hover {
+    background-color: #f9fafb;
+}
 </style>
 
 <div class="mb-6">
     <div class="flex justify-between items-center">
         <div>
-            <h2 class="text-lg font-semibold text-gray-700">Data Pegawai</h2>
-            <p class="text-gray-500">Kelola data pegawai sistem</p>
+            <h2 class="text-lg font-semibold text-gray-700">Data Program</h2>
+            <p class="text-gray-500">Kelola data program dan kegiatan</p>
         </div>
-        <a href="/pegawai/create" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
-            <i class="fas fa-plus mr-2"></i> Tambah Pegawai
+        <a href="{{ route('program.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+            <i class="fas fa-plus mr-2"></i> Tambah Program
         </a>
     </div>
 </div>
@@ -173,11 +228,11 @@
                 
                 <!-- Message -->
                 <div class="mb-6 text-left">
-                    <p class="text-gray-600 mb-3">Anda akan menghapus data pegawai:</p>
+                    <p class="text-gray-600 mb-3">Anda akan menghapus data program:</p>
                     
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
                         <p class="font-semibold text-gray-800 text-lg" id="delete-nama"></p>
-                        <p class="text-gray-600 text-sm mt-1" id="delete-nip"></p>
+                        <p class="text-gray-600 text-sm mt-1" id="delete-rekening"></p>
                     </div>
                     
                     <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
@@ -218,34 +273,26 @@
 
 <!-- Filter dan Search -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
-    <form method="GET" action="/pegawai" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+    <form method="GET" action="/program" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
         <div class="flex-1">
-            <input type="text" name="search" placeholder="Cari nama, NIP, atau TK Jalan..." 
+            <input type="text" name="search" placeholder="Cari program, kegiatan, sub kegiatan, kode rekening, atau nama pegawai..." 
                    value="{{ request('search') }}"
                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         </div>
         <div class="flex flex-wrap gap-2">
-            <select name="pangkat" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Pangkat</option>
-                @foreach($pangkatList ?? [] as $pangkat)
-                    <option value="{{ $pangkat }}" {{ request('pangkat') == $pangkat ? 'selected' : '' }}>
-                        {{ $pangkat }}
-                    </option>
-                @endforeach
-            </select>
-            <select name="golongan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Golongan</option>
-                @foreach($golonganList ?? [] as $golongan)
-                    <option value="{{ $golongan }}" {{ request('golongan') == $golongan ? 'selected' : '' }}>
-                        {{ $golongan }}
+            <select name="kode_rekening" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Rekening</option>
+                @foreach(App\Models\Program::getRekeningOptions() as $key => $value)
+                    <option value="{{ $key }}" {{ request('kode_rekening') == $key ? 'selected' : '' }}>
+                        {{ $value }}
                     </option>
                 @endforeach
             </select>
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-filter mr-2"></i> Filter
+                <i class="fas fa-search mr-2"></i> Cari
             </button>
-            @if(request()->has('search') || request()->has('pangkat') || request()->has('gol'))
-                <a href="/pegawai" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+            @if(request()->has('search') || request()->has('kode_rekening'))
+                <a href="/program" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
                     <i class="fas fa-redo mr-2"></i> Reset
                 </a>
             @endif
@@ -253,113 +300,167 @@
     </form>
 </div>
 
-<!-- Tabel Pegawai -->
+<!-- Tabel Program -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIP</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pangkat</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Golongan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jabatan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tunjangan Jalan</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-program">Program</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-kegiatan">Kegiatan</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-subkegiatan">Sub Kegiatan</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rekening</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-nama">Nama Pegawai</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-nip">NIP</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-jabatan">Jabatan</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @php
-                    // Pastikan $pegawais selalu ada dan bisa di-loop
-                    $pegawais = $pegawais ?? collect([]);
-                    $isPaginated = method_exists($pegawais, 'currentPage');
+                    // Pastikan $programs selalu ada dan bisa di-loop
+                    $programs = $programs ?? collect([]);
+                    $isPaginated = method_exists($programs, 'currentPage');
                 @endphp
                 
-                @forelse($pegawais as $index => $pegawai)
+                @forelse($programs as $index => $program)
                 <tr class="hover:bg-gray-50 transition duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         @if($isPaginated)
-                            {{ ($pegawais->currentPage() - 1) * $pegawais->perPage() + $index + 1 }}
+                            {{ ($programs->currentPage() - 1) * $programs->perPage() + $index + 1 }}
                         @else
                             {{ $index + 1 }}
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10">
-                                <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <span class="text-indigo-600 font-semibold">{{ strtoupper(substr($pegawai->nama ?? '', 0, 1)) }}</span>
-                                </div>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $pegawai->nama ?? '-' }}</div>
-                                {{-- <div class="text-sm text-gray-500">ID: {{ $pegawai->id_pegawai ?? '-' }}</div> --}}
-                            </div>
+                    
+                    <!-- Kolom Program -->
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-program table-cell-hover">
+                        <div class="text-sm font-medium text-gray-900" title="{{ $program->program }}">
+                            {{ Str::limit($program->program, 70) }}
                         </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {{ $pegawai->nip ?? '-' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ $pegawai->pangkat ?? '-' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {{ $pegawai->gol ?? '-' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {{ $pegawai->jabatan ?? '-' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        @if(!empty($pegawai->tk_jalan))
-                            @php
-                                // Cek apakah tk_jalan berupa angka (bisa diformat sebagai uang)
-                                $isNumeric = is_numeric($pegawai->tk_jalan);
-                            @endphp
-                            
-                            @if($isNumeric && $pegawai->tk_jalan > 0)
-                                {{-- Jika angka dan lebih dari 0, format sebagai uang --}}
-                                <span class="text-green-600 font-medium">
-                                    Rp {{ number_format($pegawai->tk_jalan, 0, ',', '.') }}
-                                </span>
-                            @elseif($isNumeric && $pegawai->tk_jalan == 0)
-                                {{-- Jika angka 0 --}}
-                                <span class="text-gray-500">
-                                    Rp 0
-                                </span>
-                            @elseif($isNumeric)
-                                {{-- Jika angka negatif --}}
-                                <span class="text-red-500">
-                                    Rp {{ number_format($pegawai->tk_jalan, 0, ',', '.') }}
-                                </span>
-                            @else
-                                {{-- Jika bukan angka (huruf seperti A, B, C, TK I, dll) --}}
-                                <span class="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                    {{ strtoupper($pegawai->tk_jalan) }}
-                                </span>
-                            @endif
-                        @else
-                            <span class="text-gray-400">-</span>
+                        @if(strlen($program->program) > 70)
+                            <button type="button" 
+                                    onclick="showFullText(this, '{{ addslashes($program->program) }}', 'Program')"
+                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                                Lihat selengkapnya
+                            </button>
                         @endif
                     </td>
+                    
+                    <!-- Kolom Kegiatan -->
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-kegiatan table-cell-hover">
+                        <div class="text-sm text-gray-900" title="{{ $program->kegiatan }}">
+                            {{ Str::limit($program->kegiatan, 80) }}
+                        </div>
+                        @if(strlen($program->kegiatan) > 80)
+                            <button type="button" 
+                                    onclick="showFullText(this, '{{ addslashes($program->kegiatan) }}', 'Kegiatan')"
+                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                                Lihat selengkapnya
+                            </button>
+                        @endif
+                    </td>
+                    
+                    <!-- Kolom Sub Kegiatan -->
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-subkegiatan table-cell-hover">
+                        <div class="text-sm text-gray-900" title="{{ $program->sub_kegiatan }}">
+                            {{ Str::limit($program->sub_kegiatan, 70) }}
+                        </div>
+                        @if(strlen($program->sub_kegiatan) > 70)
+                            <button type="button" 
+                                    onclick="showFullText(this, '{{ addslashes($program->sub_kegiatan) }}', 'Sub Kegiatan')"
+                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                                Lihat selengkapnya
+                            </button>
+                        @endif
+                    </td>
+                    
+                    <!-- Kolom Rekening -->
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @if($program->kode_rekening == '5.1.02.04.01.0001')
+                            <span class="program-badge program-badge-0001" title="Belanja Barang Operasional">
+                                {{ $program->kode_rekening }}
+                            </span>
+                        @elseif($program->kode_rekening == '5.1.02.04.01.0003')
+                            <span class="program-badge program-badge-0003" title="Belanja Barang Perlengkapan">
+                                {{ $program->kode_rekening }}
+                            </span>
+                        @else
+                            <span class="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                {{ $program->kode_rekening }}
+                            </span>
+                        @endif
+                    </td>
+                    
+                    <!-- Kolom Nama Pegawai -->
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-nama table-cell-hover">
+                        @if($program->pegawai)
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-8 w-8 mr-3">
+                                    <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        <span class="text-indigo-600 font-semibold text-sm">
+                                            {{ strtoupper(substr($program->pegawai->nama, 0, 1)) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="text-sm font-medium text-gray-900" title="{{ $program->pegawai->nama }}">
+                                    {{ Str::limit($program->pegawai->nama, 40) }}
+                                </div>
+                            </div>
+                        @else
+                            <span class="text-gray-400 text-sm">-</span>
+                        @endif
+                    </td>
+                    
+                    <!-- Kolom NIP -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 fixed-col-nip">
+                        @if($program->pegawai && $program->pegawai->nip)
+                            <div class="font-mono text-xs" title="{{ $program->pegawai->nip }}">
+                                {{ $program->pegawai->nip }}
+                            </div>
+                        @else
+                            <span class="text-gray-400 text-sm">-</span>
+                        @endif
+                    </td>
+                    
+                    <!-- Kolom Jabatan -->
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-jabatan table-cell-hover">
+                        @if($program->pegawai && $program->pegawai->jabatan)
+                            <div class="text-sm text-gray-700" title="{{ $program->pegawai->jabatan }}">
+                                {{ Str::limit($program->pegawai->jabatan, 50) }}
+                            </div>
+                            @if(strlen($program->pegawai->jabatan) > 50)
+                                <button type="button" 
+                                        onclick="showFullText(this, '{{ addslashes($program->pegawai->jabatan) }}', 'Jabatan')"
+                                        class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                                    Lihat selengkapnya
+                                </button>
+                            @endif
+                        @else
+                            <span class="text-gray-400 text-sm">-</span>
+                        @endif
+                    </td>
+                    
+                    <!-- Kolom Aksi -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
-                            @if(isset($pegawai->id_pegawai))
-                            <a href="/pegawai/{{ $pegawai->id_pegawai }}/edit" 
-                               class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
-                               title="Edit Pegawai">
+                            @if(isset($program->id_program))
+                            <a href="{{ route('program.edit', $program->id_program) }}" 
+                               class="text-green-600 hover:text-green-900 px-3 py-1 rounded hover:bg-green-50 transition duration-150"
+                               title="Edit Program">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
                             
                             <!-- Tombol Hapus dengan Modal -->
                             <button type="button" 
-                                    onclick="showDeleteConfirmation({{ $pegawai->id_pegawai }}, '{{ addslashes($pegawai->nama) }}', '{{ $pegawai->nip ?? '' }}')"
+                                    onclick="showDeleteConfirmation(
+                                        {{ $program->id_program }}, 
+                                        '{{ addslashes(Str::limit($program->program, 30)) }}', 
+                                        '{{ $program->kode_rekening }}'
+                                    )"
                                     class="text-red-600 hover:text-red-900 px-3 py-1 rounded hover:bg-red-50 transition duration-150"
-                                    title="Hapus Pegawai">
+                                    title="Hapus Program">
                                 <i class="fas fa-trash mr-1"></i> Hapus
                             </button>
                             @else
@@ -371,13 +472,13 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                    <td colspan="9" class="px-6 py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
-                            <i class="fas fa-user-tie text-gray-300 text-4xl mb-3"></i>
-                            <p class="text-lg">Tidak ada data pegawai</p>
-                            <p class="text-sm mt-1">Mulai dengan menambahkan pegawai baru</p>
-                            <a href="/pegawai/create" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
-                                <i class="fas fa-plus mr-2"></i> Tambah Pegawai Pertama
+                            <i class="fas fa-clipboard-list text-gray-300 text-4xl mb-3"></i>
+                            <p class="text-lg">Tidak ada data program</p>
+                            <p class="text-sm mt-1">Mulai dengan menambahkan program baru</p>
+                            <a href="{{ route('program.create') }}" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Tambah Program Pertama
                             </a>
                         </div>
                     </td>
@@ -390,9 +491,9 @@
 
 <!-- Pagination -->
 @php
-    // Cek apakah $pegawais ada dan memiliki method hasPages
+    // Cek apakah $programs ada dan memiliki method hasPages
     $showPagination = true;
-    if (isset($pegawais) && method_exists($pegawais, 'hasPages') && $pegawais->hasPages()) {
+    if (isset($programs) && method_exists($programs, 'hasPages') && $programs->hasPages()) {
         $showPagination = true;
     }
 @endphp
@@ -401,22 +502,22 @@
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
-        <span class="font-medium">{{ $pegawais->firstItem() ?: 0 }}</span> 
+        <span class="font-medium">{{ $programs->firstItem() ?: 0 }}</span> 
         sampai 
-        <span class="font-medium">{{ $pegawais->lastItem() ?: 0 }}</span> 
+        <span class="font-medium">{{ $programs->lastItem() ?: 0 }}</span> 
         dari 
-        <span class="font-medium">{{ $pegawais->total() }}</span> 
-        pegawai
+        <span class="font-medium">{{ $programs->total() }}</span> 
+        program
     </div>
     
     <div class="flex items-center space-x-1">
         {{-- Previous Page Link --}}
-        @if ($pegawais->onFirstPage())
+        @if ($programs->onFirstPage())
             <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
                 <i class="fas fa-chevron-left text-xs"></i>
             </span>
         @else
-            <a href="{{ $pegawais->previousPageUrl() }}" 
+            <a href="{{ $programs->previousPageUrl() }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-left text-xs"></i>
             </a>
@@ -424,14 +525,14 @@
         
         {{-- Pagination Elements --}}
         @php
-            $current = $pegawais->currentPage();
-            $last = $pegawais->lastPage();
+            $current = $programs->currentPage();
+            $last = $programs->lastPage();
             $start = max($current - 2, 1);
             $end = min($current + 2, $last);
         @endphp
         
         @if($start > 1)
-            <a href="{{ $pegawais->url(1) }}" 
+            <a href="{{ $programs->url(1) }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
             @if($start > 2)
                 <span class="px-3 py-1.5 text-gray-500">...</span>
@@ -442,7 +543,7 @@
             @if ($page == $current)
                 <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
             @else
-                <a href="{{ $pegawais->url($page) }}" 
+                <a href="{{ $programs->url($page) }}" 
                    class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
             @endif
         @endfor
@@ -451,13 +552,13 @@
             @if($end < $last - 1)
                 <span class="px-3 py-1.5 text-gray-500">...</span>
             @endif
-            <a href="{{ $pegawais->url($last) }}" 
+            <a href="{{ $programs->url($last) }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
         @endif
         
         {{-- Next Page Link --}}
-        @if ($pegawais->hasMorePages())
-            <a href="{{ $pegawais->nextPageUrl() }}" 
+        @if ($programs->hasMorePages())
+            <a href="{{ $programs->nextPageUrl() }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
@@ -495,35 +596,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (successNotif) hideNotification('success');
         if (errorNotif) hideNotification('error');
     }, 5000);
-    
-    // Format NIP input (jika ada di form create/edit)
-    const nipInputs = document.querySelectorAll('input[name="nip"]');
-    nipInputs.forEach(function(input) {
-        input.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 0) {
-                value = value.replace(/(\d{8})(\d{6})(\d{1})(\d{3})/, '$1 $2 $3 $4');
-            }
-            e.target.value = value;
-        });
-    });
 });
 
 // ========== DELETE CONFIRMATION FUNCTIONS ==========
 let currentDeleteId = null;
 let currentDeleteNama = null;
 
-function showDeleteConfirmation(id, nama, nip) {
+function showDeleteConfirmation(id, nama, rekening) {
     currentDeleteId = id;
     currentDeleteNama = nama;
     
     // Update modal content
     document.getElementById('delete-nama').textContent = nama;
-    document.getElementById('delete-nip').textContent = nip ? `NIP: ${nip}` : 'Tanpa NIP';
+    document.getElementById('delete-rekening').textContent = rekening ? `Rekening: ${rekening}` : 'Tanpa Rekening';
     
     // Update form action
     const form = document.getElementById('delete-form');
-    form.action = `/pegawai/${id}`;
+    form.action = `/program/${id}`;
     
     // Show modal with animation
     const modal = document.getElementById('delete-confirm-modal');
@@ -605,7 +694,7 @@ function showDeleteSuccess(nama) {
     const notification = document.getElementById('delete-notification');
     const message = document.getElementById('delete-message');
     
-    message.textContent = `Data pegawai "${nama}" berhasil dihapus.`;
+    message.textContent = `Data program "${nama}" berhasil dihapus.`;
     
     // Reset progress bar
     const progress = document.getElementById('delete-progress');
@@ -625,17 +714,79 @@ function showDeleteSuccess(nama) {
     }, 5000);
 }
 
+// ========== FULL TEXT MODAL ==========
+function showFullText(element, text, title) {
+    // Buat modal untuk menampilkan teks lengkap
+    const modalId = 'full-text-modal';
+    let modal = document.getElementById(modalId);
+    
+    if (!modal) {
+        // Buat modal jika belum ada
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden';
+        modal.innerHTML = `
+            <div class="relative min-h-screen flex items-center justify-center p-4">
+                <div class="relative bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto animate-fade-in">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900" id="full-text-title"></h3>
+                            <button type="button" onclick="hideFullTextModal()" class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <pre class="text-sm text-gray-700 whitespace-pre-wrap max-h-96 overflow-y-auto" id="full-text-content"></pre>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button type="button" onclick="hideFullTextModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    // Isi konten modal
+    document.getElementById('full-text-title').textContent = title;
+    document.getElementById('full-text-content').textContent = text;
+    
+    // Tampilkan modal
+    modal.classList.remove('hidden');
+    modal.style.display = 'block';
+}
+
+function hideFullTextModal() {
+    const modal = document.getElementById('full-text-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+}
+
 // Close modal when clicking outside
-document.getElementById('delete-confirm-modal').addEventListener('click', function(e) {
+document.getElementById('delete-confirm-modal')?.addEventListener('click', function(e) {
     if (e.target === this) {
         hideDeleteModal();
     }
 });
 
-// Close modal with Escape key
+// Close full text modal when clicking outside
+document.addEventListener('click', function(e) {
+    const fullTextModal = document.getElementById('full-text-modal');
+    if (fullTextModal && e.target === fullTextModal) {
+        hideFullTextModal();
+    }
+});
+
+// Close modals with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideDeleteModal();
+        hideFullTextModal();
     }
 });
 </script>

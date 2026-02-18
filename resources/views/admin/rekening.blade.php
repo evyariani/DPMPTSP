@@ -1,7 +1,6 @@
-{{-- resources/views/admin/pegawai.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Pegawai')
+@section('title', 'Data Rekening')
 
 @section('content')
 <style>
@@ -83,11 +82,11 @@
 <div class="mb-6">
     <div class="flex justify-between items-center">
         <div>
-            <h2 class="text-lg font-semibold text-gray-700">Data Pegawai</h2>
-            <p class="text-gray-500">Kelola data pegawai sistem</p>
+            <h2 class="text-lg font-semibold text-gray-700">Data Rekening</h2>
+            <p class="text-gray-500">Kelola data rekening sistem</p>
         </div>
-        <a href="/pegawai/create" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
-            <i class="fas fa-plus mr-2"></i> Tambah Pegawai
+        <a href="/rekening/create" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+            <i class="fas fa-plus mr-2"></i> Tambah Rekening
         </a>
     </div>
 </div>
@@ -173,11 +172,12 @@
                 
                 <!-- Message -->
                 <div class="mb-6 text-left">
-                    <p class="text-gray-600 mb-3">Anda akan menghapus data pegawai:</p>
+                    <p class="text-gray-600 mb-3">Anda akan menghapus data rekening:</p>
                     
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-                        <p class="font-semibold text-gray-800 text-lg" id="delete-nama"></p>
-                        <p class="text-gray-600 text-sm mt-1" id="delete-nip"></p>
+                        <p class="font-semibold text-gray-800 text-lg" id="delete-uraian"></p>
+                        <p class="text-gray-600 text-sm mt-1">Kode: <span id="delete-kode"></span></p>
+                        <p class="text-gray-600 text-sm">No. Rek: <span id="delete-nomor"></span></p>
                     </div>
                     
                     <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
@@ -218,34 +218,26 @@
 
 <!-- Filter dan Search -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
-    <form method="GET" action="/pegawai" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+    <form method="GET" action="/rekening" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
         <div class="flex-1">
-            <input type="text" name="search" placeholder="Cari nama, NIP, atau TK Jalan..." 
+            <input type="text" name="search" placeholder="Cari kode rekening, nomor rekening, atau uraian..." 
                    value="{{ request('search') }}"
                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
         </div>
         <div class="flex flex-wrap gap-2">
-            <select name="pangkat" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Pangkat</option>
-                @foreach($pangkatList ?? [] as $pangkat)
-                    <option value="{{ $pangkat }}" {{ request('pangkat') == $pangkat ? 'selected' : '' }}>
-                        {{ $pangkat }}
-                    </option>
-                @endforeach
-            </select>
-            <select name="golongan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Golongan</option>
-                @foreach($golonganList ?? [] as $golongan)
-                    <option value="{{ $golongan }}" {{ request('golongan') == $golongan ? 'selected' : '' }}>
-                        {{ $golongan }}
+            <select name="kode_rek" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Kode</option>
+                @foreach($kodeRekList ?? [] as $kode)
+                    <option value="{{ $kode }}" {{ request('kode_rek') == $kode ? 'selected' : '' }}>
+                        {{ $kode }}
                     </option>
                 @endforeach
             </select>
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
                 <i class="fas fa-filter mr-2"></i> Filter
             </button>
-            @if(request()->has('search') || request()->has('pangkat') || request()->has('gol'))
-                <a href="/pegawai" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+            @if(request()->has('search') || request()->has('kode_rek'))
+                <a href="/rekening" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
                     <i class="fas fa-redo mr-2"></i> Reset
                 </a>
             @endif
@@ -253,34 +245,30 @@
     </form>
 </div>
 
-<!-- Tabel Pegawai -->
+<!-- Tabel Rekening -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIP</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pangkat</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Golongan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jabatan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tunjangan Jalan</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Rekening</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Rekening</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uraian</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @php
-                    // Pastikan $pegawais selalu ada dan bisa di-loop
-                    $pegawais = $pegawais ?? collect([]);
-                    $isPaginated = method_exists($pegawais, 'currentPage');
+                    $rekenings = $rekenings ?? collect([]);
+                    $isPaginated = method_exists($rekenings, 'currentPage');
                 @endphp
                 
-                @forelse($pegawais as $index => $pegawai)
+                @forelse($rekenings as $index => $rekening)
                 <tr class="hover:bg-gray-50 transition duration-150">
                     <td class="px-6 py-4 whitespace-nowrap">
                         @if($isPaginated)
-                            {{ ($pegawais->currentPage() - 1) * $pegawais->perPage() + $index + 1 }}
+                            {{ ($rekenings->currentPage() - 1) * $rekenings->perPage() + $index + 1 }}
                         @else
                             {{ $index + 1 }}
                         @endif
@@ -289,77 +277,37 @@
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
                                 <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <span class="text-indigo-600 font-semibold">{{ strtoupper(substr($pegawai->nama ?? '', 0, 1)) }}</span>
+                                    <i class="fas fa-hashtag text-indigo-600"></i>
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $pegawai->nama ?? '-' }}</div>
-                                {{-- <div class="text-sm text-gray-500">ID: {{ $pegawai->id_pegawai ?? '-' }}</div> --}}
+                                <div class="text-sm font-medium text-gray-900">{{ $rekening->kode_rek ?? '-' }}</div>
+                                <div class="text-sm text-gray-500">ID: {{ $rekening->id_rekening ?? '-' }}</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {{ $pegawai->nip ?? '-' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ $pegawai->pangkat ?? '-' }}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {{ $pegawai->gol ?? '-' }}
+                            {{ $rekening->nomor_rek ?? '-' }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {{ $pegawai->jabatan ?? '-' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        @if(!empty($pegawai->tk_jalan))
-                            @php
-                                // Cek apakah tk_jalan berupa angka (bisa diformat sebagai uang)
-                                $isNumeric = is_numeric($pegawai->tk_jalan);
-                            @endphp
-                            
-                            @if($isNumeric && $pegawai->tk_jalan > 0)
-                                {{-- Jika angka dan lebih dari 0, format sebagai uang --}}
-                                <span class="text-green-600 font-medium">
-                                    Rp {{ number_format($pegawai->tk_jalan, 0, ',', '.') }}
-                                </span>
-                            @elseif($isNumeric && $pegawai->tk_jalan == 0)
-                                {{-- Jika angka 0 --}}
-                                <span class="text-gray-500">
-                                    Rp 0
-                                </span>
-                            @elseif($isNumeric)
-                                {{-- Jika angka negatif --}}
-                                <span class="text-red-500">
-                                    Rp {{ number_format($pegawai->tk_jalan, 0, ',', '.') }}
-                                </span>
-                            @else
-                                {{-- Jika bukan angka (huruf seperti A, B, C, TK I, dll) --}}
-                                <span class="px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                    {{ strtoupper($pegawai->tk_jalan) }}
-                                </span>
-                            @endif
-                        @else
-                            <span class="text-gray-400">-</span>
-                        @endif
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900">{{ $rekening->uraian ?? '-' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
-                            @if(isset($pegawai->id_pegawai))
-                            <a href="/pegawai/{{ $pegawai->id_pegawai }}/edit" 
+                            @if(isset($rekening->id_rekening))
+                            <a href="/rekening/{{ $rekening->id_rekening }}/edit" 
                                class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
-                               title="Edit Pegawai">
+                               title="Edit Rekening">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
                             
                             <!-- Tombol Hapus dengan Modal -->
                             <button type="button" 
-                                    onclick="showDeleteConfirmation({{ $pegawai->id_pegawai }}, '{{ addslashes($pegawai->nama) }}', '{{ $pegawai->nip ?? '' }}')"
+                                    onclick="showDeleteConfirmation({{ $rekening->id_rekening }}, '{{ addslashes($rekening->uraian) }}', '{{ $rekening->kode_rek ?? '' }}', '{{ $rekening->nomor_rek ?? '' }}')"
                                     class="text-red-600 hover:text-red-900 px-3 py-1 rounded hover:bg-red-50 transition duration-150"
-                                    title="Hapus Pegawai">
+                                    title="Hapus Rekening">
                                 <i class="fas fa-trash mr-1"></i> Hapus
                             </button>
                             @else
@@ -371,13 +319,13 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
-                            <i class="fas fa-user-tie text-gray-300 text-4xl mb-3"></i>
-                            <p class="text-lg">Tidak ada data pegawai</p>
-                            <p class="text-sm mt-1">Mulai dengan menambahkan pegawai baru</p>
-                            <a href="/pegawai/create" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
-                                <i class="fas fa-plus mr-2"></i> Tambah Pegawai Pertama
+                            <i class="fas fa-credit-card text-gray-300 text-4xl mb-3"></i>
+                            <p class="text-lg">Tidak ada data rekening</p>
+                            <p class="text-sm mt-1">Mulai dengan menambahkan rekening baru</p>
+                            <a href="/rekening/create" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Tambah Rekening Pertama
                             </a>
                         </div>
                     </td>
@@ -390,9 +338,8 @@
 
 <!-- Pagination -->
 @php
-    // Cek apakah $pegawais ada dan memiliki method hasPages
-    $showPagination = true;
-    if (isset($pegawais) && method_exists($pegawais, 'hasPages') && $pegawais->hasPages()) {
+    $showPagination = false;
+    if (isset($rekenings) && method_exists($rekenings, 'hasPages') && $rekenings->hasPages()) {
         $showPagination = true;
     }
 @endphp
@@ -401,22 +348,22 @@
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
-        <span class="font-medium">{{ $pegawais->firstItem() ?: 0 }}</span> 
+        <span class="font-medium">{{ $rekenings->firstItem() ?: 0 }}</span> 
         sampai 
-        <span class="font-medium">{{ $pegawais->lastItem() ?: 0 }}</span> 
+        <span class="font-medium">{{ $rekenings->lastItem() ?: 0 }}</span> 
         dari 
-        <span class="font-medium">{{ $pegawais->total() }}</span> 
-        pegawai
+        <span class="font-medium">{{ $rekenings->total() }}</span> 
+        rekening
     </div>
     
     <div class="flex items-center space-x-1">
         {{-- Previous Page Link --}}
-        @if ($pegawais->onFirstPage())
+        @if ($rekenings->onFirstPage())
             <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
                 <i class="fas fa-chevron-left text-xs"></i>
             </span>
         @else
-            <a href="{{ $pegawais->previousPageUrl() }}" 
+            <a href="{{ $rekenings->previousPageUrl() }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-left text-xs"></i>
             </a>
@@ -424,14 +371,14 @@
         
         {{-- Pagination Elements --}}
         @php
-            $current = $pegawais->currentPage();
-            $last = $pegawais->lastPage();
+            $current = $rekenings->currentPage();
+            $last = $rekenings->lastPage();
             $start = max($current - 2, 1);
             $end = min($current + 2, $last);
         @endphp
         
         @if($start > 1)
-            <a href="{{ $pegawais->url(1) }}" 
+            <a href="{{ $rekenings->url(1) }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
             @if($start > 2)
                 <span class="px-3 py-1.5 text-gray-500">...</span>
@@ -442,7 +389,7 @@
             @if ($page == $current)
                 <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
             @else
-                <a href="{{ $pegawais->url($page) }}" 
+                <a href="{{ $rekenings->url($page) }}" 
                    class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
             @endif
         @endfor
@@ -451,13 +398,13 @@
             @if($end < $last - 1)
                 <span class="px-3 py-1.5 text-gray-500">...</span>
             @endif
-            <a href="{{ $pegawais->url($last) }}" 
+            <a href="{{ $rekenings->url($last) }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
         @endif
         
         {{-- Next Page Link --}}
-        @if ($pegawais->hasMorePages())
-            <a href="{{ $pegawais->nextPageUrl() }}" 
+        @if ($rekenings->hasMorePages())
+            <a href="{{ $rekenings->nextPageUrl() }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
@@ -496,14 +443,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (errorNotif) hideNotification('error');
     }, 5000);
     
-    // Format NIP input (jika ada di form create/edit)
-    const nipInputs = document.querySelectorAll('input[name="nip"]');
-    nipInputs.forEach(function(input) {
+    // Format nomor rekening input (jika ada di form create/edit)
+    const nomorRekInputs = document.querySelectorAll('input[name="nomor_rek"]');
+    nomorRekInputs.forEach(function(input) {
         input.addEventListener('input', function(e) {
+            // Hapus semua karakter selain angka
             let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 0) {
-                value = value.replace(/(\d{8})(\d{6})(\d{1})(\d{3})/, '$1 $2 $3 $4');
-            }
+            // Tambahkan spasi setiap 4 digit
+            value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
             e.target.value = value;
         });
     });
@@ -513,17 +460,18 @@ document.addEventListener('DOMContentLoaded', function() {
 let currentDeleteId = null;
 let currentDeleteNama = null;
 
-function showDeleteConfirmation(id, nama, nip) {
+function showDeleteConfirmation(id, uraian, kode, nomor) {
     currentDeleteId = id;
-    currentDeleteNama = nama;
+    currentDeleteNama = uraian;
     
     // Update modal content
-    document.getElementById('delete-nama').textContent = nama;
-    document.getElementById('delete-nip').textContent = nip ? `NIP: ${nip}` : 'Tanpa NIP';
+    document.getElementById('delete-uraian').textContent = uraian;
+    document.getElementById('delete-kode').textContent = kode;
+    document.getElementById('delete-nomor').textContent = nomor;
     
     // Update form action
     const form = document.getElementById('delete-form');
-    form.action = `/pegawai/${id}`;
+    form.action = `/rekening/${id}`;
     
     // Show modal with animation
     const modal = document.getElementById('delete-confirm-modal');
@@ -601,11 +549,11 @@ document.getElementById('delete-form').addEventListener('submit', function(e) {
 });
 
 // Tampilkan notifikasi hapus sukses
-function showDeleteSuccess(nama) {
+function showDeleteSuccess(uraian) {
     const notification = document.getElementById('delete-notification');
     const message = document.getElementById('delete-message');
     
-    message.textContent = `Data pegawai "${nama}" berhasil dihapus.`;
+    message.textContent = `Data rekening "${uraian}" berhasil dihapus.`;
     
     // Reset progress bar
     const progress = document.getElementById('delete-progress');

@@ -9,6 +9,10 @@
         "php": "^8.2",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+<<<<<<< HEAD
+=======
+        "laravolt/indonesia": "^0.39.0",
+>>>>>>> 6437e779595a9e7f34956f2f4b0bac5f94eee6c3
         "phpoffice/phpspreadsheet": "^5.4"
     },
     "require-dev": {
