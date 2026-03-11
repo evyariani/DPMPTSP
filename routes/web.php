@@ -8,6 +8,7 @@ use App\Http\Controllers\TransportasiController;
 use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\UangHarianController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\SPTController; // TAMBAHKAN INI
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +84,31 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
             Route::put('/{id}', [ProgramController::class, 'update'])->name('program.update');
             Route::delete('/{id}', [ProgramController::class, 'destroy'])->name('program.destroy');
         });
+    });
+    
+    // ============================================
+    // SPT MANAGEMENT - NEW MODULE
+    // ============================================
+    Route::prefix('spt')->group(function () {
+        // SEMUA USER BISA MELIHAT DAFTAR SPT
+        Route::get('/', [SPTController::class, 'index'])->name('spt.index');
+        
+        // PERHATIKAN URUTAN INI SANGAT PENTING!
+        // ROUTE KHUSUS (DENGAN PREFIX TETAP) HARUS DILETAKKAN SEBELUM ROUTE DENGAN PARAMETER {id}
+        Route::get('/export', [SPTController::class, 'export'])->name('spt.export');
+        Route::get('/get-pegawai/{id}', [SPTController::class, 'getPegawaiData'])->name('spt.get-pegawai');
+        Route::get('/print/{id}', [SPTController::class, 'print'])->name('spt.print');
+        Route::get('/preview-pdf/{id}', [SPTController::class, 'previewPdf'])->name('spt.preview-pdf'); // TAMBAHKAN INI
+        Route::get('/create', [SPTController::class, 'create'])->name('spt.create');
+        
+        // ROUTE DENGAN PARAMETER {id} DILETAKKAN SETELAH ROUTE KHUSUS
+        Route::get('/{id}', [SPTController::class, 'show'])->name('spt.show');
+        Route::get('/{id}/edit', [SPTController::class, 'edit'])->name('spt.edit');
+        Route::put('/{id}', [SPTController::class, 'update'])->name('spt.update');
+        Route::delete('/{id}', [SPTController::class, 'destroy'])->name('spt.destroy');
+        
+        // ROUTE POST UNTUK STORE
+        Route::post('/', [SPTController::class, 'store'])->name('spt.store');
     });
     
     // TRANSPORTASI MANAGEMENT
