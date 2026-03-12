@@ -4,177 +4,385 @@
     <meta charset="utf-8">
     <title>Surat Perintah Tugas</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.5;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            margin: 1cm 2.5cm 2cm 3.5cm;
+            color: #000;
+            line-height: 1.2;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 15px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 18px;
-            text-transform: uppercase;
-        }
-        .header h2 {
-            margin: 5px 0;
-            font-size: 16px;
-        }
-        .header p {
-            margin: 3px 0;
-            font-size: 14px;
-        }
-        .title {
-            text-align: center;
-            margin: 30px 0;
-            font-weight: bold;
-            font-size: 16px;
-            text-decoration: underline;
-        }
-        .content {
-            margin: 20px 0;
-        }
-        table {
+        
+        /* KOP SURAT - LOGO DAN TEKS RATA ATAS */
+        .kop-surat {
             width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-        table, th, td {
-            border: 1px solid #000;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-            vertical-align: top;
-        }
-        th {
-            background-color: #f0f0f0;
-            font-weight: bold;
-        }
-        .signature {
-            margin-top: 50px;
+            margin-bottom: 0;
+            overflow: visible;
             display: flex;
-            justify-content: flex-end;
+            align-items: flex-start; /* RATA ATAS */
+            justify-content: center;
+            gap: 5px;
         }
-        .signature-box {
+        
+        .logo {
+            width: 65px;
+            height: 65px;
+            flex-shrink: 0;
+            margin-top: 0;
+        }
+        
+        .logo img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .header-text {
+            flex: 1;
+            text-align: center;
+            line-height: 1.2;
+            margin-top: 0; /* PASTIKAN RATA ATAS */
+        }
+        
+        .header-text .pemkab {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+            padding: 0;
+            line-height: 1.2;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .header-text .dinas {
+            font-family: Arial, sans-serif;
+            font-size: 21px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0; /* HILANGKAN MARGIN */
+            padding: 0;
+            line-height: 1.2;
+            white-space: nowrap;
+            letter-spacing: -0.2px;
+        }
+        
+        .header-text .alamat {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 0; /* HILANGKAN MARGIN */
+            padding: 0;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        
+        .header-text .kontak {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            margin: 0; /* HILANGKAN MARGIN */
+            padding: 0;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        
+        /* GARIS KOP - TIPIS ATAS TEBAL BAWAH */
+        .garis-kop {
+            width: 100%;
+            margin: 2px 0 15px 0;
+            clear: both;
+            border-top: 1px solid #000;
+            border-bottom: 3px solid #000;
+            height: 2px;
+        }
+        
+        /* JUDUL SURAT */
+        .judul-surat {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .judul-surat h1 {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        
+        .judul-surat .nomor {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        /* DASAR */
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .section-subtitle {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            margin: 15px 0 10px 0;
+        }
+        
+        .dasar-item {
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+        
+        .dasar-nomor {
+            float: left;
+            width: 25px;
+            text-align: right;
+            margin-right: 5px;
+        }
+        
+        .dasar-teks {
+            margin-left: 30px;
+            display: block;
+        }
+        
+        /* PEGAWAI */
+        .pegawai-item {
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .pegawai-header {
+            margin-bottom: 2px;
+            overflow: hidden;
+        }
+        
+        .kepada-label {
+            float: left;
+            width: 70px;
+            font-weight: normal;
+        }
+        
+        .pegawai-nomor {
+            float: left;
+            width: 25px;
+            text-align: right;
+            margin-right: 5px;
+        }
+        
+        .pegawai-detail {
+            margin-left: 30px;
+        }
+        
+        .detail-row {
+            margin-bottom: 2px;
+            overflow: hidden;
+        }
+        
+        .detail-label {
+            float: left;
+            width: 100px;
+        }
+        
+        .detail-titikdua {
+            float: left;
+            width: 15px;
+            text-align: center;
+        }
+        
+        .detail-value {
+            margin-left: 115px;
+            display: block;
+        }
+        
+        /* UNTUK */
+        .untuk-item {
+            margin-bottom: 5px;
+            overflow: hidden;
+        }
+        
+        .untuk-label {
+            float: left;
+            width: 70px;
+        }
+        
+        .untuk-nomor {
+            float: left;
+            width: 25px;
+            text-align: right;
+            margin-right: 5px;
+        }
+        
+        .untuk-teks {
+            margin-left: 100px;
+            display: block;
+        }
+        
+        /* TANDA TANGAN */
+        .tanda-tangan {
+            float: right;
             width: 300px;
             text-align: center;
+            margin-top: 40px;
         }
-        .signature-line {
-            margin-top: 80px;
-            border-top: 1px solid #000;
-            padding-top: 5px;
+        
+        .tempat-tanggal {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            margin-bottom: 5px;
         }
-        .footer {
-            margin-top: 30px;
-            font-size: 12px;
-            text-align: center;
-            color: #666;
+        
+        .jabatan-ttd {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            margin-bottom: 30px;
         }
-        .list-item {
-            margin: 3px 0;
+        
+        .nama-ttd {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            text-decoration: underline;
+            margin-bottom: 2px;
         }
-        .bold {
-            font-weight: bold;
+        
+        .pangkat-ttd {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+        
+        .nip-ttd {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+        }
+        
+        .clearfix {
+            clear: both;
+        }
+        
+        .clear {
+            clear: both;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>PEMERINTAH KABUPATEN TANAH LAUT</h1>
-        <h2>DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU</h2>
-        <p>Jl. A. Syairani No. 1 Pelaihari Kode Pos 70814</p>
-        <p>Telp. (0512) 123456, Email: dpmptsp@tanahlautkab.go.id</p>
+    <!-- KOP SURAT - LOGO DAN TEKS RATA ATAS -->
+    <div class="kop-surat">
+        <div class="logo">
+            <img src="{{ public_path('image/Logo_Tala-removebg-preview (2).png') }}" alt="Logo">
+        </div>
+        <div class="header-text">
+            <div class="pemkab">PEMERINTAH KABUPATEN TANAH LAUT</div>
+            <div class="dinas">DINAS PENANAMAN MODAL DAN PTSP</div>
+            <div class="alamat">Jalan H. Boejasin, Pelaihari, Kab. Tanah Laut, Kalimantan Selatan 70814</div>
+            <div class="kontak">Laman https://dpmptsp.tanahlautkab.go.id Pos-el dpmptsptanahlautkab@gmail.com</div>
+        </div>
+    </div>
+    
+    <!-- GARIS KOP -->
+    <div class="garis-kop"></div>
+
+    <!-- JUDUL SURAT -->
+    <div class="judul-surat">
+        <h1>SURAT PERINTAH TUGAS</h1>
+        <div class="nomor">Nomor : {{ $spt->nomor_surat }}</div>
     </div>
 
-    <div class="title">
-        SURAT PERINTAH TUGAS<br>
-        Nomor: {{ $spt->nomor_surat }}
+    <!-- DASAR -->
+    <div class="section">
+        <div class="section-title">DASAR :</div>
+        @foreach($dasarList as $index => $dasar)
+        <div class="dasar-item">
+            <span class="dasar-nomor">{{ $index + 1 }}.</span>
+            <span class="dasar-teks">{{ $dasar }}</span>
+        </div>
+        @endforeach
     </div>
 
-    <div class="content">
-        <table>
-            <tr>
-                <td width="25%"><strong>Dasar</strong></td>
-                <td width="75%">:</td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    @foreach($dasarList as $index => $dasar)
-                        <div class="list-item">{{ $index + 1 }}. {{ $dasar }}</div>
-                    @endforeach
-                </td>
-            </tr>
-        </table>
-
-        <table>
-            <tr>
-                <th colspan="2">MEMERINTAHKAN</th>
-            </tr>
-            <tr>
-                <td width="25%">Kepada</td>
-                <td width="75%">:</td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    @foreach($pegawaiList as $index => $pegawai)
-                        <div class="list-item">
-                            <strong>{{ $index + 1 }}. {{ $pegawai->nama }}</strong><br>
-                            NIP: {{ $pegawai->nip ?? '-' }}<br>
-                            Pangkat/Gol: {{ $pegawai->pangkat ?? '-' }} / {{ $pegawai->gol ?? '-' }}<br>
-                            Jabatan: {{ $pegawai->jabatan ?? '-' }}
-                        </div>
-                        @if(!$loop->last)
-                            <hr style="margin: 10px 0; border: 0.5px dashed #ccc;">
+    <!-- MEMERINTAHKAN -->
+    <div class="section">
+        <div class="section-subtitle">MEMERINTAHKAN</div>
+        
+        @foreach($pegawaiList as $index => $pegawai)
+        <div class="pegawai-item">
+            <span class="pegawai-nomor">{{ $index + 1 }}.</span>
+            <div class="pegawai-detail">
+                <div class="detail-row">
+                    <span class="detail-label">Nama</span>
+                    <span class="detail-titikdua">:</span>
+                    <span class="detail-value">{{ $pegawai->nama }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Pangkat/gol</span>
+                    <span class="detail-titikdua">:</span>
+                    <span class="detail-value">
+                        @if($pegawai->pangkat && $pegawai->gol)
+                            {{ $pegawai->pangkat }} ({{ $pegawai->gol }})
+                        @elseif($pegawai->pangkat)
+                            {{ $pegawai->pangkat }}
+                        @elseif($pegawai->gol)
+                            Gol. {{ $pegawai->gol }}
+                        @else
+                            -
                         @endif
-                    @endforeach
-                </td>
-            </tr>
-        </table>
-
-        <table>
-            <tr>
-                <td width="25%"><strong>Untuk</strong></td>
-                <td width="75%">:</td>
-            </tr>
-            <tr>
-                <td colspan="2">
-                    <div class="list-item">{{ $spt->tujuan }}</div>
-                </td>
-            </tr>
-        </table>
-
-        <table>
-            <tr>
-                <td width="25%"><strong>Tempat</strong></td>
-                <td width="75%">: {{ $spt->lokasi }}</td>
-            </tr>
-            <tr>
-                <td><strong>Tanggal</strong></td>
-                <td>: {{ $spt->tanggal->format('d F Y') }}</td>
-            </tr>
-        </table>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">NIP</span>
+                    <span class="detail-titikdua">:</span>
+                    <span class="detail-value">{{ $pegawai->nip ?? '-' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Jabatan</span>
+                    <span class="detail-titikdua">:</span>
+                    <span class="detail-value">{{ $pegawai->jabatan ?? '-' }}</span>
+                </div>
+            </div>
+        </div>
+        @endforeach
     </div>
 
-    <div class="signature">
-        <div class="signature-box">
-            <div>Ditetapkan di : Pelaihari</div>
-            <div>Pada tanggal : {{ $spt->tanggal->format('d F Y') }}</div>
-            <div class="signature-line">
-                <strong>{{ $spt->penandaTangan->nama ?? '-' }}</strong><br>
-                NIP. {{ $spt->penandaTangan->nip ?? '-' }}<br>
-                {{ $spt->penandaTangan->jabatan ?? '-' }}
-            </div>
+    <!-- UNTUK -->
+    <div class="section">
+        <div class="untuk-item">
+            <span class="untuk-label">Untuk :</span>
+            <span class="untuk-nomor">1.</span>
+            <span class="untuk-teks">{{ $spt->tujuan }}</span>
         </div>
     </div>
 
-    <div class="footer">
-        <p>Dokumen ini dicetak secara elektronik, tidak memerlukan tanda tangan basah.</p>
+    <!-- TANDA TANGAN -->
+    <div class="tanda-tangan">
+        <div class="tempat-tanggal">Pelaihari, {{ $spt->tanggal->format('d F Y') }}</div>
+        <div class="jabatan-ttd">{{ $spt->penandaTangan->jabatan ?? 'Kepala Dinas' }}</div>
+        
+        <div class="nama-ttd">{{ $spt->penandaTangan->nama ?? '-' }}</div>
+        <div class="pangkat-ttd">
+            @if($spt->penandaTangan->pangkat && $spt->penandaTangan->gol)
+                {{ $spt->penandaTangan->pangkat }} ({{ $spt->penandaTangan->gol }})
+            @elseif($spt->penandaTangan->pangkat)
+                {{ $spt->penandaTangan->pangkat }}
+            @elseif($spt->penandaTangan->gol)
+                Gol. {{ $spt->penandaTangan->gol }}
+            @endif
+        </div>
+        <div class="nip-ttd">NIP. {{ $spt->penandaTangan->nip ?? '-' }}</div>
     </div>
+    
+    <div class="clearfix"></div>
 </body>
 </html>

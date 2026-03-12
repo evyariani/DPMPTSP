@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SPT;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf; // TAMBAHKAN INI
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SPTController extends Controller
 {
@@ -343,6 +343,48 @@ class SPTController extends Controller
     }
 
     /**
+     * Helper untuk membersihkan nama file dari karakter ilegal
+     */
+    private function sanitizeFilename($filename)
+    {
+        // Daftar karakter yang tidak diperbolehkan dalam nama file
+        // Ganti dengan karakter dash (-)
+        $filename = str_replace(
+            ['/', '\\', ':', '*', '?', '"', '<', '>', '|', ' ', '(', ')', '[', ']', '{', '}', '!', '@', '#', '$', '%', '^', '&', '=', '+', ',', ';', "'"], 
+            '-', 
+            $filename
+        );
+        
+        // Hapus karakter selain huruf, angka, titik, dan dash
+        $filename = preg_replace('/[^a-zA-Z0-9.-]/', '', $filename);
+        
+        // Hapus dash berulang (ganti dengan single dash)
+        $filename = preg_replace('/-+/', '-', $filename);
+        
+        // Hapus dash di awal dan akhir
+        $filename = trim($filename, '-');
+        
+        // Jika hasil kosong, beri nama default
+        if (empty($filename)) {
+            $filename = 'spt';
+        }
+        
+        return $filename;
+    }
+
+    /**
+     * Helper untuk menghasilkan nama file PDF yang aman
+     */
+    private function generatePdfFilename($spt, $prefix = 'SPT-', $suffix = '.pdf')
+    {
+        // Ambil nomor surat dan bersihkan
+        $nomorBersih = $this->sanitizeFilename($spt->nomor_surat);
+        
+        // Gabungkan dengan ID untuk memastikan unique
+        return $prefix . $nomorBersih . '-' . $spt->id_spt . $suffix;
+    }
+
+    /**
      * Print SPT (cetak PDF)
      */
     public function print($id)
@@ -358,11 +400,11 @@ class SPTController extends Controller
             // Set ukuran kertas (opsional)
             $pdf->setPaper('A4', 'portrait');
             
-            // Download PDF
-            return $pdf->download('SPT-'.$spt->nomor_surat.'.pdf');
+            // Generate nama file yang aman
+            $namaFile = $this->generatePdfFilename($spt, 'SPT-', '.pdf');
             
-            // Atau tampilkan di browser
-            // return $pdf->stream('SPT-'.$spt->nomor_surat.'.pdf');
+            // Download PDF
+            return $pdf->download($namaFile);
             
         } catch (\Exception $e) {
             return redirect()->route('spt.index')
@@ -383,8 +425,11 @@ class SPTController extends Controller
             $pdf = Pdf::loadView('admin.spt-pdf', compact('spt', 'pegawaiList', 'dasarList'));
             $pdf->setPaper('A4', 'portrait');
             
+            // Generate nama file yang aman
+            $namaFile = $this->generatePdfFilename($spt, 'SPT-', '.pdf');
+            
             // Tampilkan di browser
-            return $pdf->stream('SPT-'.$spt->nomor_surat.'.pdf');
+            return $pdf->stream($namaFile);
             
         } catch (\Exception $e) {
             return redirect()->route('spt.index')
