@@ -13,27 +13,33 @@
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
-            margin: 1cm 2.5cm 2cm 3.5cm;
+            margin: 1cm 2cm 2cm 2cm; /* Atas: 1cm, Kanan: 2cm, Bawah: 2cm, Kiri: 2cm */
             color: #000;
             line-height: 1.2;
         }
         
-        /* KOP SURAT - LOGO DAN TEKS RATA ATAS */
-        .kop-surat {
+        /* KOP SURAT MENGGUNAKAN TABEL YANG DIHIDE BORDERNYA */
+        .kop-table {
             width: 100%;
-            margin-bottom: 0;
-            overflow: visible;
-            display: flex;
-            align-items: flex-start; /* RATA ATAS */
-            justify-content: center;
-            gap: 5px;
+            border-collapse: collapse;
+            margin-bottom: 5px; /* Space dengan garis kop */
+            border: none; /* Sembunyikan border tabel */
+        }
+        
+        .kop-table td {
+            border: none; /* Sembunyikan border sel */
+            padding: 0;
+            vertical-align: middle; /* Center vertikal */
+        }
+        
+        .logo-cell {
+            width: 55px;
+            padding-right: 5px;
         }
         
         .logo {
-            width: 65px;
-            height: 65px;
-            flex-shrink: 0;
-            margin-top: 0;
+            width: 55px;
+            height: 55px;
         }
         
         .logo img {
@@ -43,10 +49,8 @@
         }
         
         .header-text {
-            flex: 1;
-            text-align: center;
-            line-height: 1.2;
-            margin-top: 0; /* PASTIKAN RATA ATAS */
+            width: 100%;
+            text-align: center; /* Center teks horizontal */
         }
         
         .header-text .pemkab {
@@ -66,7 +70,7 @@
             font-size: 21px;
             font-weight: bold;
             text-transform: uppercase;
-            margin: 0; /* HILANGKAN MARGIN */
+            margin: 0;
             padding: 0;
             line-height: 1.2;
             white-space: nowrap;
@@ -76,7 +80,7 @@
         .header-text .alamat {
             font-family: Arial, sans-serif;
             font-size: 11px;
-            margin: 0; /* HILANGKAN MARGIN */
+            margin: 0;
             padding: 0;
             line-height: 1.2;
             white-space: nowrap;
@@ -85,7 +89,7 @@
         .header-text .kontak {
             font-family: Arial, sans-serif;
             font-size: 11px;
-            margin: 0; /* HILANGKAN MARGIN */
+            margin: 0;
             padding: 0;
             line-height: 1.2;
             white-space: nowrap;
@@ -94,7 +98,7 @@
         /* GARIS KOP - TIPIS ATAS TEBAL BAWAH */
         .garis-kop {
             width: 100%;
-            margin: 2px 0 15px 0;
+            margin: 0 0 15px 0; /* Hapus margin top, biarkan margin bottom saja */
             clear: both;
             border-top: 1px solid #000;
             border-bottom: 3px solid #000;
@@ -280,18 +284,22 @@
     </style>
 </head>
 <body>
-    <!-- KOP SURAT - LOGO DAN TEKS RATA ATAS -->
-    <div class="kop-surat">
-        <div class="logo">
-            <img src="{{ public_path('image/Logo_Tala-removebg-preview (2).png') }}" alt="Logo">
-        </div>
-        <div class="header-text">
-            <div class="pemkab">PEMERINTAH KABUPATEN TANAH LAUT</div>
-            <div class="dinas">DINAS PENANAMAN MODAL DAN PTSP</div>
-            <div class="alamat">Jalan H. Boejasin, Pelaihari, Kab. Tanah Laut, Kalimantan Selatan 70814</div>
-            <div class="kontak">Laman https://dpmptsp.tanahlautkab.go.id Pos-el dpmptsptanahlautkab@gmail.com</div>
-        </div>
-    </div>
+    <!-- KOP SURAT MENGGUNAKAN TABEL TERSEMBUNYI UNTUK KERAPIHAN -->
+    <table class="kop-table">
+        <tr>
+            <td class="logo-cell">
+                <div class="logo">
+                    <img src="{{ public_path('image/Logo_Tala-removebg-preview (2).png') }}" alt="Logo">
+                </div>
+            </td>
+            <td class="header-text">
+                <div class="pemkab">PEMERINTAH KABUPATEN TANAH LAUT</div>
+                <div class="dinas">DINAS PENANAMAN MODAL DAN PTSP</div>
+                <div class="alamat">Jalan H. Boejasin, Pelaihari, Kab. Tanah Laut, Kalimantan Selatan 70814</div>
+                <div class="kontak">Laman https://dpmptsp.tanahlautkab.go.id Pos-el dpmptsptanahlautkab@gmail.com</div>
+            </td>
+        </tr>
+    </table>
     
     <!-- GARIS KOP -->
     <div class="garis-kop"></div>
