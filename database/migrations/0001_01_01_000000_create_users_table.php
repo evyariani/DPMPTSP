@@ -12,9 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('username', 100)->unique();
             $table->string('password', 255);
-            $table->enum('level', ['admin', 'pegawai', 'pemimpin', 'admin_keuangan'])->default('pegawai');
+            $table->enum('level', ['admin', 'pegawai', 'kadis'])->default('pegawai');
             $table->timestamps();
-            $table->softDeletes(); // Untuk soft delete
+            $table->softDeletes();
         });
     }
 

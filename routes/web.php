@@ -45,13 +45,13 @@ Route::get('/dashboard', function () {
 | PROTECTED ROUTES - SEMUA USER HARUS LOGIN
 |--------------------------------------------------------------------------
 */
-Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(function () {
+Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
     
     // USER MANAGEMENT
     Route::prefix('user')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('user.index');
         
-        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+        Route::middleware(['role:admin|kadis'])->group(function () {
             Route::get('/create', [UserController::class, 'create'])->name('user.create');
             Route::post('/', [UserController::class, 'store'])->name('user.store');
             Route::get('/{id}/edit', [UserController::class, 'edit'])->name('user.edit');
@@ -64,7 +64,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
     Route::prefix('pegawai')->group(function () {
         Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
         
-        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+        Route::middleware(['role:admin|kadis'])->group(function () {
             Route::get('/create', [PegawaiController::class, 'create'])->name('pegawai.create');
             Route::post('/', [PegawaiController::class, 'store'])->name('pegawai.store');
             Route::get('/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
@@ -77,7 +77,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
     Route::prefix('program')->group(function () {
         Route::get('/', [ProgramController::class, 'index'])->name('program.index');
         
-        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+        Route::middleware(['role:admin|kadis'])->group(function () {
             Route::get('/create', [ProgramController::class, 'create'])->name('program.create');
             Route::post('/', [ProgramController::class, 'store'])->name('program.store');
             Route::get('/{id}/edit', [ProgramController::class, 'edit'])->name('program.edit');
@@ -98,7 +98,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         Route::get('/export', [SPTController::class, 'export'])->name('spt.export');
         Route::get('/get-pegawai/{id}', [SPTController::class, 'getPegawaiData'])->name('spt.get-pegawai');
         Route::get('/print/{id}', [SPTController::class, 'print'])->name('spt.print');
-        Route::get('/preview-pdf/{id}', [SPTController::class, 'previewPdf'])->name('spt.preview-pdf'); // TAMBAHKAN INI
+        Route::get('/preview-pdf/{id}', [SPTController::class, 'previewPdf'])->name('spt.preview-pdf');
         Route::get('/create', [SPTController::class, 'create'])->name('spt.create');
         
         // ROUTE DENGAN PARAMETER {id} DILETAKKAN SETELAH ROUTE KHUSUS
@@ -115,7 +115,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
     Route::prefix('transportasi')->group(function () {
         Route::get('/', [TransportasiController::class, 'index'])->name('transportasi.index');
         
-        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+        Route::middleware(['role:admin|kadis'])->group(function () {
             Route::get('/create', [TransportasiController::class, 'create'])->name('transportasi.create');
             Route::post('/', [TransportasiController::class, 'store'])->name('transportasi.store');
             Route::get('/{id}/edit', [TransportasiController::class, 'edit'])->name('transportasi.edit');
@@ -128,7 +128,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
     Route::prefix('rekening')->group(function () {
         Route::get('/', [RekeningController::class, 'index'])->name('rekening.index');
         
-        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+        Route::middleware(['role:admin|kadis'])->group(function () {
             Route::get('/create', [RekeningController::class, 'create'])->name('rekening.create');
             Route::post('/', [RekeningController::class, 'store'])->name('rekening.store');
             Route::get('/{id}/edit', [RekeningController::class, 'edit'])->name('rekening.edit');
@@ -144,7 +144,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
         // CRUD Routes
         Route::get('/', [UangHarianController::class, 'index'])->name('uang-harian.index');
         
-        Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+        Route::middleware(['role:admin|kadis'])->group(function () {
             Route::get('/create', [UangHarianController::class, 'create'])->name('uang-harian.create');
             Route::post('/', [UangHarianController::class, 'store'])->name('uang-harian.store');
             Route::get('/{id}/edit', [UangHarianController::class, 'edit'])->name('uang-harian.edit');
@@ -163,7 +163,7 @@ Route::middleware(['role:admin|pemimpin|admin_keuangan|pegawai'])->group(functio
     });
     
     // MODUL LAINNYA
-    Route::middleware(['role:admin|pemimpin|admin_keuangan'])->group(function () {
+    Route::middleware(['role:admin|kadis'])->group(function () {
         Route::get('/unit', function () {
             return view('admin.unit');
         })->name('unit.index');

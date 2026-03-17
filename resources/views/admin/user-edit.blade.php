@@ -1,17 +1,17 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah User Baru')
+@section('title', 'Edit User')
 
 @section('content')
 <div class="mb-6">
     <div class="flex justify-between items-center">
         <div>
-            <h2 class="text-lg font-semibold text-gray-700">Tambah User Baru</h2>
-            <p class="text-gray-500">Isi formulir untuk menambahkan user baru ke sistem</p>
+            <h2 class="text-lg font-semibold text-gray-700">Edit User</h2>
+            <p class="text-gray-500">Edit informasi user {{ $user->username }}</p>
         </div>
-        {{-- <a href="{{ route('user.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
+        <a href="{{ route('user.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
             <i class="fas fa-arrow-left mr-2"></i> Kembali
-        </a> --}}
+        </a>
     </div>
 </div>
 
@@ -47,11 +47,12 @@
     </div>
 @endif
 
-<!-- Form Tambah User -->
+<!-- Form Edit User -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="p-6">
-        <form action="{{ route('user.store') }}" method="POST" id="formUser" autocomplete="off">
+        <form action="{{ route('user.update', $user->id) }}" method="POST" id="formUser" autocomplete="off">
             @csrf
+            @method('PUT')
             
             <!-- Grid 2 kolom untuk informasi user -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -65,7 +66,7 @@
                         <input type="text" 
                                id="username"
                                name="username" 
-                               value="{{ old('username') }}"
+                               value="{{ old('username', $user->username) }}"
                                required
                                autocomplete="off"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('username') border-red-500 @enderror"
@@ -77,22 +78,21 @@
                         <p class="mt-1 text-sm text-gray-500">Username harus unik dan minimal 3 karakter</p>
                     </div>
 
-                    <!-- Password -->
+                    <!-- Password (Opsional) -->
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Password <span class="text-red-500">*</span>
+                            Password <span class="text-gray-500 text-xs">(Kosongkan jika tidak diubah)</span>
                         </label>
                         <input type="password" 
                                id="password"
                                name="password" 
-                               required
                                autocomplete="new-password"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror"
-                               placeholder="Masukkan password (minimal 3 karakter)">
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Masukkan password baru (minimal 3 karakter)">
                         @error('password')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-sm text-gray-500">Password minimal 3 karakter</p>
+                        <p class="mt-1 text-sm text-gray-500">Kosongkan jika tidak ingin mengubah password</p>
                     </div>
                 </div>
 
@@ -105,33 +105,36 @@
                         </label>
                         
                         @php
-                            $adminExists = \App\Models\User::where('level', 'admin')->exists();
-                            $kadisExists = \App\Models\User::where('level', 'kadis')->exists();
-                            $selectedLevel = old('level', $adminExists && $kadisExists ? 'pegawai' : '');
+                            $adminExists = \App\Models\User::where('level', 'admin')
+                                ->where('id', '!=', $user->id)
+                                ->exists();
+                            $kadisExists = \App\Models\User::where('level', 'kadis')
+                                ->where('id', '!=', $user->id)
+                                ->exists();
                         @endphp
                         
-                        @if($adminExists && $kadisExists)
-                            {{-- Jika admin dan kadis sudah ada, otomatis pegawai tanpa dropdown --}}
+                        @if($user->level == 'pegawai' && $adminExists && $kadisExists)
+                            {{-- Jika user adalah pegawai, dan admin & kadis sudah ada --}}
                             <input type="hidden" name="level" value="pegawai">
                             <div class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700">
-                                Pegawai
+                                Pegawai (Otomatis - Admin & Kadis sudah ada)
                             </div>
                         @else
-                            {{-- Tampilkan dropdown jika masih ada opsi --}}
+                            {{-- Tampilkan dropdown --}}
                             <select id="level" 
                                     name="level" 
                                     required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('level') border-red-500 @enderror">
                                 <option value="">Pilih Level User</option>
                                 
-                                @if(!$adminExists)
-                                    <option value="admin" {{ $selectedLevel == 'admin' ? 'selected' : '' }}>Admin</option>
+                                @if(!$adminExists || $user->level == 'admin')
+                                    <option value="admin" {{ old('level', $user->level) == 'admin' ? 'selected' : '' }}>Admin</option>
                                 @endif
                                 
-                                <option value="pegawai" {{ $selectedLevel == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
+                                <option value="pegawai" {{ old('level', $user->level) == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
                                 
-                                @if(!$kadisExists)
-                                    <option value="kadis" {{ $selectedLevel == 'kadis' ? 'selected' : '' }}>Kepala Dinas (Kadis)</option>
+                                @if(!$kadisExists || $user->level == 'kadis')
+                                    <option value="kadis" {{ old('level', $user->level) == 'kadis' ? 'selected' : '' }}>Kepala Dinas (Kadis)</option>
                                 @endif
                             </select>
                         @endif
@@ -149,7 +152,7 @@
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
-                    <i class="fas fa-save mr-2"></i> Simpan User
+                    <i class="fas fa-save mr-2"></i> Update User
                 </button>
             </div>
         </form>
@@ -157,25 +160,18 @@
 </div>
 
 <script>
-// Clear form on page load untuk mencegah cache
+// Clear password field on page load untuk mencegah cache
 document.addEventListener('DOMContentLoaded', function() {
-    // Reset form
-    document.getElementById('formUser').reset();
-    
     // Auto-focus ke input username
     document.getElementById('username').focus();
     
-    // Clear any autofilled values
-    setTimeout(function() {
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-    }, 100);
+    // Clear password field
+    document.getElementById('password').value = '';
 });
 
 // Validasi form sebelum submit
 document.getElementById('formUser').addEventListener('submit', function(e) {
     const username = document.getElementById('username');
-    const password = document.getElementById('password');
     
     // Validasi Username
     if (!username.value.trim()) {
@@ -189,21 +185,6 @@ document.getElementById('formUser').addEventListener('submit', function(e) {
         alert('Username minimal 3 karakter!');
         e.preventDefault();
         username.focus();
-        return false;
-    }
-    
-    // Validasi Password
-    if (!password.value) {
-        alert('Password wajib diisi!');
-        e.preventDefault();
-        password.focus();
-        return false;
-    }
-    
-    if (password.value.length < 3) {
-        alert('Password minimal 3 karakter!');
-        e.preventDefault();
-        password.focus();
         return false;
     }
     
