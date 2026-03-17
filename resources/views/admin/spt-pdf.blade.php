@@ -12,13 +12,13 @@
         
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt; /* SEMUA FONT ISI 12PT */
+            font-size: 12pt;
             margin: 1cm 2cm 2cm 2cm;
             color: #000;
             line-height: 1.2;
         }
         
-        /* KOP SURAT MENGGUNAKAN TABEL YANG DIHIDE BORDERNYA */
+        /* KOP SURAT */
         .kop-table {
             width: 100%;
             border-collapse: collapse;
@@ -55,7 +55,7 @@
         
         .header-text .pemkab {
             font-family: Arial, sans-serif;
-            font-size: 16px; /* KOP TETAP 16 */
+            font-size: 16px;
             font-weight: bold;
             text-transform: uppercase;
             margin: 0;
@@ -67,7 +67,7 @@
         
         .header-text .dinas {
             font-family: Arial, sans-serif;
-            font-size: 16px; /* KOP TETAP 16 */
+            font-size: 16px;
             font-weight: bold;
             text-transform: uppercase;
             margin: 0;
@@ -79,7 +79,7 @@
         
         .header-text .alamat {
             font-family: Arial, sans-serif;
-            font-size: 11px; /* KOP TETAP 11 */
+            font-size: 11px;
             margin: 0;
             padding: 0;
             line-height: 1.2;
@@ -88,7 +88,7 @@
         
         .header-text .kontak {
             font-family: Arial, sans-serif;
-            font-size: 11px; /* KOP TETAP 11 */
+            font-size: 11px;
             margin: 0;
             padding: 0;
             line-height: 1.2;
@@ -113,7 +113,7 @@
         
         .judul-surat h1 {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 16px; /* JUDUL 16 */
+            font-size: 16px;
             font-weight: normal;
             text-transform: uppercase;
             margin: 0;
@@ -121,32 +121,31 @@
         
         .judul-surat .nomor {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 14px; /* NOMOR 14 */
+            font-size: 14px;
             margin-top: 5px;
         }
         
-        /* MEMERINTAHKAN */
+        /* MEMERINTAHKAN - tanpa margin berlebihan */
         .memerintahkan {
             text-align: center;
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt; /* DIUBAH JADI 12PT */
+            font-size: 12pt;
             font-weight: normal;
             text-transform: uppercase;
-            margin: 15px 0 10px 0;
+            margin: 0; /* HAPUS SEMUA MARGIN */
         }
         
         /* TABEL UNTUK DASAR/KEPADA/UNTUK */
         .content-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 30px;
         }
         
         .content-table td {
             padding: 1px 2px;
             vertical-align: top;
             border: none;
-            font-size: 12pt; /* SEMUA FONT ISI 12PT */
+            font-size: 12pt;
             font-family: 'Times New Roman', Times, serif;
         }
         
@@ -180,16 +179,16 @@
         }
         
         .spacer-row td {
-            height: 10px;
+            height: 5px;
         }
         
         .pegawai-spacer td {
-            height: 15px; /* Space enter setelah setiap pegawai */
+            height: 15px; /* Space antar pegawai */
         }
         
-        /* SPACE SETELAH KEPADA DAN SETELAH UNTUK */
+        /* SPACE UNTUK JARAK ANTAR SECTION - SEMUA SAMA 2 ENTER */
         .section-spacer {
-            height: 20px; /* Space enter setelah Kepada dan setelah Untuk */
+            height: 24px; /* 2 ENTER (12px x 2) */
         }
         
         /* TANDA TANGAN */
@@ -197,8 +196,8 @@
             float: right;
             width: 300px;
             text-align: center;
-            margin-top: 40px;
-            font-size: 12pt; /* FONT TANDA TANGAN 12PT */
+            margin-top: 30px;
+            font-size: 12pt;
             font-family: 'Times New Roman', Times, serif;
         }
         
@@ -213,7 +212,7 @@
         }
         
         .enter-dua-kali {
-            height: 30px;
+            height: 40px;
         }
         
         .nama-ttd {
@@ -263,9 +262,8 @@
         <div class="nomor">Nomor : {{ $spt->nomor_surat }}</div>
     </div>
 
-    <!-- CONTENT TABLE - DASAR -->
+    <!-- SECTION DASAR -->
     <table class="content-table">
-        <!-- DASAR -->
         <tr>
             <td class="label-col">Dasar</td>
             <td class="titikdua-col">:</td>
@@ -288,17 +286,19 @@
             <td colspan="3">{{ $dasarList[2] }}</td>
         </tr>
         @endif
-        
-        <!-- SPACER -->
-        <tr class="spacer-row"><td colspan="6"></td></tr>
     </table>
+
+    <!-- SPACE DASAR KE MEMERINTAHKAN - 2 ENTER -->
+    <div class="section-spacer"></div>
 
     <!-- MEMERINTAHKAN -->
     <div class="memerintahkan">MEMERINTAHKAN</div>
 
-    <!-- LANJUTAN TABEL UNTUK KEPADA DAN UNTUK -->
+    <!-- SPACE MEMERINTAHKAN KE KEPADA - 2 ENTER -->
+    <div class="section-spacer"></div>
+
+    <!-- SECTION KEPADA -->
     <table class="content-table">
-        <!-- KEPADA -->
         @foreach($pegawaiList as $index => $pegawai)
         <tr>
             @if($index == 0)
@@ -351,11 +351,13 @@
         <tr class="pegawai-spacer"><td colspan="6"></td></tr>
         @endif
         @endforeach
-        
-        <!-- SPACE ENTER SETELAH KEPADA (SEBELUM UNTUK) -->
-        <tr class="section-spacer"><td colspan="6"></td></tr>
-        
-        <!-- UNTUK -->
+    </table>
+
+    <!-- SPACE PEGAWAI TERAKHIR KE UNTUK - 2 ENTER -->
+    <div class="section-spacer"></div>
+
+    <!-- SECTION UNTUK -->
+    <table class="content-table">
         <tr>
             <td class="label-col">Untuk</td>
             <td class="titikdua-col">:</td>
@@ -370,10 +372,10 @@
             <td colspan="3">{{ $spt->tujuan_lain }}</td>
         </tr>
         @endif
-        
-        <!-- SPACE ENTER SETELAH UNTUK -->
-        <tr class="section-spacer"><td colspan="6"></td></tr>
     </table>
+
+    <!-- SPACE SETELAH UNTUK -->
+    <div class="section-spacer"></div>
 
     <!-- TANDA TANGAN -->
     <div class="tanda-tangan">
@@ -403,7 +405,7 @@
         <div class="tempat-tanggal">Pelaihari, {{ $tanggal }}</div>
         <div class="jabatan-ttd">{{ $spt->penandaTangan->jabatan ?? 'Kepala Dinas' }}</div>
         
-        <!-- ENTER 2 KALI -->
+        <!-- ENTER 2 KALI UNTUK TANDA TANGAN -->
         <div style="height: 50px;"></div>
         
         <div class="nama-ttd">{{ $spt->penandaTangan->nama ?? '-' }}</div>
