@@ -10,9 +10,9 @@ class AuthController extends Controller
 {
     public function login()
     {
-        // Jika sudah login, redirect ke user
+        // Jika sudah login, redirect berdasarkan level
         if (session()->has('user')) {
-            return redirect('/user');
+            return $this->redirectBasedOnLevel();
         }
         
         return view('auth.login');
@@ -44,13 +44,41 @@ class AuthController extends Controller
             ]
         ]);
 
-        // Redirect ke user management
-        return redirect('/user');
+        // Redirect berdasarkan level user
+        return $this->redirectBasedOnLevel();
     }
 
     public function logout()
     {
         session()->flush();
         return redirect('/login')->with('success', 'Anda telah logout!');
+    }
+
+    /**
+     * Redirect berdasarkan level user
+     * Kadis -> User
+     * Admin -> User
+     * Pegawai -> SPT
+     */
+    private function redirectBasedOnLevel()
+    {
+        $level = session('user')['level'];
+        
+        switch ($level) {
+            case 'pegawai':
+                // Pegawai diarahkan ke SPT
+                return redirect('/spt');
+                break;
+            case 'kadis':
+                // Kadis diarahkan ke User
+                return redirect('/user');
+                break;
+            case 'admin':
+                // Admin diarahkan ke User
+                return redirect('/user');
+                break;
+            default:
+                return redirect('/user');
+        }
     }
 }
