@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PegawaiController extends Controller
 {
@@ -98,18 +99,46 @@ class PegawaiController extends Controller
         
         Pegawai::create($validated);
         
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pegawai berhasil ditambahkan'
+            ]);
+        }
+        
         return redirect('/pegawai')->with('success', 'Pegawai berhasil ditambahkan');
     }
     
     public function edit($id)
     {
-        $pegawai = Pegawai::findOrFail($id);
-        return view('admin.edit-pegawai', compact('pegawai')); // UBAH INI
+        try {
+            $pegawai = Pegawai::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data pegawai tidak ditemukan'
+                ], 404);
+            }
+            return redirect('/pegawai')->with('error', 'Data pegawai tidak ditemukan');
+        }
+        
+        return view('admin.edit-pegawai', compact('pegawai'));
     }
     
     public function update(Request $request, $id)
     {
-        $pegawai = Pegawai::findOrFail($id);
+        try {
+            $pegawai = Pegawai::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data pegawai tidak ditemukan'
+                ], 404);
+            }
+            return redirect('/pegawai')->with('error', 'Data pegawai tidak ditemukan');
+        }
         
         $validated = $request->validate([
             'nama' => 'required|string|max:100',
@@ -138,15 +167,137 @@ class PegawaiController extends Controller
         
         $pegawai->update($validated);
         
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pegawai berhasil diperbarui'
+            ]);
+        }
+        
         return redirect('/pegawai')->with('success', 'Pegawai berhasil diperbarui');
     }
     
+    /**
+     * PERBAIKAN UTAMA: Method destroy dengan dukungan AJAX
+     */
     public function destroy($id)
     {
-        $pegawai = Pegawai::findOrFail($id);
+        try {
+            $pegawai = Pegawai::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data pegawai tidak ditemukan!'
+                ], 404);
+            }
+            return redirect('/pegawai')->with('error', 'Data pegawai tidak ditemukan!');
+        }
         
+        // Simpan nama pegawai untuk pesan notifikasi
+        $namaPegawai = $pegawai->nama;
+        $nipPegawai = $pegawai->nip;
+        
+        // Cek apakah pegawai memiliki relasi dengan data lain (jika ada)
+        // Misalnya: cek apakah pegawai memiliki surat, dll
+        // if ($pegawai->surat()->count() > 0) {
+        //     if (request()->ajax()) {
+        //         return response()->json([
+        //             'success' => false,
+        //             'message' => 'Tidak dapat menghapus pegawai karena memiliki data surat terkait!'
+        //         ], 403);
+        //     }
+        //     return redirect('/pegawai')->with('error', 'Tidak dapat menghapus pegawai karena memiliki data surat terkait!');
+        // }
+        
+        // Lakukan soft delete atau hard delete
         $pegawai->delete();
         
-        return redirect('/pegawai')->with('success', 'Pegawai berhasil dihapus');
+        // Response untuk AJAX request
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Pegawai {$namaPegawai}" . ($nipPegawai ? " (NIP: {$nipPegawai})" : "") . " berhasil dihapus!",
+                'data' => [
+                    'id' => $id,
+                    'nama' => $namaPegawai,
+                    'nip' => $nipPegawai
+                ]
+            ]);
+        }
+        
+        // Response untuk request biasa
+        return redirect('/pegawai')->with('success', "Pegawai {$namaPegawai} berhasil dihapus!");
+    }
+    
+    /**
+     * Method untuk restore data yang terhapus (jika menggunakan soft delete)
+     */
+    public function restore($id)
+    {
+        try {
+            $pegawai = Pegawai::withTrashed()->findOrFail($id);
+            
+            if (!$pegawai->trashed()) {
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data pegawai tidak dalam keadaan terhapus'
+                    ], 400);
+                }
+                return redirect('/pegawai')->with('error', 'Data pegawai tidak dalam keadaan terhapus');
+            }
+            
+            $pegawai->restore();
+            
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Pegawai {$pegawai->nama} berhasil dipulihkan!"
+                ]);
+            }
+            
+            return redirect('/pegawai')->with('success', "Pegawai {$pegawai->nama} berhasil dipulihkan!");
+            
+        } catch (ModelNotFoundException $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data pegawai tidak ditemukan'
+                ], 404);
+            }
+            return redirect('/pegawai')->with('error', 'Data pegawai tidak ditemukan');
+        }
+    }
+    
+    /**
+     * Method untuk force delete (hapus permanen)
+     */
+    public function forceDelete($id)
+    {
+        try {
+            $pegawai = Pegawai::withTrashed()->findOrFail($id);
+            $namaPegawai = $pegawai->nama;
+            
+            $pegawai->forceDelete();
+            
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Pegawai {$namaPegawai} berhasil dihapus permanen!"
+                ]);
+            }
+            
+            return redirect('/pegawai')->with('success', "Pegawai {$namaPegawai} berhasil dihapus permanen!");
+            
+        } catch (ModelNotFoundException $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data pegawai tidak ditemukan'
+                ], 404);
+            }
+            return redirect('/pegawai')->with('error', 'Data pegawai tidak ditemukan');
+        }
     }
 }

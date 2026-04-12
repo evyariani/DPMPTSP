@@ -1,9 +1,7 @@
 {{-- resources/views/admin/user.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Manajemen User')
-
-@section('subtitle', 'Kelola data pengguna sistem')
+@section('title', 'User')
 
 @section('content')
 <style>
@@ -94,20 +92,14 @@
     {{-- Header dengan Tombol Tambah --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
         <div>
-            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-users text-indigo-600"></i>
-                Data User
-            </h2>
-            <p class="text-gray-500 text-sm mt-1">
-                Kelola data pengguna yang memiliki akses ke sistem
-            </p>
+            <h2 class="text-lg font-semibold text-gray-700">Data User</h2>
+            <p class="text-gray-500">Kelola data pengguna sistem</p>
         </div>
-        <a href="/user/create" 
-           class="inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
-            <i class="fas fa-plus mr-2"></i>
-            Tambah User Baru
+        <a href="/user/create" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+            <i class="fas fa-plus mr-2"></i> Tambah User
         </a>
     </div>
+</div>
 
     {{-- Notifikasi Toast (Posisi Bawah Kanan) --}}
     @if(session('success'))
@@ -231,47 +223,93 @@
                 Filter Pencarian
             </h3>
         </div>
-        <div class="p-5">
-            <form method="GET" action="/user" class="flex flex-col sm:flex-row gap-3">
-                <div class="flex-1">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400 text-sm"></i>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div id="delete-confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
+            <div class="p-6 text-center">
+                <!-- Icon Warning -->
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
+                
+                <!-- Message -->
+                <div class="mb-6 text-left">
+                    <p class="text-gray-600 mb-3">Anda akan menghapus user:</p>
+                    
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                        <p class="font-semibold text-gray-800 text-lg" id="delete-username"></p>
+                        <p class="text-gray-600 text-sm mt-1" id="delete-level"></p>
+                    </div>
+                    
+                    <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700">
+                                    Data yang dihapus <span class="font-semibold">tidak dapat dikembalikan</span>.
+                                </p>
+                            </div>
                         </div>
-                        <input type="text" 
-                               name="search" 
-                               placeholder="Cari username..." 
-                               value="{{ request('search') }}"
-                               class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow text-sm">
                     </div>
                 </div>
-                <div class="sm:w-48">
-                    <select name="level" 
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow text-sm">
-                        <option value="">Semua Level</option>
-                        <option value="admin" {{ request('level') == 'admin' ? 'selected' : '' }}>Admin</option>
-                        <option value="pegawai" {{ request('level') == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
-                        <option value="pemimpin" {{ request('level') == 'pemimpin' ? 'selected' : '' }}>Pemimpin</option>
-                        <option value="admin_keuangan" {{ request('level') == 'admin_keuangan' ? 'selected' : '' }}>Admin Keuangan</option>
-                    </select>
-                </div>
-                <div class="flex gap-2">
-                    <button type="submit" 
-                            class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 inline-flex items-center justify-center shadow-sm hover:shadow">
-                        <i class="fas fa-filter mr-2"></i>
-                        Filter
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-center space-x-4">
+                    <button type="button" 
+                            onclick="hideDeleteModal()"
+                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                        <i class="fas fa-times mr-2"></i> Batal
                     </button>
-                    @if(request()->has('search') || request()->has('level'))
-                        <a href="/user" 
-                           class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200 inline-flex items-center justify-center">
-                            <i class="fas fa-redo mr-2"></i>
-                            Reset
-                        </a>
-                    @endif
+                    
+                    <form id="delete-form" method="POST" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                            <i class="fas fa-trash mr-2"></i> Hapus
+                        </button>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
+</div>
+
+<!-- Filter dan Search -->
+<div class="bg-white rounded-lg shadow p-4 mb-6">
+    <form method="GET" action="/user" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+        <div class="flex-1">
+            <input type="text" name="search" placeholder="Cari username..." 
+                   value="{{ request('search') }}"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <select name="level" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Level</option>
+                <option value="admin" {{ request('level') == 'admin' ? 'selected' : '' }}>Admin</option>
+                <option value="pegawai" {{ request('level') == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
+                <option value="kadis" {{ request('level') == 'kadis' ? 'selected' : '' }}>Kepala Dinas (Kadis)</option>
+            </select>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                <i class="fas fa-filter mr-2"></i> Filter
+            </button>
+            @if(request()->has('search') || request()->has('level'))
+                <a href="/user" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+                    <i class="fas fa-redo mr-2"></i> Reset
+                </a>
+            @endif
+        </div>
+    </form>
+</div>
 
     {{-- Tabel User --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -459,6 +497,7 @@
         @endif
     </div>
 </div>
+@endif
 @endsection
 
 @section('scripts')

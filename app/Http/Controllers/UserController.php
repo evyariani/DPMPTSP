@@ -5,11 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
+        // Cek login
+        if (!session()->has('user')) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
+        }
+
+        // Hanya admin yang bisa akses
+        if (session('user')['level'] !== 'admin') {
+            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
+        }
+        
         // Cek login
         if (!session()->has('user')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
@@ -52,10 +63,33 @@ class UserController extends Controller
         $kadisExists = User::where('level', 'kadis')->exists();
 
         return view('admin.user-create', compact('adminExists', 'kadisExists'));
+        if (!session()->has('user')) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
+        }
+
+        if (session('user')['level'] !== 'admin') {
+            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
+        }
+
+        // Cek apakah sudah ada admin
+        $adminExists = User::where('level', 'admin')->exists();
+        
+        // Cek apakah sudah ada kadis
+        $kadisExists = User::where('level', 'kadis')->exists();
+
+        return view('admin.user-create', compact('adminExists', 'kadisExists'));
     }
     
     public function store(Request $request)
     {
+        if (!session()->has('user')) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
+        }
+
+        if (session('user')['level'] !== 'admin') {
+            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
+        }
+
         if (!session()->has('user')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
         }
@@ -92,10 +126,36 @@ class UserController extends Controller
                 ->withInput()
                 ->with('error', 'Akun Kepala Dinas (Kadis) sudah ada. Tidak dapat menambahkan kadis lagi!');
         }
+            'level' => 'required|in:admin,pegawai,kadis',
+        ]);
+        
+        // Cek apakah sudah ada admin
+        $adminExists = User::where('level', 'admin')->exists();
+        
+        // Cek apakah sudah ada kadis
+        $kadisExists = User::where('level', 'kadis')->exists();
+        
+        // Logika pembatasan level
+        $level = $request->level;
+        
+        // Jika memilih admin tapi admin sudah ada
+        if ($level == 'admin' && $adminExists) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Akun Admin sudah ada. Tidak dapat menambahkan admin lagi!');
+        }
+        
+        // Jika memilih kadis tapi kadis sudah ada
+        if ($level == 'kadis' && $kadisExists) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Akun Kepala Dinas (Kadis) sudah ada. Tidak dapat menambahkan kadis lagi!');
+        }
         
         User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
+            'level' => $level,
             'level' => $level,
         ]);
         
@@ -137,8 +197,17 @@ class UserController extends Controller
             return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
         }
 
+        if (!session()->has('user')) {
+            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
+        }
+
+        if (session('user')['level'] !== 'admin') {
+            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
+        }
+
         $request->validate([
             'username' => 'required|unique:users,username,' . $id,
+            'level' => 'required|in:admin,pegawai,kadis',
             'level' => 'required|in:admin,pegawai,kadis',
         ]);
         
@@ -174,9 +243,13 @@ class UserController extends Controller
         $data = [
             'username' => $request->username,
             'level' => $level,
+            'level' => $level,
         ];
         
         if ($request->filled('password')) {
+            $request->validate([
+                'password' => 'min:3'
+            ]);
             $data['password'] = Hash::make($request->password);
         }
         
@@ -185,6 +258,9 @@ class UserController extends Controller
         return redirect('/user')->with('success', 'User berhasil diperbarui!');
     }
     
+    /**
+     * PERBAIKAN UTAMA: Method destroy dengan dukungan AJAX
+     */
     public function destroy($id)
     {
         if (!session()->has('user')) {
@@ -196,6 +272,12 @@ class UserController extends Controller
         }
 
         if ($id == session('user')['id']) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak dapat menghapus akun sendiri!'
+                ], 403);
+            }
             return redirect('/user')->with('error', 'Tidak dapat menghapus akun sendiri!');
         }
         

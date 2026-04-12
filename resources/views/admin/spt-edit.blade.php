@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Surat Perintah Tugas (SPT)')
+@section('title', 'Edit Surat Perintah Tugas (SPT)')
 
 @section('content')
 <div class="mb-6">
     <div class="flex justify-between items-center">
         <div>
-            <h2 class="text-lg font-semibold text-gray-700">Tambah Surat Perintah Tugas Baru</h2>
-            <p class="text-gray-500">Isi formulir untuk menambahkan data SPT baru</p>
+            <h2 class="text-lg font-semibold text-gray-700">Edit Surat Perintah Tugas</h2>
+            <p class="text-gray-500">Ubah data Surat Perintah Tugas</p>
         </div>
         <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
             <i class="fas fa-arrow-left mr-2"></i> Kembali
@@ -47,11 +47,12 @@
     </div>
 @endif
 
-<!-- Form Tambah SPT -->
+<!-- Form Edit SPT -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="p-6">
-        <form action="{{ route('spt.store') }}" method="POST" id="formSPT">
+        <form action="{{ route('spt.update', $spt->id_spt) }}" method="POST" id="formSPT">
             @csrf
+            @method('PUT')
             
             <!-- Grid 2 kolom untuk informasi dasar -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -65,7 +66,7 @@
                         <input type="text" 
                                id="nomor_surat" 
                                name="nomor_surat" 
-                               value="{{ old('nomor_surat') }}"
+                               value="{{ old('nomor_surat', $spt->nomor_surat) }}"
                                required
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                placeholder="Contoh: SPT-001/2024">
@@ -80,7 +81,7 @@
                         <input type="date" 
                                id="tanggal" 
                                name="tanggal" 
-                               value="{{ old('tanggal', date('Y-m-d')) }}"
+                               value="{{ old('tanggal', $spt->tanggal->format('Y-m-d')) }}"
                                required
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                         <p class="mt-1 text-sm text-gray-500">Tanggal pembuatan surat</p>
@@ -117,7 +118,8 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                             <option value="">Pilih Penanda Tangan</option>
                             @foreach($penandaTangans as $pegawai)
-                                <option value="{{ $pegawai->id_pegawai }}" {{ old('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : '' }}>
+                                <option value="{{ $pegawai->id_pegawai }}" 
+                                    {{ old('penanda_tangan', $spt->penanda_tangan) == $pegawai->id_pegawai ? 'selected' : '' }}>
                                     {{ $pegawai->nama }} - {{ $pegawai->jabatan }}
                                 </option>
                             @endforeach
@@ -134,9 +136,9 @@
                 </label>
                 <div id="dasar-container" class="space-y-3">
                     @php
-                        $oldDasar = old('dasar', ['']);
+                        $dasarList = old('dasar', $spt->dasar ?? ['']);
                     @endphp
-                    @foreach($oldDasar as $index => $value)
+                    @foreach($dasarList as $index => $value)
                     <div class="flex items-start space-x-2 dasar-item">
                         <div class="flex-grow">
                             <input type="text" 
@@ -166,9 +168,9 @@
                 </label>
                 <div id="pegawai-container" class="space-y-3">
                     @php
-                        $oldPegawai = old('pegawai', ['']);
+                        $pegawaiList = old('pegawai', $spt->pegawai ?? ['']);
                     @endphp
-                    @foreach($oldPegawai as $index => $value)
+                    @foreach($pegawaiList as $index => $value)
                     <div class="flex items-start space-x-2 pegawai-item">
                         <div class="flex-grow">
                             <select name="pegawai[]" 
@@ -212,7 +214,7 @@
                           rows="4"
                           required
                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                          placeholder="Jelaskan tujuan penugasan...">{{ old('tujuan') }}</textarea>
+                          placeholder="Jelaskan tujuan penugasan...">{{ old('tujuan', $spt->tujuan) }}</textarea>
                 <p class="mt-1 text-sm text-gray-500">Uraikan maksud dan tujuan pelaksanaan tugas</p>
             </div>
 
@@ -222,7 +224,7 @@
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
-                    <i class="fas fa-save mr-2"></i> Simpan SPT
+                    <i class="fas fa-save mr-2"></i> Update SPT
                 </button>
             </div>
         </form>

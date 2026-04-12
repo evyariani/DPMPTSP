@@ -23,8 +23,36 @@ class Pegawai extends Model
         'tk_jalan'
     ];
     
-    // HAPUS ATAU KOMENTARI CASTING INI:
-    // protected $casts = [
-    //     'tk_jalan' => 'decimal:0'
-    // ];
+    /**
+     * Relasi ke SPT sebagai penanda tangan
+     */
+    public function sptSebagaiPenandaTangan()
+    {
+        return $this->hasMany(SPT::class, 'penanda_tangan', 'id_pegawai');
+    }
+
+    /**
+     * Method untuk mendapatkan SPT yang diikuti
+     * (karena pakai JSON, tidak bisa pakai relasi biasa)
+     */
+    public function getSptDiikuti()
+    {
+        return SPT::whereJsonContains('pegawai', $this->id_pegawai)->get();
+    }
+
+    /**
+     * Hitung jumlah SPT yang diikuti
+     */
+    public function getJumlahSptDiikutiAttribute()
+    {
+        return SPT::whereJsonContains('pegawai', $this->id_pegawai)->count();
+    }
+
+    /**
+     * Hitung jumlah SPT sebagai penanda tangan
+     */
+    public function getJumlahSptPenandaTanganAttribute()
+    {
+        return $this->sptSebagaiPenandaTangan()->count();
+    }
 }
