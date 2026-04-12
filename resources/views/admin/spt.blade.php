@@ -91,6 +91,31 @@
     @apply bg-green-100 text-green-800 border border-green-200;
 }
 
+/* Status Badge */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.status-approved {
+    background-color: #d1fae5;
+    color: #059669;
+}
+
+.status-rejected {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
 /* Wrapping untuk teks panjang */
 .text-wrap-cell {
     word-wrap: break-word;
@@ -132,6 +157,11 @@
 .fixed-col-penandatangan {
     min-width: 180px;
     max-width: 250px;
+}
+
+.fixed-col-status {
+    min-width: 120px;
+    max-width: 150px;
 }
 
 /* Hover effect untuk sel tabel */
@@ -202,6 +232,28 @@
 </div>
 @endif
 
+@if(session('warning'))
+<div id="warning-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
+    <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg shadow-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <p class="font-medium">Peringatan!</p>
+                <p class="text-sm mt-1">{{ session('warning') }}</p>
+            </div>
+            <button type="button" onclick="hideNotification('warning')" class="ml-4 text-yellow-600 hover:text-yellow-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mt-2 w-full bg-yellow-200 rounded-full h-1">
+            <div id="warning-progress" class="bg-yellow-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Notifikasi Hapus - POSISI DI BAWAH -->
 <div id="delete-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg">
@@ -223,28 +275,42 @@
     </div>
 </div>
 
+<!-- Notifikasi Reset Approval -->
+<div id="reset-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
+    <div class="bg-purple-50 border-l-4 border-purple-500 text-purple-800 p-4 rounded-lg shadow-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-undo-alt text-purple-500 text-xl"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <p class="font-medium">Status Direset!</p>
+                <p id="reset-message" class="text-sm mt-1"></p>
+            </div>
+            <button type="button" onclick="hideNotification('reset')" class="ml-4 text-purple-600 hover:text-purple-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mt-2 w-full bg-purple-200 rounded-full h-1">
+            <div id="reset-progress" class="bg-purple-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal Konfirmasi Hapus -->
 <div id="delete-confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
             <div class="p-6 text-center">
-                <!-- Icon Warning -->
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
                     <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                 </div>
-                
-                <!-- Title -->
                 <h3 class="text-xl font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
-                
-                <!-- Message -->
                 <div class="mb-6 text-left">
                     <p class="text-gray-600 mb-3">Anda akan menghapus data SPT:</p>
-                    
                     <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
                         <p class="font-semibold text-gray-800 text-lg" id="delete-nomor"></p>
                         <p class="text-gray-600 text-sm mt-1" id="delete-tujuan"></p>
                     </div>
-                    
                     <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
                         <div class="flex items-start">
                             <div class="flex-shrink-0">
@@ -258,21 +324,60 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Action Buttons -->
                 <div class="flex justify-center space-x-4">
-                    <button type="button" 
-                            onclick="hideDeleteModal()"
-                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                    <button type="button" onclick="hideDeleteModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
                         <i class="fas fa-times mr-2"></i> Batal
                     </button>
-                    
                     <form id="delete-form" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" 
-                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                        <button type="submit" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
                             <i class="fas fa-trash mr-2"></i> Hapus
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Konfirmasi Reset Approval -->
+<div id="reset-confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
+            <div class="p-6 text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
+                    <i class="fas fa-undo-alt text-yellow-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Reset Status Approval</h3>
+                <div class="mb-6 text-left">
+                    <p class="text-gray-600 mb-3">Anda akan mereset status approval SPT:</p>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                        <p class="font-semibold text-gray-800 text-lg" id="reset-nomor"></p>
+                        <p class="text-gray-600 text-sm mt-1" id="reset-status"></p>
+                    </div>
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-500 mt-0.5"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-yellow-700">
+                                    Status akan dikembalikan ke <span class="font-semibold">"Menunggu Persetujuan"</span>.
+                                    TTD dan stempel akan dihapus.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button type="button" onclick="hideResetModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                        <i class="fas fa-times mr-2"></i> Batal
+                    </button>
+                    <form id="reset-form" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                            <i class="fas fa-undo-alt mr-2"></i> Reset Status
                         </button>
                     </form>
                 </div>
@@ -321,12 +426,19 @@
                     </option>
                 @endforeach
             </select>
+
+            <select name="status_approval" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">Semua Status</option>
+                <option value="pending" {{ request('status_approval') == 'pending' ? 'selected' : '' }}>Menunggu</option>
+                <option value="approved" {{ request('status_approval') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                <option value="rejected" {{ request('status_approval') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+            </select>
             
             <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
                 <i class="fas fa-search mr-2"></i> Cari
             </button>
             
-            @if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan'))
+            @if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan') || request()->has('status_approval'))
                 <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
                     <i class="fas fa-redo mr-2"></i> Reset
                 </a>
@@ -349,12 +461,12 @@
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tanggal">Tanggal</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-lokasi">Lokasi</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-penandatangan">Penanda Tangan</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-status">Status</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @php
-                    // Pastikan $spts selalu ada dan bisa di-loop
                     $spts = $spts ?? collect([]);
                     $isPaginated = method_exists($spts, 'currentPage');
                 @endphp
@@ -435,7 +547,6 @@
                                     </div>
                                 @endforeach
                             </div>
-                            {{-- <span class="pegawai-count-badge">{{ count($pegawaiList) }} orang</span> --}}
                         @else
                             <span class="text-gray-400 text-sm">-</span>
                         @endif
@@ -502,65 +613,102 @@
                         @endif
                     </td>
                     
-                    <!-- Kolom Aksi -->
+                    <!-- Kolom Status Approval -->
+                    <td class="px-6 py-4 whitespace-nowrap fixed-col-status">
+                        @if($spt->isApproved())
+                            <span class="status-badge status-approved">
+                                <i class="fas fa-check-circle mr-1"></i> Disetujui
+                            </span>
+                            @if($spt->approved_at)
+                                <div class="text-xs text-gray-500 mt-1">
+                                    {{ $spt->approved_at->format('d/m/Y H:i') }}
+                                </div>
+                            @endif
+                        @elseif($spt->isRejected())
+                            <span class="status-badge status-rejected">
+                                <i class="fas fa-times-circle mr-1"></i> Ditolak
+                            </span>
+                            @if($spt->rejection_reason)
+                                <div class="text-xs text-gray-500 mt-1" title="{{ $spt->rejection_reason }}">
+                                    {{ Str::limit($spt->rejection_reason, 20) }}
+                                </div>
+                            @endif
+                        @else
+                            <span class="status-badge status-pending">
+                                <i class="fas fa-clock mr-1"></i> Menunggu
+                            </span>
+                        @endif
+                    </td>
+                    
+                    <!-- Kolom Aksi - PERBAIKAN: Edit dan Hapus bisa untuk PENDING dan REJECTED -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex flex-col space-y-2">
-                            {{-- <div class="flex space-x-2">
-                                @if(isset($spt->id_spt))
-                                <a href="{{ route('spt.show', $spt->id_spt) }}" 
-                                   class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
-                                   title="Detail SPT">
-                                    <i class="fas fa-eye mr-1"></i> Detail
-                                </a>
-                                @endif
-                            </div> --}}
-                            <div class="flex space-x-2">
-                                @if(isset($spt->id_spt))
-                                <a href="{{ route('spt.edit', $spt->id_spt) }}" 
-                                   class="text-green-600 hover:text-green-900 px-3 py-1 rounded hover:bg-green-50 transition duration-150"
-                                   title="Edit SPT">
-                                    <i class="fas fa-edit mr-1"></i> Edit
-                                </a>
-                                
-                                <!-- Tombol Print -->
-                               <!-- Di view spt/index.blade.php, bagian tombol aksi -->
-<a href="{{ route('spt.print', $spt->id_spt) }}" 
-   target="_blank"
-   class="text-purple-600 hover:text-purple-900 px-3 py-1 rounded hover:bg-purple-50 transition duration-150"
-   title="Download PDF SPT">
-    <i class="fas fa-download mr-1"></i> PDF
-</a>
-
-<!-- Tambahkan tombol preview jika diperlukan -->
-<a href="{{ route('spt.preview-pdf', $spt->id_spt) }}" 
-   target="_blank"
-   class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
-   title="Preview PDF SPT">
-    <i class="fas fa-eye mr-1"></i> Preview
-</a>
-                                <!-- Tombol Hapus dengan Modal -->
-                                <button type="button" 
-                                        onclick="showDeleteConfirmation(
-                                            {{ $spt->id_spt }}, 
-                                            '{{ addslashes(Str::limit($spt->nomor_surat, 30)) }}', 
-                                            '{{ addslashes(Str::limit($spt->tujuan, 50)) }}'
-                                        )"
-                                        class="text-red-600 hover:text-red-900 px-3 py-1 rounded hover:bg-red-50 transition duration-150"
-                                        title="Hapus SPT">
-                                    <i class="fas fa-trash mr-1"></i> Hapus
-                                </button>
-                                @else
-                                <span class="text-gray-400 px-3 py-1">Detail</span>
-                                <span class="text-gray-400 px-3 py-1">Edit</span>
-                                <span class="text-gray-400 px-3 py-1">Hapus</span>
-                                @endif
-                            </div>
+                        <div class="flex flex-wrap gap-2">
+                            <!-- Tombol Edit - Bisa untuk PENDING dan REJECTED (untuk perbaikan) -->
+                            @if($spt->isPending() || $spt->isRejected())
+                            <a href="{{ route('spt.edit', $spt->id_spt) }}" 
+                               class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition duration-150"
+                               title="Edit SPT">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            @else
+                            <span class="text-gray-400 p-1 cursor-not-allowed" title="Tidak dapat diedit (sudah disetujui)">
+                                <i class="fas fa-edit"></i>
+                            </span>
+                            @endif
+                            
+                            <!-- Tombol Download PDF -->
+                            <a href="{{ route('spt.print', $spt->id_spt) }}" 
+                               target="_blank"
+                               class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition duration-150"
+                               title="Download PDF SPT">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            
+                            <!-- Tombol Preview PDF -->
+                            <a href="{{ route('spt.preview-pdf', $spt->id_spt) }}" 
+                               target="_blank"
+                               class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition duration-150"
+                               title="Preview PDF SPT">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            
+                            <!-- Tombol Reset Approval - Khusus Admin untuk reset status -->
+                            @if(($spt->isApproved() || $spt->isRejected()) && (session('user')['level'] ?? 'guest') == 'admin')
+                            <button type="button" 
+                                    onclick="showResetConfirmation(
+                                        {{ $spt->id_spt }}, 
+                                        '{{ addslashes(Str::limit($spt->nomor_surat, 50)) }}', 
+                                        '{{ $spt->isApproved() ? 'Disetujui' : 'Ditolak' }}'
+                                    )"
+                                    class="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50 transition duration-150"
+                                    title="Reset Status Approval">
+                                <i class="fas fa-undo-alt"></i>
+                            </button>
+                            @endif
+                            
+                            <!-- Tombol Hapus - Bisa untuk PENDING dan REJECTED (untuk perbaikan) -->
+                            @if($spt->isPending() || $spt->isRejected())
+                            <button type="button" 
+                                    onclick="showDeleteConfirmation(
+                                        {{ $spt->id_spt }}, 
+                                        '{{ addslashes(Str::limit($spt->nomor_surat, 30)) }}', 
+                                        '{{ addslashes(Str::limit($spt->tujuan, 50)) }}'
+                                    )"
+                                    class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition duration-150"
+                                    title="Hapus SPT">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            @else
+                            <span class="text-gray-400 p-1 cursor-not-allowed" title="Tidak dapat dihapus (sudah disetujui)">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                            @endif
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                    <td colspan="10" class="px-6 py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <i class="fas fa-file-alt text-gray-300 text-4xl mb-3"></i>
                             <p class="text-lg">Tidak ada data SPT</p>
@@ -578,15 +726,7 @@
 </div>
 
 <!-- Pagination -->
-@php
-    // Cek apakah $spts ada dan memiliki method hasPages
-    $showPagination = true;
-    if (isset($spts) && method_exists($spts, 'hasPages') && $spts->hasPages()) {
-        $showPagination = true;
-    }
-@endphp
-
-@if($showPagination)
+@if(isset($spts) && method_exists($spts, 'hasPages') && $spts->hasPages())
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
@@ -599,62 +739,7 @@
     </div>
     
     <div class="flex items-center space-x-1">
-        {{-- Previous Page Link --}}
-        @if ($spts->onFirstPage())
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
-                <i class="fas fa-chevron-left text-xs"></i>
-            </span>
-        @else
-            <a href="{{ $spts->previousPageUrl() }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
-                <i class="fas fa-chevron-left text-xs"></i>
-            </a>
-        @endif
-        
-        {{-- Pagination Elements --}}
-        @php
-            $current = $spts->currentPage();
-            $last = $spts->lastPage();
-            $start = max($current - 2, 1);
-            $end = min($current + 2, $last);
-        @endphp
-        
-        @if($start > 1)
-            <a href="{{ $spts->url(1) }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
-            @if($start > 2)
-                <span class="px-3 py-1.5 text-gray-500">...</span>
-            @endif
-        @endif
-        
-        @for ($page = $start; $page <= $end; $page++)
-            @if ($page == $current)
-                <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
-            @else
-                <a href="{{ $spts->url($page) }}" 
-                   class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
-            @endif
-        @endfor
-        
-        @if($end < $last)
-            @if($end < $last - 1)
-                <span class="px-3 py-1.5 text-gray-500">...</span>
-            @endif
-            <a href="{{ $spts->url($last) }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
-        @endif
-        
-        {{-- Next Page Link --}}
-        @if ($spts->hasMorePages())
-            <a href="{{ $spts->nextPageUrl() }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
-                <i class="fas fa-chevron-right text-xs"></i>
-            </a>
-        @else
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
-                <i class="fas fa-chevron-right text-xs"></i>
-            </span>
-        @endif
+        {{ $spts->links() }}
     </div>
 </div>
 @endif
@@ -676,13 +761,10 @@ function hideNotification(type) {
 
 // Auto-hide notifications after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto hide success/error notifications
     setTimeout(() => {
-        const successNotif = document.getElementById('success-notification');
-        const errorNotif = document.getElementById('error-notification');
-        
-        if (successNotif) hideNotification('success');
-        if (errorNotif) hideNotification('error');
+        hideNotification('success');
+        hideNotification('error');
+        hideNotification('warning');
     }, 5000);
 });
 
@@ -694,56 +776,61 @@ function showDeleteConfirmation(id, nomor, tujuan) {
     currentDeleteId = id;
     currentDeleteNomor = nomor;
     
-    // Update modal content
     document.getElementById('delete-nomor').textContent = nomor;
     document.getElementById('delete-tujuan').textContent = tujuan ? `Tujuan: ${tujuan}` : 'Tanpa Tujuan';
     
-    // Update form action
     const form = document.getElementById('delete-form');
     form.action = `/spt/${id}`;
     
-    // Show modal with animation
     const modal = document.getElementById('delete-confirm-modal');
     modal.classList.remove('hidden');
     modal.style.display = 'block';
-    
-    // Add animation class to modal content
-    const modalContent = modal.querySelector('.bg-white');
-    modalContent.classList.add('animate-fade-in');
 }
 
 function hideDeleteModal() {
     const modal = document.getElementById('delete-confirm-modal');
-    const modalContent = modal.querySelector('.bg-white');
-    
-    // Add fade out animation
-    modalContent.classList.remove('animate-fade-in');
-    modalContent.classList.add('animate-fade-out');
-    
-    // Hide modal after animation
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-        modalContent.classList.remove('animate-fade-out');
-        currentDeleteId = null;
-        currentDeleteNomor = null;
-    }, 300);
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    currentDeleteId = null;
+    currentDeleteNomor = null;
 }
 
-// Handle form submission dengan AJAX untuk notifikasi lebih baik
-document.getElementById('delete-form')?.addEventListener('submit', function(e) {
+// ========== RESET APPROVAL FUNCTIONS ==========
+let currentResetId = null;
+
+function showResetConfirmation(id, nomor, status) {
+    currentResetId = id;
+    
+    document.getElementById('reset-nomor').textContent = nomor;
+    document.getElementById('reset-status').textContent = `Status saat ini: ${status}`;
+    
+    const form = document.getElementById('reset-form');
+    form.action = `/spt/${id}/reset-approval`;
+    
+    const modal = document.getElementById('reset-confirm-modal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'block';
+}
+
+function hideResetModal() {
+    const modal = document.getElementById('reset-confirm-modal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+    currentResetId = null;
+}
+
+// Handle reset form submission
+document.getElementById('reset-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     
     const form = this;
     const formData = new FormData(form);
     
-    // Tampilkan loading
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Mereset...';
     submitBtn.disabled = true;
     
-    // Kirim request DELETE
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -755,11 +842,61 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Tampilkan notifikasi hapus sukses
+            showResetSuccess(document.getElementById('reset-nomor').textContent);
+            hideResetModal();
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            throw new Error(data.message || 'Gagal mereset status');
+        }
+    })
+    .catch(error => {
+        alert('Terjadi kesalahan: ' + error.message);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
+function showResetSuccess(nomor) {
+    const notification = document.getElementById('reset-notification');
+    const message = document.getElementById('reset-message');
+    message.textContent = `Status approval SPT "${nomor}" berhasil direset ke Menunggu.`;
+    
+    notification.classList.remove('hidden');
+    notification.style.display = 'block';
+    notification.classList.add('animate-slide-in-bottom');
+    
+    setTimeout(() => {
+        hideNotification('reset');
+    }, 5000);
+}
+
+// Handle delete form submission with AJAX
+document.getElementById('delete-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
+    submitBtn.disabled = true;
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
             showDeleteSuccess(currentDeleteNomor);
-            // Sembunyikan modal
             hideDeleteModal();
-            // Refresh halaman setelah 2 detik
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -768,35 +905,21 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        // Jika error, tampilkan alert biasa
         alert('Terjadi kesalahan saat menghapus data: ' + error.message);
-        // Reset tombol
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
 });
 
-// Tampilkan notifikasi hapus sukses
 function showDeleteSuccess(nomor) {
     const notification = document.getElementById('delete-notification');
     const message = document.getElementById('delete-message');
-    
     message.textContent = `Data SPT dengan nomor "${nomor}" berhasil dihapus.`;
     
-    // Reset progress bar
-    const progress = document.getElementById('delete-progress');
-    progress.style.width = '100%';
-    progress.style.animation = 'none';
-    void progress.offsetWidth; // Trigger reflow
-    progress.style.animation = 'progressBar 5s linear forwards';
-    
-    // Show notification dengan animasi bawah
     notification.classList.remove('hidden');
     notification.style.display = 'block';
     notification.classList.add('animate-slide-in-bottom');
     
-    // Auto hide after 5 seconds
     setTimeout(() => {
         hideNotification('delete');
     }, 5000);
@@ -804,12 +927,10 @@ function showDeleteSuccess(nomor) {
 
 // ========== FULL TEXT MODAL ==========
 function showFullText(element, text, title) {
-    // Buat modal untuk menampilkan teks lengkap
     const modalId = 'full-text-modal';
     let modal = document.getElementById(modalId);
     
     if (!modal) {
-        // Buat modal jika belum ada
         modal = document.createElement('div');
         modal.id = modalId;
         modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden';
@@ -838,11 +959,9 @@ function showFullText(element, text, title) {
         document.body.appendChild(modal);
     }
     
-    // Isi konten modal
     document.getElementById('full-text-title').textContent = title;
     document.getElementById('full-text-content').textContent = text;
     
-    // Tampilkan modal
     modal.classList.remove('hidden');
     modal.style.display = 'block';
 }
@@ -889,17 +1008,15 @@ function showFullDasar(element, dasarList) {
         document.body.appendChild(modal);
     }
     
-    // Isi list dasar
     const listElement = document.getElementById('full-dasar-list');
     listElement.innerHTML = '';
-    dasarList.forEach((dasar, index) => {
+    dasarList.forEach((dasar) => {
         const li = document.createElement('li');
         li.className = 'text-sm text-gray-700';
         li.textContent = dasar;
         listElement.appendChild(li);
     });
     
-    // Tampilkan modal
     modal.classList.remove('hidden');
     modal.style.display = 'block';
 }
@@ -912,30 +1029,28 @@ function hideFullDasarModal() {
     }
 }
 
-// Close modal when clicking outside
+// Close modals when clicking outside
 document.getElementById('delete-confirm-modal')?.addEventListener('click', function(e) {
-    if (e.target === this) {
-        hideDeleteModal();
-    }
+    if (e.target === this) hideDeleteModal();
 });
 
-// Close full text modal when clicking outside
+document.getElementById('reset-confirm-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) hideResetModal();
+});
+
 document.addEventListener('click', function(e) {
     const fullTextModal = document.getElementById('full-text-modal');
-    if (fullTextModal && e.target === fullTextModal) {
-        hideFullTextModal();
-    }
+    if (fullTextModal && e.target === fullTextModal) hideFullTextModal();
     
     const fullDasarModal = document.getElementById('full-dasar-modal');
-    if (fullDasarModal && e.target === fullDasarModal) {
-        hideFullDasarModal();
-    }
+    if (fullDasarModal && e.target === fullDasarModal) hideFullDasarModal();
 });
 
 // Close modals with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideDeleteModal();
+        hideResetModal();
         hideFullTextModal();
         hideFullDasarModal();
     }

@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\SPT;
 use App\Models\Pegawai;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SPTController extends Controller
 {
@@ -16,6 +20,17 @@ class SPTController extends Controller
     {
         try {
             $query = SPT::with('penandaTangan');
+            
+            // Cek level user
+            $userLevel = session('user')['level'] ?? 'guest';
+            
+            // PERBAIKAN: Jika Kadis, tampilkan SPT pending dan resubmitted
+            if ($userLevel == 'kadis') {
+                $query->where(function($q) {
+                    $q->where('status_approval', 'pending')
+                      ->orWhere('status_approval', 'resubmitted');
+                });
+            }
             
             // Search
             if ($request->has('search') && $request->search != '') {
@@ -45,6 +60,11 @@ class SPTController extends Controller
                 $query->where('penanda_tangan', $request->penanda_tangan);
             }
             
+            // Filter berdasarkan status approval (untuk admin)
+            if ($userLevel == 'admin' && $request->has('status_approval') && $request->status_approval != '') {
+                $query->where('status_approval', $request->status_approval);
+            }
+            
             // Order by id_spt descending (terbaru)
             $query->orderBy('id_spt', 'desc');
             
@@ -68,8 +88,7 @@ class SPTController extends Controller
                 ->get();
             
         } catch (\Exception $e) {
-            // Jika ada error, berikan data kosong
-            $spts = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
+            $spts = new LengthAwarePaginator([], 0, 10);
             $pegawais = collect([]);
         }
         
@@ -81,7 +100,12 @@ class SPTController extends Controller
      */
     public function create()
     {
-        // Daftar jabatan yang boleh menjadi penanda tangan
+        $userLevel = session('user')['level'] ?? 'guest';
+        if ($userLevel == 'kadis') {
+            return redirect()->route('spt.index')
+                ->with('error', 'Kadis tidak dapat membuat SPT baru.');
+        }
+        
         $jabatanPenandaTangan = [
             'Kepala Dinas',
             'Sekretaris',
@@ -93,15 +117,12 @@ class SPTController extends Controller
             'Kasubbag Umum dan Kepegawaian'
         ];
         
-        // 1. Ambil pegawai untuk PENANDA TANGAN (hanya jabatan tertentu)
         $penandaTangans = Pegawai::whereIn('jabatan', $jabatanPenandaTangan)
             ->orderBy('nama')
             ->get();
         
-        // 2. Ambil SEMUA pegawai untuk dropdown PEGAWAI YANG DITUGASKAN
         $semuaPegawai = Pegawai::orderBy('nama')->get();
         
-        // Siapkan data pegawai untuk JavaScript (format array asosiatif)
         $pegawaiData = [];
         foreach ($semuaPegawai as $pegawai) {
             $initial = $pegawai->nama ? strtoupper(substr($pegawai->nama, 0, 1)) : '-';
@@ -123,7 +144,6 @@ class SPTController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi data
         $validated = $request->validate([
             'nomor_surat' => 'required|string|max:100',
             'dasar' => 'required|array',
@@ -134,30 +154,14 @@ class SPTController extends Controller
             'tanggal' => 'required|date',
             'lokasi' => 'required|string|max:255',
             'penanda_tangan' => 'required|exists:tb_pegawai,id_pegawai'
-        ], [
-            'nomor_surat.required' => 'Nomor surat harus diisi',
-            'nomor_surat.max' => 'Nomor surat maksimal 100 karakter',
-            'dasar.required' => 'Dasar harus diisi minimal 1',
-            'dasar.array' => 'Format dasar tidak valid',
-            'dasar.*.required' => 'Setiap dasar harus diisi',
-            'pegawai.required' => 'Pegawai harus dipilih minimal 1',
-            'pegawai.array' => 'Format pegawai tidak valid',
-            'pegawai.*.exists' => 'Pegawai tidak valid',
-            'tujuan.required' => 'Tujuan harus diisi',
-            'tanggal.required' => 'Tanggal harus diisi',
-            'tanggal.date' => 'Format tanggal tidak valid',
-            'lokasi.required' => 'Lokasi harus diisi',
-            'lokasi.max' => 'Lokasi maksimal 255 karakter',
-            'penanda_tangan.required' => 'Penanda tangan harus dipilih',
-            'penanda_tangan.exists' => 'Penanda tangan tidak valid'
         ]);
         
-        // Simpan data
         try {
+            $validated['status_approval'] = 'pending';
             SPT::create($validated);
             
             return redirect()->route('spt.index')
-                ->with('success', 'Data SPT berhasil ditambahkan.');
+                ->with('success', 'Data SPT berhasil ditambahkan dan menunggu persetujuan Kadis.');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
@@ -171,9 +175,9 @@ class SPTController extends Controller
     public function show($id)
     {
         try {
-            $spt = SPT::with('penandaTangan')->findOrFail($id);
-            $pegawaiList = $spt->pegawai_list; // Menggunakan accessor
-            $dasarList = $spt->dasar_list; // Menggunakan accessor
+            $spt = SPT::with(['penandaTangan', 'approvedBy'])->findOrFail($id);
+            $pegawaiList = $spt->pegawai_list;
+            $dasarList = $spt->dasar_list;
             
             return view('admin.spt-show', compact('spt', 'pegawaiList', 'dasarList'));
         } catch (\Exception $e) {
@@ -190,7 +194,11 @@ class SPTController extends Controller
         try {
             $spt = SPT::findOrFail($id);
             
-            // Daftar jabatan yang boleh menjadi penanda tangan
+            if ($spt->isApproved()) {
+                return redirect()->route('spt.index')
+                    ->with('error', 'Surat yang sudah disetujui tidak dapat diedit.');
+            }
+            
             $jabatanPenandaTangan = [
                 'Kepala Dinas',
                 'Sekretaris',
@@ -202,15 +210,12 @@ class SPTController extends Controller
                 'Kasubbag Umum dan Kepegawaian'
             ];
             
-            // 1. Ambil pegawai untuk PENANDA TANGAN (hanya jabatan tertentu)
             $penandaTangans = Pegawai::whereIn('jabatan', $jabatanPenandaTangan)
                 ->orderBy('nama')
                 ->get();
             
-            // 2. Ambil SEMUA pegawai untuk dropdown PEGAWAI YANG DITUGASKAN
             $semuaPegawai = Pegawai::orderBy('nama')->get();
             
-            // Siapkan data untuk JavaScript
             $pegawaiData = [];
             foreach ($semuaPegawai as $pegawai) {
                 $initial = $pegawai->nama ? strtoupper(substr($pegawai->nama, 0, 1)) : '-';
@@ -239,6 +244,11 @@ class SPTController extends Controller
         try {
             $spt = SPT::findOrFail($id);
             
+            if ($spt->isApproved()) {
+                return redirect()->route('spt.index')
+                    ->with('error', 'Surat yang sudah disetujui tidak dapat diubah.');
+            }
+            
             $validated = $request->validate([
                 'nomor_surat' => 'required|string|max:100',
                 'dasar' => 'required|array',
@@ -249,28 +259,23 @@ class SPTController extends Controller
                 'tanggal' => 'required|date',
                 'lokasi' => 'required|string|max:255',
                 'penanda_tangan' => 'required|exists:tb_pegawai,id_pegawai'
-            ], [
-                'nomor_surat.required' => 'Nomor surat harus diisi',
-                'nomor_surat.max' => 'Nomor surat maksimal 100 karakter',
-                'dasar.required' => 'Dasar harus diisi minimal 1',
-                'dasar.array' => 'Format dasar tidak valid',
-                'dasar.*.required' => 'Setiap dasar harus diisi',
-                'pegawai.required' => 'Pegawai harus dipilih minimal 1',
-                'pegawai.array' => 'Format pegawai tidak valid',
-                'pegawai.*.exists' => 'Pegawai tidak valid',
-                'tujuan.required' => 'Tujuan harus diisi',
-                'tanggal.required' => 'Tanggal harus diisi',
-                'tanggal.date' => 'Format tanggal tidak valid',
-                'lokasi.required' => 'Lokasi harus diisi',
-                'lokasi.max' => 'Lokasi maksimal 255 karakter',
-                'penanda_tangan.required' => 'Penanda tangan harus dipilih',
-                'penanda_tangan.exists' => 'Penanda tangan tidak valid'
             ]);
+            
+            // Jika SPT ditolak dan diedit, set last_edited_at
+            if ($spt->isRejected()) {
+                $validated['last_edited_at'] = now();
+            }
             
             $spt->update($validated);
             
+            if ($spt->isRejected()) {
+                return redirect()->route('spt.index')
+                    ->with('warning', 'Data SPT berhasil diperbarui. Jangan lupa klik tombol "Ajukan Ulang" untuk mengirimkan ke Kadis.');
+            }
+            
             return redirect()->route('spt.index')
                 ->with('success', 'Data SPT berhasil diperbarui.');
+                
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
@@ -285,10 +290,21 @@ class SPTController extends Controller
     {
         try {
             $spt = SPT::findOrFail($id);
+            
+            if ($spt->isApproved()) {
+                if (request()->ajax() || request()->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Surat yang sudah disetujui tidak dapat dihapus.'
+                    ], 403);
+                }
+                return redirect()->route('spt.index')
+                    ->with('error', 'Surat yang sudah disetujui tidak dapat dihapus.');
+            }
+            
             $nomorSurat = $spt->nomor_surat;
             $spt->delete();
             
-            // Jika request AJAX
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -299,7 +315,6 @@ class SPTController extends Controller
             return redirect()->route('spt.index')
                 ->with('success', "Data SPT dengan nomor '{$nomorSurat}' berhasil dihapus.");
         } catch (\Exception $e) {
-            // Jika request AJAX
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -313,76 +328,233 @@ class SPTController extends Controller
     }
 
     /**
-     * Export data SPT (contoh fitur tambahan)
+     * Ajukan Ulang SPT yang Ditolak
      */
-    public function export(Request $request)
+    public function resubmit(Request $request, $id)
     {
         try {
-            $query = SPT::with('penandaTangan');
+            DB::beginTransaction();
             
-            // Filter berdasarkan bulan/tahun jika ada
-            if ($request->has('bulan') && $request->bulan != '') {
-                $query->whereMonth('tanggal', $request->bulan);
+            $spt = SPT::findOrFail($id);
+            
+            // Validasi: hanya SPT yang ditolak yang bisa diajukan ulang
+            if (!$spt->isRejected()) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Hanya SPT yang ditolak yang dapat diajukan ulang.'
+                    ], 400);
+                }
+                return redirect()->back()
+                    ->with('error', 'Hanya SPT yang ditolak yang dapat diajukan ulang.');
             }
             
-            if ($request->has('tahun') && $request->tahun != '') {
-                $query->whereYear('tanggal', $request->tahun);
+            // Cek apakah SPT sudah pernah diajukan ulang sebelumnya
+            if ($spt->status_approval == 'resubmitted') {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'SPT ini sudah diajukan ulang dan sedang menunggu persetujuan.'
+                    ], 400);
+                }
+                return redirect()->back()
+                    ->with('warning', 'SPT ini sudah diajukan ulang dan sedang menunggu persetujuan.');
             }
             
-            $spts = $query->orderBy('tanggal', 'desc')->get();
+            // Update status ke 'resubmitted'
+            $spt->update([
+                'status_approval' => 'resubmitted',
+                'rejection_reason' => null,
+                'resubmitted_at' => now(),
+                'resubmitted_by' => session('user')['id'] ?? Auth::id(),
+                'last_edited_at' => now()
+            ]);
             
-            // Logic export ke Excel/PDF disini
-            // ...
+            DB::commit();
             
-            return redirect()->back()->with('success', 'Data berhasil diexport.');
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "SPT dengan nomor '{$spt->nomor_surat}' berhasil diajukan ulang ke Kadis.",
+                    'data' => [
+                        'id' => $spt->id_spt,
+                        'nomor_surat' => $spt->nomor_surat,
+                        'status' => $spt->status_approval
+                    ]
+                ]);
+            }
             
+            return redirect()->route('spt.index')
+                ->with('success', "SPT dengan nomor '{$spt->nomor_surat}' berhasil diajukan ulang ke Kadis.");
+                
         } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengajukan ulang SPT: ' . $e->getMessage()
+                ], 500);
+            }
+            
             return redirect()->back()
-                ->with('error', 'Gagal export data: ' . $e->getMessage());
+                ->with('error', 'Gagal mengajukan ulang SPT: ' . $e->getMessage());
+        }
+    }
+
+    // ========== METHOD UNTUK APPROVAL KADIS ==========
+
+    /**
+     * Display list SPT for Kadis approval
+     */
+    public function approvalList(Request $request)
+    {
+        try {
+            $query = SPT::with(['penandaTangan', 'approvedBy'])
+                ->where(function($q) {
+                    $q->where('status_approval', 'pending')
+                      ->orWhere('status_approval', 'resubmitted');
+                });
+            
+            // Search
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('nomor_surat', 'like', "%{$search}%")
+                      ->orWhere('tujuan', 'like', "%{$search}%")
+                      ->orWhereHas('penandaTangan', function ($pegawaiQuery) use ($search) {
+                          $pegawaiQuery->where('nama', 'like', "%{$search}%");
+                      });
+                });
+            }
+            
+            // Prioritaskan yang resubmitted (diajukan ulang) muncul lebih dulu
+            $spts = $query->orderByRaw("FIELD(status_approval, 'resubmitted', 'pending')")
+                         ->orderBy('resubmitted_at', 'desc')
+                         ->orderBy('created_at', 'desc')
+                         ->paginate(10);
+            
+            return view('admin.spt-pending', compact('spts'));
+        } catch (\Exception $e) {
+            $spts = new LengthAwarePaginator([], 0, 10);
+            return view('admin.spt-pending', compact('spts'))
+                ->with('error', 'Gagal memuat data: ' . $e->getMessage());
         }
     }
 
     /**
-     * Helper untuk membersihkan nama file dari karakter ilegal
+     * Approve SPT
+     * ===== PERBAIKAN: TANPA PARAMETER PATH GAMBAR =====
+     * Method ini akan memanggil $spt->approve($userId) di Model
+     * Yang secara otomatis akan:
+     * 1. Set status_approval = 'approved'
+     * 2. Generate verification_code (contoh: SPT-1-ABC123) sebagai Tanda Tangan Digital
+     * 3. Generate document_hash untuk deteksi perubahan
      */
-    private function sanitizeFilename($filename)
+    public function approve($id)
     {
-        // Daftar karakter yang tidak diperbolehkan dalam nama file
-        // Ganti dengan karakter dash (-)
-        $filename = str_replace(
-            ['/', '\\', ':', '*', '?', '"', '<', '>', '|', ' ', '(', ')', '[', ']', '{', '}', '!', '@', '#', '$', '%', '^', '&', '=', '+', ',', ';', "'"], 
-            '-', 
-            $filename
-        );
-        
-        // Hapus karakter selain huruf, angka, titik, dan dash
-        $filename = preg_replace('/[^a-zA-Z0-9.-]/', '', $filename);
-        
-        // Hapus dash berulang (ganti dengan single dash)
-        $filename = preg_replace('/-+/', '-', $filename);
-        
-        // Hapus dash di awal dan akhir
-        $filename = trim($filename, '-');
-        
-        // Jika hasil kosong, beri nama default
-        if (empty($filename)) {
-            $filename = 'spt';
+        try {
+            DB::beginTransaction();
+            
+            $spt = SPT::findOrFail($id);
+            
+            // Cek apakah sudah disetujui
+            if ($spt->isApproved()) {
+                return redirect()->back()
+                    ->with('warning', 'Surat ini sudah disetujui sebelumnya.');
+            }
+            
+            // Cek apakah ditolak
+            if ($spt->isRejected()) {
+                return redirect()->back()
+                    ->with('warning', 'Surat ini sudah ditolak. Silahkan minta pegawai untuk mengajukan ulang.');
+            }
+            
+            // Ambil ID user yang login (Kadis)
+            $userId = session('user')['id'] ?? Auth::id();
+            
+            // ===== APPROVE TANPA PARAMETER PATH GAMBAR =====
+            // QR Code akan otomatis menjadi Tanda Tangan Digital
+            $spt->approve($userId);
+            
+            DB::commit();
+            
+            // Redirect dengan pesan sukses termasuk informasi QR Code
+            return redirect()->route('kadis.spt.approval')
+                ->with('success', "SPT dengan nomor '{$spt->nomor_surat}' berhasil disetujui. Tanda Tangan Digital (QR Code) telah dibuat dengan kode: {$spt->verification_code}");
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal menyetujui SPT: ' . $e->getMessage());
         }
-        
-        return $filename;
     }
 
     /**
-     * Helper untuk menghasilkan nama file PDF yang aman
+     * Reject SPT
      */
-    private function generatePdfFilename($spt, $prefix = 'SPT-', $suffix = '.pdf')
+    public function reject(Request $request, $id)
     {
-        // Ambil nomor surat dan bersihkan
-        $nomorBersih = $this->sanitizeFilename($spt->nomor_surat);
-        
-        // Gabungkan dengan ID untuk memastikan unique
-        return $prefix . $nomorBersih . '-' . $spt->id_spt . $suffix;
+        try {
+            $request->validate([
+                'rejection_reason' => 'required|string|min:5|max:500'
+            ]);
+            
+            DB::beginTransaction();
+            
+            $spt = SPT::findOrFail($id);
+            
+            if ($spt->isApproved()) {
+                return redirect()->back()
+                    ->with('warning', 'Surat yang sudah disetujui tidak dapat ditolak.');
+            }
+            
+            $userId = session('user')['id'] ?? Auth::id();
+            $spt->reject($userId, $request->rejection_reason);
+            
+            DB::commit();
+            
+            return redirect()->route('kadis.spt.approval')
+                ->with('info', "SPT dengan nomor '{$spt->nomor_surat}' telah ditolak.");
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal menolak SPT: ' . $e->getMessage());
+        }
     }
+
+    /**
+     * Reset approval (kembalikan ke pending) - KHUSUS ADMIN
+     */
+    public function resetApproval($id)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $spt = SPT::findOrFail($id);
+            
+            $userLevel = session('user')['level'] ?? 'guest';
+            if ($userLevel != 'admin') {
+                return redirect()->back()
+                    ->with('error', 'Hanya admin yang dapat mereset status approval.');
+            }
+            
+            $spt->resetApproval();
+            
+            DB::commit();
+            
+            return redirect()->route('spt.index')
+                ->with('success', "Status approval SPT '{$spt->nomor_surat}' telah direset ke pending.");
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal mereset approval: ' . $e->getMessage());
+        }
+    }
+
+    // ========== METHOD PDF ==========
 
     /**
      * Print SPT (cetak PDF)
@@ -390,20 +562,15 @@ class SPTController extends Controller
     public function print($id)
     {
         try {
-            $spt = SPT::with('penandaTangan')->findOrFail($id);
+            $spt = SPT::with(['penandaTangan', 'approvedBy'])->findOrFail($id);
             $pegawaiList = $spt->pegawai_list;
             $dasarList = $spt->dasar_list;
             
-            // Generate PDF
             $pdf = Pdf::loadView('admin.spt-pdf', compact('spt', 'pegawaiList', 'dasarList'));
-            
-            // Set ukuran kertas (opsional)
             $pdf->setPaper('A4', 'portrait');
             
-            // Generate nama file yang aman
             $namaFile = $this->generatePdfFilename($spt, 'SPT-', '.pdf');
             
-            // Download PDF
             return $pdf->download($namaFile);
             
         } catch (\Exception $e) {
@@ -418,17 +585,15 @@ class SPTController extends Controller
     public function previewPdf($id)
     {
         try {
-            $spt = SPT::with('penandaTangan')->findOrFail($id);
+            $spt = SPT::with(['penandaTangan', 'approvedBy'])->findOrFail($id);
             $pegawaiList = $spt->pegawai_list;
             $dasarList = $spt->dasar_list;
             
             $pdf = Pdf::loadView('admin.spt-pdf', compact('spt', 'pegawaiList', 'dasarList'));
             $pdf->setPaper('A4', 'portrait');
             
-            // Generate nama file yang aman
             $namaFile = $this->generatePdfFilename($spt, 'SPT-', '.pdf');
             
-            // Tampilkan di browser
             return $pdf->stream($namaFile);
             
         } catch (\Exception $e) {
@@ -438,28 +603,33 @@ class SPTController extends Controller
     }
 
     /**
-     * Get data pegawai untuk API (contoh fitur tambahan)
+     * Helper untuk menghasilkan nama file PDF yang aman
      */
-    public function getPegawaiData($id)
+    private function generatePdfFilename($spt, $prefix = 'SPT-', $suffix = '.pdf')
     {
-        try {
-            $pegawai = Pegawai::findOrFail($id);
-            
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'nama' => $pegawai->nama,
-                    'nip' => $pegawai->nip,
-                    'pangkat' => $pegawai->pangkat,
-                    'gol' => $pegawai->gol,
-                    'jabatan' => $pegawai->jabatan
-                ]
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data pegawai tidak ditemukan'
-            ], 404);
+        $nomorBersih = $this->sanitizeFilename($spt->nomor_surat);
+        return $prefix . $nomorBersih . '-' . $spt->id_spt . $suffix;
+    }
+
+    /**
+     * Helper untuk membersihkan nama file dari karakter ilegal
+     */
+    private function sanitizeFilename($filename)
+    {
+        $filename = str_replace(
+            ['/', '\\', ':', '*', '?', '"', '<', '>', '|', ' ', '(', ')', '[', ']', '{', '}', '!', '@', '#', '$', '%', '^', '&', '=', '+', ',', ';', "'"], 
+            '-', 
+            $filename
+        );
+        
+        $filename = preg_replace('/[^a-zA-Z0-9.-]/', '', $filename);
+        $filename = preg_replace('/-+/', '-', $filename);
+        $filename = trim($filename, '-');
+        
+        if (empty($filename)) {
+            $filename = 'spt';
         }
+        
+        return $filename;
     }
 }

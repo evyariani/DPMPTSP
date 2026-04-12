@@ -56,9 +56,9 @@ class AuthController extends Controller
 
     /**
      * Redirect berdasarkan level user
-     * Kadis -> User
-     * Admin -> User
-     * Pegawai -> SPT
+     * Kadis -> Halaman Persetujuan SPT (kadis.spt.approval)
+     * Admin -> User (user.index)
+     * Pegawai -> SPT (spt.index)
      */
     private function redirectBasedOnLevel()
     {
@@ -67,18 +67,18 @@ class AuthController extends Controller
         switch ($level) {
             case 'pegawai':
                 // Pegawai diarahkan ke SPT
-                return redirect('/spt');
+                return redirect()->route('spt.index');
                 break;
             case 'kadis':
-                // Kadis diarahkan ke User
-                return redirect('/user');
+                // Kadis diarahkan ke halaman persetujuan SPT
+                return redirect()->route('kadis.spt.approval');
                 break;
             case 'admin':
                 // Admin diarahkan ke User
-                return redirect('/user');
+                return redirect()->route('user.index');
                 break;
             default:
-                return redirect('/user');
+                return redirect()->route('spt.index');
         }
     }
 }

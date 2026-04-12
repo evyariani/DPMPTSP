@@ -29,6 +29,19 @@
     </div>
 @endif
 
+@if(session('warning'))
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm">{{ session('warning') }}</p>
+            </div>
+        </div>
+    </div>
+@endif
+
 @if ($errors->any())
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
         <div class="flex">
@@ -45,6 +58,27 @@
             </div>
         </div>
     </div>
+@endif
+
+<!-- Alert Info jika SPT sedang ditolak -->
+@if($spt->isRejected())
+<div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+    <div class="flex">
+        <div class="flex-shrink-0">
+            <i class="fas fa-times-circle text-red-500"></i>
+        </div>
+        <div class="ml-3">
+            <p class="font-medium">SPT Ini Ditolak!</p>
+            <p class="text-sm mt-1">
+                Alasan penolakan: <strong>{{ $spt->rejection_reason }}</strong>
+            </p>
+            <p class="text-sm mt-2">
+                Silakan perbaiki data SPT sesuai catatan di atas, lalu klik tombol 
+                <strong>"Ajukan Ulang"</strong> untuk mengirimkan kembali ke Kadis.
+            </p>
+        </div>
+    </div>
+</div>
 @endif
 
 <!-- Form Edit SPT -->
@@ -224,12 +258,113 @@
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
-                    <i class="fas fa-save mr-2"></i> Update SPT
+                    <i class="fas fa-save mr-2"></i> Simpan Perubahan
                 </button>
+                
+                <!-- ===== TOMBOL AJUKAN ULANG (HANYA UNTUK SPT YANG DITOLAK) ===== -->
+                @if($spt->isRejected())
+                <button type="button" 
+                        id="btn-resubmit"
+                        class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
+                    <i class="fas fa-paper-plane mr-2"></i> Ajukan Ulang ke Kadis
+                </button>
+                @endif
             </div>
         </form>
     </div>
 </div>
+
+<!-- Modal Konfirmasi Ajukan Ulang -->
+<div id="resubmit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
+            <div class="p-6 text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                    <i class="fas fa-paper-plane text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-4">Ajukan Ulang SPT?</h3>
+                <div class="mb-6 text-left">
+                    <p class="text-gray-600 mb-3">Anda akan mengajukan ulang SPT:</p>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                        <p class="font-semibold text-gray-800 text-lg" id="resubmit-nomor">{{ $spt->nomor_surat }}</p>
+                        <p class="text-gray-600 text-sm mt-1">Tujuan: {{ Str::limit($spt->tujuan, 50) }}</p>
+                    </div>
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">
+                                    Setelah diajukan ulang, surat akan muncul kembali di halaman persetujuan Kadis.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button type="button" 
+                            onclick="hideResubmitModal()" 
+                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                        <i class="fas fa-times mr-2"></i> Batal
+                    </button>
+                    <button type="button" 
+                            id="confirm-resubmit"
+                            class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                        <i class="fas fa-paper-plane mr-2"></i> Ya, Ajukan Ulang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes slideInFromBottom {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-in-bottom {
+    animation: slideInFromBottom 0.3s ease-out forwards;
+}
+
+@keyframes slideOutToBottom {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}
+
+.animate-slide-out-bottom {
+    animation: slideOutToBottom 0.3s ease-out forwards;
+}
+</style>
 @endsection
 
 @section('scripts')
@@ -551,6 +686,91 @@ document.getElementById('nomor_surat').addEventListener('input', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     // Update preview pegawai
     updatePegawaiPreview();
+});
+
+// ========== FUNGSI AJUKAN ULANG (RESUBMIT) ==========
+let currentResubmitId = {{ $spt->id_spt }};
+
+function showResubmitModal() {
+    const modal = document.getElementById('resubmit-modal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'block';
+}
+
+function hideResubmitModal() {
+    const modal = document.getElementById('resubmit-modal');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+}
+
+// Tombol Ajukan Ulang
+const btnResubmit = document.getElementById('btn-resubmit');
+if (btnResubmit) {
+    btnResubmit.addEventListener('click', showResubmitModal);
+}
+
+// Konfirmasi Ajukan Ulang
+document.getElementById('confirm-resubmit').addEventListener('click', function() {
+    const confirmBtn = this;
+    const originalText = confirmBtn.innerHTML;
+    
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+    confirmBtn.disabled = true;
+    
+    fetch('{{ route("spt.resubmit", $spt->id_spt) }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Tampilkan notifikasi sukses
+            showSuccessNotification(data.message);
+            hideResubmitModal();
+            
+            // Redirect ke halaman index setelah 1.5 detik
+            setTimeout(() => {
+                window.location.href = '{{ route("spt.index") }}';
+            }, 1500);
+        } else {
+            throw new Error(data.message || 'Gagal mengajukan ulang');
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    });
+});
+
+function showSuccessNotification(message) {
+    // Buat notifikasi temporary
+    const notif = document.createElement('div');
+    notif.className = 'fixed bottom-6 right-6 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-slide-in-bottom';
+    notif.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ${message}`;
+    document.body.appendChild(notif);
+    
+    setTimeout(() => {
+        notif.classList.remove('animate-slide-in-bottom');
+        notif.classList.add('animate-slide-out-bottom');
+        setTimeout(() => notif.remove(), 300);
+    }, 3000);
+}
+
+// Tutup modal dengan klik di luar
+document.getElementById('resubmit-modal')?.addEventListener('click', function(e) {
+    if (e.target === this) hideResubmitModal();
+});
+
+// Tutup modal dengan tombol Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideResubmitModal();
 });
 </script>
 @endsection

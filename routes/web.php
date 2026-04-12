@@ -9,6 +9,7 @@ use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\UangHarianController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SPTController;
+use App\Http\Controllers\VerifikasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,9 @@ use App\Http\Controllers\SPTController;
 Route::get('/', function () {
     return redirect('/login');
 });
+
+// ===== ROUTE VERIFIKASI - TIDAK PAKAI MIDDLEWARE, BISA DIAKSES PUBLIK =====
+Route::get('/verify/spt/{code}', [VerifikasiController::class, 'verify'])->name('verifikasi.spt');
 
 /*
 |--------------------------------------------------------------------------
@@ -38,13 +42,48 @@ Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 */
 Route::get('/dashboard', function () {
     $level = session('user')['level'] ?? 'guest';
+    
+    // KADIS diarahkan ke halaman approval SPT
     if ($level == 'kadis') {
+        return redirect()->route('kadis.spt.approval');
+    } 
+    elseif ($level == 'pegawai') {
         return redirect('/spt');
-    } elseif ($level == 'pegawai') {
-        return redirect('/spt');
-    } else {
+    } 
+    else {
         return redirect('/user');
     }
+});
+
+/*
+|--------------------------------------------------------------------------
+| KADIS ROUTES - PERSETUJUAN SPT
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['role:kadis'])->prefix('kadis')->name('kadis.')->group(function () {
+    // Halaman approval SPT untuk Kadis
+    Route::get('/spt/approval', [SPTController::class, 'approvalList'])->name('spt.approval');
+    
+    // Approve SPT
+    Route::post('/spt/{id}/approve', [SPTController::class, 'approve'])->name('spt.approve');
+    
+    // Approve SPT dengan custom signature (AJAX)
+    Route::post('/spt/{id}/approve-signature', [SPTController::class, 'approveWithSignature'])->name('spt.approve-signature');
+    
+    // Reject SPT
+    Route::post('/spt/{id}/reject', [SPTController::class, 'reject'])->name('spt.reject');
+    
+    // Lihat detail SPT
+    Route::get('/spt/{id}', [SPTController::class, 'show'])->name('spt.show');
+    
+    // Preview PDF SPT
+    Route::get('/spt/{id}/preview', [SPTController::class, 'previewPdf'])->name('spt.preview');
+    
+    // Print SPT
+    Route::get('/spt/{id}/print', [SPTController::class, 'print'])->name('spt.print');
+    
+    // Statistik approval untuk dashboard
+    Route::get('/approval-stats', [SPTController::class, 'approvalStats'])->name('approval.stats');
 });
 
 /*
@@ -54,8 +93,8 @@ Route::get('/dashboard', function () {
 */
 Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
     
-    // USER MANAGEMENT - HANYA ADMIN & KADIS YANG BISA AKSES
-    Route::prefix('user')->middleware(['role:admin|kadis'])->group(function () {
+    // USER MANAGEMENT - HANYA ADMIN YANG BISA AKSES
+    Route::prefix('user')->middleware(['role:admin'])->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('user.index');
         Route::get('/create', [UserController::class, 'create'])->name('user.create');
         Route::post('/', [UserController::class, 'store'])->name('user.store');
@@ -64,8 +103,8 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     });
     
-    // PEGAWAI MANAGEMENT - HANYA ADMIN & KADIS YANG BISA AKSES
-    Route::prefix('pegawai')->middleware(['role:admin|kadis'])->group(function () {
+    // PEGAWAI MANAGEMENT - HANYA ADMIN YANG BISA AKSES
+    Route::prefix('pegawai')->middleware(['role:admin'])->group(function () {
         Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
         Route::get('/create', [PegawaiController::class, 'create'])->name('pegawai.create');
         Route::post('/', [PegawaiController::class, 'store'])->name('pegawai.store');
@@ -74,8 +113,8 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::delete('/{id}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
     });
     
-    // PROGRAM MANAGEMENT - HANYA ADMIN & KADIS YANG BISA AKSES
-    Route::prefix('program')->middleware(['role:admin|kadis'])->group(function () {
+    // PROGRAM MANAGEMENT - HANYA ADMIN YANG BISA AKSES
+    Route::prefix('program')->middleware(['role:admin'])->group(function () {
         Route::get('/', [ProgramController::class, 'index'])->name('program.index');
         Route::get('/create', [ProgramController::class, 'create'])->name('program.create');
         Route::post('/', [ProgramController::class, 'store'])->name('program.store');
@@ -84,8 +123,8 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::delete('/{id}', [ProgramController::class, 'destroy'])->name('program.destroy');
     });
     
-    // UANG HARIAN MANAGEMENT - HANYA ADMIN & KADIS YANG BISA AKSES
-    Route::prefix('uang-harian')->middleware(['role:admin|kadis'])->group(function () {
+    // UANG HARIAN MANAGEMENT - HANYA ADMIN YANG BISA AKSES
+    Route::prefix('uang-harian')->middleware(['role:admin'])->group(function () {
         Route::get('/', [UangHarianController::class, 'index'])->name('uang-harian.index');
         Route::get('/create', [UangHarianController::class, 'create'])->name('uang-harian.create');
         Route::post('/', [UangHarianController::class, 'store'])->name('uang-harian.store');
@@ -96,8 +135,8 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::get('/get-kecamatan', [UangHarianController::class, 'getKecamatan'])->name('uang-harian.get-kecamatan');
     });
     
-    // SPT MANAGEMENT - SEMUA USER BISA AKSES (PEGAWAI, ADMIN, KADIS)
-    Route::prefix('spt')->group(function () {
+    // SPT MANAGEMENT - ADMIN DAN PEGAWAI SAJA (KADIS TIDAK BIKIN SPT)
+    Route::prefix('spt')->middleware(['role:admin|pegawai'])->group(function () {
         Route::get('/', [SPTController::class, 'index'])->name('spt.index');
         Route::get('/export', [SPTController::class, 'export'])->name('spt.export');
         Route::get('/get-pegawai/{id}', [SPTController::class, 'getPegawaiData'])->name('spt.get-pegawai');
@@ -109,10 +148,11 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::put('/{id}', [SPTController::class, 'update'])->name('spt.update');
         Route::delete('/{id}', [SPTController::class, 'destroy'])->name('spt.destroy');
         Route::post('/', [SPTController::class, 'store'])->name('spt.store');
+        Route::post('/spt/{id}/resubmit', [SPTController::class, 'resubmit'])->name('spt.resubmit');
     });
     
-    // TRANSPORTASI MANAGEMENT
-    Route::prefix('transportasi')->middleware(['role:admin|kadis'])->group(function () {
+    // TRANSPORTASI MANAGEMENT - HANYA ADMIN YANG BISA AKSES
+    Route::prefix('transportasi')->middleware(['role:admin'])->group(function () {
         Route::get('/', [TransportasiController::class, 'index'])->name('transportasi.index');
         Route::get('/create', [TransportasiController::class, 'create'])->name('transportasi.create');
         Route::post('/', [TransportasiController::class, 'store'])->name('transportasi.store');
@@ -121,8 +161,8 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::delete('/{id}', [TransportasiController::class, 'destroy'])->name('transportasi.destroy');
     });
     
-    // REKENING MANAGEMENT
-    Route::prefix('rekening')->middleware(['role:admin|kadis'])->group(function () {
+    // REKENING MANAGEMENT - HANYA ADMIN YANG BISA AKSES
+    Route::prefix('rekening')->middleware(['role:admin'])->group(function () {
         Route::get('/', [RekeningController::class, 'index'])->name('rekening.index');
         Route::get('/create', [RekeningController::class, 'create'])->name('rekening.create');
         Route::post('/', [RekeningController::class, 'store'])->name('rekening.store');
@@ -131,8 +171,8 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::delete('/{id}', [RekeningController::class, 'destroy'])->name('rekening.destroy');
     });
     
-    // MODUL LAINNYA
-    Route::middleware(['role:admin|kadis'])->group(function () {
+    // MODUL LAINNYA - HANYA ADMIN
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/unit', function () {
             return view('admin.unit');
         })->name('unit.index');

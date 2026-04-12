@@ -95,7 +95,6 @@
             white-space: nowrap;
         }
         
-        /* GARIS KOP */
         .garis-kop {
             width: 100%;
             margin: 0 0 15px 0;
@@ -105,7 +104,6 @@
             height: 2px;
         }
         
-        /* JUDUL SURAT */
         .judul-surat {
             text-align: center;
             margin-bottom: 20px;
@@ -125,17 +123,15 @@
             margin-top: 5px;
         }
         
-        /* MEMERINTAHKAN - tanpa margin berlebihan */
         .memerintahkan {
             text-align: center;
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
             font-weight: normal;
             text-transform: uppercase;
-            margin: 0; /* HAPUS SEMUA MARGIN */
+            margin: 0;
         }
         
-        /* TABEL UNTUK DASAR/KEPADA/UNTUK */
         .content-table {
             width: 100%;
             border-collapse: collapse;
@@ -183,18 +179,17 @@
         }
         
         .pegawai-spacer td {
-            height: 15px; /* Space antar pegawai */
+            height: 15px;
         }
         
-        /* SPACE UNTUK JARAK ANTAR SECTION - SEMUA SAMA 2 ENTER */
         .section-spacer {
-            height: 24px; /* 2 ENTER (12px x 2) */
+            height: 24px;
         }
         
-        /* TANDA TANGAN */
-        .tanda-tangan {
+        /* ===== STYLE UNTUK TTD DIGITAL (QR CODE) ===== */
+        .tanda-tangan-digital {
             float: right;
-            width: 300px;
+            width: 320px;
             text-align: center;
             margin-top: 30px;
             font-size: 12pt;
@@ -208,30 +203,110 @@
         
         .jabatan-ttd {
             font-size: 12pt;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
         
-        .enter-dua-kali {
-            height: 40px;
+        /* QR Code Digital Signature */
+        .digital-signature-container {
+            display: inline-block;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        
+        .digital-signature-qr {
+            width: 150px;
+            height: 150px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .digital-signature-text {
+            font-size: 9pt;
+            color: #0d6efd;
+            font-family: Arial, sans-serif;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        .verification-info {
+            font-size: 8pt;
+            color: #555;
+            font-family: Arial, sans-serif;
+            margin-top: 5px;
+            line-height: 1.3;
+        }
+        
+        .verification-code {
+            font-family: monospace;
+            font-size: 9pt;
+            background: #f8f9fa;
+            padding: 3px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 5px;
+            letter-spacing: 1px;
         }
         
         .nama-ttd {
             font-size: 12pt;
             text-decoration: underline;
-            margin-bottom: 2px;
+            margin-top: 5px;
+            margin-bottom: 0;
+            padding-top: 0;
         }
         
         .pangkat-ttd {
             font-size: 12pt;
-            margin-bottom: 2px;
+            margin-top: 0;
+            margin-bottom: 0;
         }
         
         .nip-ttd {
             font-size: 12pt;
+            margin-top: 0;
+        }
+        
+        .approval-info {
+            font-size: 8pt;
+            color: #666;
+            margin-top: 8px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        
+        .status-watermark {
+            position: fixed;
+            bottom: 50%;
+            right: -50px;
+            transform: rotate(-45deg);
+            font-size: 60px;
+            font-weight: bold;
+            color: rgba(220, 38, 38, 0.15);
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
         }
         
         .clearfix {
             clear: both;
+        }
+        
+        .footer-verifikasi {
+            position: fixed;
+            bottom: 20px;
+            right: 30px;
+            font-size: 7pt;
+            color: #999;
+            text-align: right;
+            font-family: Arial, sans-serif;
+        }
+        
+        .page-break {
+            page-break-after: always;
         }
     </style>
 </head>
@@ -253,7 +328,6 @@
         </tr>
     </table>
     
-    <!-- GARIS KOP -->
     <div class="garis-kop"></div>
 
     <!-- JUDUL SURAT -->
@@ -288,13 +362,11 @@
         @endif
     </table>
 
-    <!-- SPACE DASAR KE MEMERINTAHKAN - 2 ENTER -->
     <div class="section-spacer"></div>
 
     <!-- MEMERINTAHKAN -->
     <div class="memerintahkan">MEMERINTAHKAN</div>
 
-    <!-- SPACE MEMERINTAHKAN KE KEPADA - 2 ENTER -->
     <div class="section-spacer"></div>
 
     <!-- SECTION KEPADA -->
@@ -353,7 +425,6 @@
         @endforeach
     </table>
 
-    <!-- SPACE PEGAWAI TERAKHIR KE UNTUK - 2 ENTER -->
     <div class="section-spacer"></div>
 
     <!-- SECTION UNTUK -->
@@ -374,13 +445,11 @@
         @endif
     </table>
 
-    <!-- SPACE SETELAH UNTUK -->
     <div class="section-spacer"></div>
 
-    <!-- TANDA TANGAN -->
-    <div class="tanda-tangan">
+    <!-- ===== TANDA TANGAN DIGITAL (QR CODE) ===== -->
+    <div class="tanda-tangan-digital">
         @php
-            // Array bulan dalam bahasa Indonesia
             $bulanIndonesia = [
                 'January' => 'Januari',
                 'February' => 'Februari',
@@ -396,7 +465,6 @@
                 'December' => 'Desember'
             ];
             
-            // Format tanggal dengan bulan Indonesia
             $tanggal = $spt->tanggal->format('d') . ' ' . 
                        $bulanIndonesia[$spt->tanggal->format('F')] . ' ' . 
                        $spt->tanggal->format('Y');
@@ -405,22 +473,153 @@
         <div class="tempat-tanggal">Pelaihari, {{ $tanggal }}</div>
         <div class="jabatan-ttd">{{ $spt->penandaTangan->jabatan ?? 'Kepala Dinas' }}</div>
         
-        <!-- ENTER 2 KALI UNTUK TANDA TANGAN -->
-        <div style="height: 50px;"></div>
-        
-        <div class="nama-ttd">{{ $spt->penandaTangan->nama ?? '-' }}</div>
-        <div class="pangkat-ttd">
-            @if($spt->penandaTangan->pangkat && $spt->penandaTangan->gol)
-                {{ $spt->penandaTangan->pangkat }} ({{ $spt->penandaTangan->gol }})
-            @elseif($spt->penandaTangan->pangkat)
-                {{ $spt->penandaTangan->pangkat }}
-            @elseif($spt->penandaTangan->gol)
-                Gol. {{ $spt->penandaTangan->gol }}
+        <!-- CEK STATUS APPROVAL -->
+        @if($spt->isApproved())
+            @php
+                // Generate QR Code dengan Endroid
+                $qrImage = null;
+                if (class_exists('Endroid\QrCode\Builder\Builder')) {
+                    try {
+                        $result = \Endroid\QrCode\Builder\Builder::create()
+                            ->writer(new \Endroid\QrCode\Writer\PngWriter())
+                            ->data($spt->verification_url)
+                            ->encoding(new \Endroid\QrCode\Encoding\Encoding('UTF-8'))
+                            ->errorCorrectionLevel(\Endroid\QrCode\ErrorCorrectionLevel::High)
+                            ->size(150)
+                            ->margin(10)
+                            ->roundBlockSizeMode(\Endroid\QrCode\RoundBlockSizeMode::Margin)
+                            ->build();
+                        $qrImage = 'data:image/png;base64,' . base64_encode($result->getString());
+                    } catch (\Exception $e) {
+                        \Log::error('Endroid QR Code failed: ' . $e->getMessage());
+                    }
+                }
+                
+                // Fallback ke Simple QR Code jika Endroid gagal
+                if (!$qrImage && extension_loaded('imagick')) {
+                    try {
+                        $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+                            ->size(150)
+                            ->margin(1)
+                            ->errorCorrection('H')
+                            ->generate($spt->verification_url);
+                        $qrImage = 'data:image/png;base64,' . base64_encode($qrCode);
+                    } catch (\Exception $e) {
+                        \Log::warning('Simple QR failed: ' . $e->getMessage());
+                    }
+                }
+                
+                // Fallback ke Google Charts API
+                if (!$qrImage) {
+                    try {
+                        $googleQrUrl = 'https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=' . urlencode($spt->verification_url) . '&choe=UTF-8';
+                        $qrImageContent = @file_get_contents($googleQrUrl);
+                        if ($qrImageContent !== false) {
+                            $qrImage = 'data:image/png;base64,' . base64_encode($qrImageContent);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::warning('Google Charts QR failed: ' . $e->getMessage());
+                    }
+                }
+            @endphp
+            
+            @if($qrImage)
+                <!-- TAMPILKAN QR CODE SEBAGAI TANDA TANGAN DIGITAL -->
+                <div class="digital-signature-container">
+                    <img src="{{ $qrImage }}" class="digital-signature-qr" alt="QR Code Tanda Tangan Digital">
+                    {{-- <div class="digital-signature-text">
+                        ✓ TERTANDA TANGAN SECARA DIGITAL
+                    </div> --}}
+                </div>
+                
+                <div class="verification-info">
+                    Scan QR Code untuk verifikasi keaslian dokumen
+                </div>
+                
+                <div class="verification-code">
+                    Kode Verifikasi: {{ $spt->verification_code }}
+                </div>
+            @else
+                <!-- FALLBACK JIKA QR CODE GAGAL -->
+                <div class="digital-signature-container" style="padding: 15px; min-width: 200px;">
+                    <div class="digital-signature-text" style="font-size: 11pt;">
+                        ✓ TERTANDA TANGAN DIGITAL
+                    </div>
+                    <div class="verification-info" style="margin-top: 10px;">
+                        <strong>Kode Verifikasi:</strong> {{ $spt->verification_code }}
+                    </div>
+                    <div class="verification-info" style="font-size: 7pt; word-break: break-all; margin-top: 5px;">
+                        {{ $spt->verification_url }}
+                    </div>
+                </div>
             @endif
-        </div>
-        <div class="nip-ttd">NIP. {{ $spt->penandaTangan->nip ?? '-' }}</div>
+            
+            <!-- NAMA DAN NIP PENANDA TANGAN -->
+            <div class="nama-ttd">{{ $spt->penandaTangan->nama ?? '-' }}</div>
+            <div class="pangkat-ttd">
+                @if($spt->penandaTangan->pangkat && $spt->penandaTangan->gol)
+                    {{ $spt->penandaTangan->pangkat }} ({{ $spt->penandaTangan->gol }})
+                @elseif($spt->penandaTangan->pangkat)
+                    {{ $spt->penandaTangan->pangkat }}
+                @elseif($spt->penandaTangan->gol)
+                    Gol. {{ $spt->penandaTangan->gol }}
+                @else
+                    -
+                @endif
+            </div>
+            <div class="nip-ttd">NIP. {{ $spt->penandaTangan->nip ?? '-' }}</div>
+            
+            <div class="approval-info">
+                Disetujui secara digital pada {{ $spt->approved_at ? $spt->approved_at->format('d/m/Y H:i:s') : '-' }}
+                @if($spt->verification_count > 0)
+                    <br>✓ Telah diverifikasi {{ $spt->verification_count }} kali
+                @endif
+            </div>
+        @elseif($spt->isRejected())
+            <div style="height: 80px;"></div>
+            <div class="nama-ttd" style="text-decoration: none; color: #999;">{{ $spt->penandaTangan->nama ?? '-' }}</div>
+            <div class="pangkat-ttd" style="color: #999;">
+                @if($spt->penandaTangan->pangkat && $spt->penandaTangan->gol)
+                    {{ $spt->penandaTangan->pangkat }} ({{ $spt->penandaTangan->gol }})
+                @elseif($spt->penandaTangan->pangkat)
+                    {{ $spt->penandaTangan->pangkat }}
+                @elseif($spt->penandaTangan->gol)
+                    Gol. {{ $spt->penandaTangan->gol }}
+                @endif
+            </div>
+            <div class="nip-ttd" style="color: #999;">NIP. {{ $spt->penandaTangan->nip ?? '-' }}</div>
+            <div class="approval-info" style="color: #dc2626;">
+                STATUS: DITOLAK - {{ $spt->rejection_reason ?? 'Tidak ada alasan' }}
+            </div>
+            <div class="status-watermark">DITOLAK</div>
+        @else
+            <div style="height: 80px;"></div>
+            <div class="nama-ttd" style="text-decoration: none; color: #999;">{{ $spt->penandaTangan->nama ?? '-' }}</div>
+            <div class="pangkat-ttd" style="color: #999;">
+                @if($spt->penandaTangan->pangkat && $spt->penandaTangan->gol)
+                    {{ $spt->penandaTangan->pangkat }} ({{ $spt->penandaTangan->gol }})
+                @elseif($spt->penandaTangan->pangkat)
+                    {{ $spt->penandaTangan->pangkat }}
+                @elseif($spt->penandaTangan->gol)
+                    Gol. {{ $spt->penandaTangan->gol }}
+                @endif
+            </div>
+            <div class="nip-ttd" style="color: #999;">NIP. {{ $spt->penandaTangan->nip ?? '-' }}</div>
+            <div class="approval-info" style="color: #d97706;">
+                Menunggu persetujuan Kepala Dinas
+            </div>
+            <div class="status-watermark" style="color: rgba(217, 119, 6, 0.15);">MENUNGGU</div>
+        @endif
     </div>
     
     <div class="clearfix"></div>
+
+    <!-- Footer Verifikasi -->
+    @if($spt->isApproved() && $spt->verification_code)
+    <div class="footer-verifikasi">
+        Dokumen ini ditandatangani secara elektronik.<br>
+        Verifikasi: {{ $spt->verification_code }}
+    </div>
+    @endif
 </body>
 </html>

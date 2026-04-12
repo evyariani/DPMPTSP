@@ -9,9 +9,6 @@
             <h2 class="text-lg font-semibold text-gray-700">Tambah Surat Perintah Tugas Baru</h2>
             <p class="text-gray-500">Isi formulir untuk menambahkan data SPT baru</p>
         </div>
-        <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
-            <i class="fas fa-arrow-left mr-2"></i> Kembali
-        </a>
     </div>
 </div>
 

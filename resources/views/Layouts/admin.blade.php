@@ -58,6 +58,17 @@
         .hover-bg-blue-50:hover {
             background-color: #eff6ff;
         }
+        
+        /* Badge untuk jumlah pending */
+        .pending-badge {
+            background-color: #fef3c7;
+            color: #d97706;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            margin-left: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-50" x-data="{ 
@@ -124,8 +135,73 @@
                         $userLevel = session('user')['level'] ?? 'guest';
                     @endphp
                     
+                    <!-- MENU UNTUK LEVEL KADIS -->
+                    @if($userLevel == 'kadis')
+                        <!-- Header Menu -->
+                        <li class="mb-3">
+                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2" x-show="sidebarOpen">
+                                <i class="fas fa-tasks mr-2"></i> Persetujuan Surat
+                            </div>
+                        </li>
+                        
+                        <!-- SPT - Menu Utama Kadis -->
+                        <li>
+                            <a href="{{ route('kadis.spt.approval') }}" 
+                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
+                                      {{ request()->routeIs('kadis.spt.approval') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                               :class="{'justify-center': !sidebarOpen}">
+                                <i class="fas fa-file-invoice-dollar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
+                                <span x-show="sidebarOpen" class="text-sm font-medium">Persetujuan SPT</span>
+                                @if(isset($pendingCount) && $pendingCount > 0)
+                                <span x-show="sidebarOpen" class="pending-badge">
+                                    {{ $pendingCount }}
+                                </span>
+                                @endif
+                            </a>
+                        </li>
+                        
+                        <!-- Divider -->
+                        <li class="my-3">
+                            <div class="border-t border-blue-100" x-show="sidebarOpen"></div>
+                        </li>
+                        
+                        <!-- Header Menu Lainnya (Future) -->
+                        <li class="mb-2">
+                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2" x-show="sidebarOpen">
+                                <i class="fas fa-archive mr-2"></i> Lainnya
+                            </div>
+                        </li>
+                        
+                        <!-- Menu Lainnya (belum aktif, untuk pengembangan mendatang) -->
+                        <li>
+                            <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 cursor-not-allowed opacity-60"
+                                 :class="{'justify-center': !sidebarOpen}">
+                                <i class="fas fa-chart-line text-gray-400 text-lg w-6"></i>
+                                <span x-show="sidebarOpen" class="text-sm font-medium">Dashboard</span>
+                                <span x-show="sidebarOpen" class="ml-auto text-xs text-gray-400">(Soon)</span>
+                            </div>
+                        </li>
+                        
+                        <li>
+                            <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 cursor-not-allowed opacity-60"
+                                 :class="{'justify-center': !sidebarOpen}">
+                                <i class="fas fa-history text-gray-400 text-lg w-6"></i>
+                                <span x-show="sidebarOpen" class="text-sm font-medium">Riwayat Persetujuan</span>
+                                <span x-show="sidebarOpen" class="ml-auto text-xs text-gray-400">(Soon)</span>
+                            </div>
+                        </li>
+                        
+                        <li>
+                            <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 cursor-not-allowed opacity-60"
+                                 :class="{'justify-center': !sidebarOpen}">
+                                <i class="fas fa-print text-gray-400 text-lg w-6"></i>
+                                <span x-show="sidebarOpen" class="text-sm font-medium">Laporan</span>
+                                <span x-show="sidebarOpen" class="ml-auto text-xs text-gray-400">(Soon)</span>
+                            </div>
+                        </li>
+                        
                     <!-- MENU UNTUK ADMIN (HANYA DATA MASTER) -->
-                    @if($userLevel == 'admin')
+                    @elseif($userLevel == 'admin')
                         <!-- User -->
                         <li>
                             <a href="/user" 
@@ -172,126 +248,6 @@
                         
                     <!-- MENU UNTUK PEGAWAI (HANYA SPT, SPD, DLL) -->
                     @elseif($userLevel == 'pegawai')
-                        <!-- SPT -->
-                        <li>
-                            <a href="/spt" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-file-invoice-dollar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">SPT</span>
-                                <span x-show="sidebarOpen" class="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">Surat</span>
-                            </a>
-                        </li>
-
-                        <!-- SPD DEPAN -->
-                        <li>
-                            <a href="/transaksi" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('transaksi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-exchange-alt text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">SPD Depan</span>
-                            </a>
-                        </li>
-
-                        <!-- SPD BELAKANG -->
-                        <li>
-                            <a href="/laporan" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('laporan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-chart-bar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">SPD Belakang</span>
-                            </a>
-                        </li>
-
-                        <!-- RINCIAN BIDANG -->
-                        <li>
-                            <a href="/pengaturan" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-cog text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">Rincian Bidang</span>
-                            </a>
-                        </li>
-
-                        <!-- KWITANSI BIDANG -->
-                        <li>
-                            <a href="/kwitansi" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-file-invoice text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">Kwitansi Bidang</span>
-                            </a>
-                        </li>
-                        
-                    <!-- MENU UNTUK KADIS (SEMUA MENU) -->
-                    @elseif($userLevel == 'kadis')
-                        <!-- Data Master Section -->
-                        <li class="mb-2">
-                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2" x-show="sidebarOpen">
-                                <i class="fas fa-database mr-2"></i> Data Master
-                            </div>
-                        </li>
-                        
-                        <!-- User -->
-                        <li>
-                            <a href="/user" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('user*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-users text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">User</span>
-                            </a>
-                        </li>
-                        
-                        <!-- Pegawai -->
-                        <li>
-                            <a href="/pegawai" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('pegawai*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-building text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">Pegawai</span>
-                            </a>
-                        </li>
-                        
-                        <!-- Program -->
-                        <li>
-                            <a href="/program" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('program*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-boxes text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">Program</span>
-                            </a>
-                        </li>
-                        
-                        <!-- Uang Harian -->
-                        <li>
-                            <a href="/uang-harian" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-money-bill-wave text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">Uang Harian</span>
-                            </a>
-                        </li>
-                        
-                        <!-- Divider -->
-                        <li class="my-3">
-                            <div class="border-t border-blue-100" x-show="sidebarOpen"></div>
-                        </li>
-                        
-                        <li class="mb-2">
-                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2" x-show="sidebarOpen">
-                                <i class="fas fa-file-alt mr-2"></i> Transaksi
-                            </div>
-                        </li>
-                        
                         <!-- SPT -->
                         <li>
                             <a href="/spt" 
