@@ -21,16 +21,6 @@ class UserController extends Controller
             return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
         }
         
-        // Cek login
-        if (!session()->has('user')) {
-            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
-        }
-
-        // Hanya admin yang bisa akses
-        if (session('user')['level'] !== 'admin') {
-            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
-        }
-        
         $query = User::query();
         
         if ($request->has('search') && $request->search != '') {
@@ -63,33 +53,10 @@ class UserController extends Controller
         $kadisExists = User::where('level', 'kadis')->exists();
 
         return view('admin.user-create', compact('adminExists', 'kadisExists'));
-        if (!session()->has('user')) {
-            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
-        }
-
-        if (session('user')['level'] !== 'admin') {
-            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
-        }
-
-        // Cek apakah sudah ada admin
-        $adminExists = User::where('level', 'admin')->exists();
-        
-        // Cek apakah sudah ada kadis
-        $kadisExists = User::where('level', 'kadis')->exists();
-
-        return view('admin.user-create', compact('adminExists', 'kadisExists'));
     }
     
     public function store(Request $request)
     {
-        if (!session()->has('user')) {
-            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
-        }
-
-        if (session('user')['level'] !== 'admin') {
-            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
-        }
-
         if (!session()->has('user')) {
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
         }
@@ -126,36 +93,10 @@ class UserController extends Controller
                 ->withInput()
                 ->with('error', 'Akun Kepala Dinas (Kadis) sudah ada. Tidak dapat menambahkan kadis lagi!');
         }
-            'level' => 'required|in:admin,pegawai,kadis',
-        ]);
-        
-        // Cek apakah sudah ada admin
-        $adminExists = User::where('level', 'admin')->exists();
-        
-        // Cek apakah sudah ada kadis
-        $kadisExists = User::where('level', 'kadis')->exists();
-        
-        // Logika pembatasan level
-        $level = $request->level;
-        
-        // Jika memilih admin tapi admin sudah ada
-        if ($level == 'admin' && $adminExists) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Akun Admin sudah ada. Tidak dapat menambahkan admin lagi!');
-        }
-        
-        // Jika memilih kadis tapi kadis sudah ada
-        if ($level == 'kadis' && $kadisExists) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Akun Kepala Dinas (Kadis) sudah ada. Tidak dapat menambahkan kadis lagi!');
-        }
         
         User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
-            'level' => $level,
             'level' => $level,
         ]);
         
@@ -172,7 +113,11 @@ class UserController extends Controller
             return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
         }
 
-        $user = User::findOrFail($id);
+        try {
+            $user = User::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return redirect('/user')->with('error', 'Data user tidak ditemukan!');
+        }
         
         // Cek apakah sudah ada admin (selain user yang sedang diedit)
         $adminExists = User::where('level', 'admin')
@@ -197,21 +142,16 @@ class UserController extends Controller
             return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
         }
 
-        if (!session()->has('user')) {
-            return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
-        }
-
-        if (session('user')['level'] !== 'admin') {
-            return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
-        }
-
         $request->validate([
             'username' => 'required|unique:users,username,' . $id,
             'level' => 'required|in:admin,pegawai,kadis',
-            'level' => 'required|in:admin,pegawai,kadis',
         ]);
         
-        $user = User::findOrFail($id);
+        try {
+            $user = User::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return redirect('/user')->with('error', 'Data user tidak ditemukan!');
+        }
         
         // Cek apakah sudah ada admin (selain user ini)
         $adminExists = User::where('level', 'admin')
@@ -243,7 +183,6 @@ class UserController extends Controller
         $data = [
             'username' => $request->username,
             'level' => $level,
-            'level' => $level,
         ];
         
         if ($request->filled('password')) {
@@ -263,14 +202,29 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        // Cek login
         if (!session()->has('user')) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Silakan login terlebih dahulu!'
+                ], 401);
+            }
             return redirect('/login')->with('error', 'Silakan login terlebih dahulu!');
         }
 
+        // Cek level akses
         if (session('user')['level'] !== 'admin') {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses!'
+                ], 403);
+            }
             return redirect('/dashboard')->with('error', 'Anda tidak memiliki akses!');
         }
 
+        // Cek tidak menghapus akun sendiri
         if ($id == session('user')['id']) {
             if (request()->ajax()) {
                 return response()->json([
@@ -281,12 +235,28 @@ class UserController extends Controller
             return redirect('/user')->with('error', 'Tidak dapat menghapus akun sendiri!');
         }
         
-        $user = User::findOrFail($id);
+        try {
+            $user = User::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data user tidak ditemukan!'
+                ], 404);
+            }
+            return redirect('/user')->with('error', 'Data user tidak ditemukan!');
+        }
         
         // Cegah menghapus admin terakhir
         if ($user->level == 'admin') {
             $adminCount = User::where('level', 'admin')->count();
             if ($adminCount <= 1) {
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tidak dapat menghapus admin terakhir!'
+                    ], 403);
+                }
                 return redirect('/user')->with('error', 'Tidak dapat menghapus admin terakhir!');
             }
         }
@@ -295,12 +265,32 @@ class UserController extends Controller
         if ($user->level == 'kadis') {
             $kadisCount = User::where('level', 'kadis')->count();
             if ($kadisCount <= 1) {
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tidak dapat menghapus Kepala Dinas terakhir!'
+                    ], 403);
+                }
                 return redirect('/user')->with('error', 'Tidak dapat menghapus Kepala Dinas terakhir!');
             }
         }
         
+        $username = $user->username;
         $user->delete();
         
-        return redirect('/user')->with('success', 'User berhasil dihapus!');
+        // Response untuk AJAX request
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "User {$username} berhasil dihapus!",
+                'data' => [
+                    'id' => $id,
+                    'username' => $username
+                ]
+            ]);
+        }
+        
+        // Response untuk request biasa
+        return redirect('/user')->with('success', "User {$username} berhasil dihapus!");
     }
 }

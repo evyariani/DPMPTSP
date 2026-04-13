@@ -5,29 +5,7 @@
 
 @section('content')
 <style>
-/* Animasi untuk modal dan notifikasi */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
-    }
-}
-
+/* Animasi untuk notifikasi bawah */
 @keyframes slideInFromBottom {
     from {
         transform: translateY(100%);
@@ -59,12 +37,26 @@
     }
 }
 
-.animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-.animate-fade-out {
-    animation: fadeOut 0.3s ease-out forwards;
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
 }
 
 .animate-slide-in-bottom {
@@ -75,22 +67,21 @@
     animation: slideOutToBottom 0.3s ease-out forwards;
 }
 
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
 .progress-bar {
     animation: progressBar 5s linear forwards;
 }
-
-/* Modal backdrop */
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 40;
-}
 </style>
 
-<div class="space-y-6">
-    {{-- Header dengan Tombol Tambah --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+<div class="mb-6">
+    <div class="flex justify-between items-center">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Data User</h2>
             <p class="text-gray-500">Kelola data pengguna sistem</p>
@@ -101,127 +92,68 @@
     </div>
 </div>
 
-    {{-- Notifikasi Toast (Posisi Bawah Kanan) --}}
-    @if(session('success'))
-    <div id="success-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
-        <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-lg shadow-lg">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
-                </div>
-                <div class="ml-3 flex-1">
-                    <p class="font-medium">Berhasil!</p>
-                    <p class="text-sm mt-1">{{ session('success') }}</p>
-                </div>
-                <button onclick="hideNotification('success')" class="text-emerald-600 hover:text-emerald-800">
-                    <i class="fas fa-times"></i>
-                </button>
+<!-- Notifikasi Toast - POSISI DI BAWAH -->
+@if(session('success'))
+<div id="success-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
+    <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-check-circle text-green-500 text-xl"></i>
             </div>
-            <div class="mt-2 w-full bg-emerald-200 rounded-full h-1">
-                <div id="success-progress" class="bg-emerald-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+            <div class="ml-3 flex-1">
+                <p class="font-medium">Berhasil!</p>
+                <p class="text-sm mt-1">{{ session('success') }}</p>
             </div>
+            <button type="button" onclick="hideNotification('success')" class="ml-4 text-green-600 hover:text-green-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mt-2 w-full bg-green-200 rounded-full h-1">
+            <div id="success-progress" class="bg-green-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
         </div>
     </div>
-    @endif
+</div>
+@endif
 
-    @if(session('error'))
-    <div id="error-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
-        <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-800 p-4 rounded-lg shadow-lg">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-rose-500 text-xl"></i>
-                </div>
-                <div class="ml-3 flex-1">
-                    <p class="font-medium">Terjadi Kesalahan!</p>
-                    <p class="text-sm mt-1">{{ session('error') }}</p>
-                </div>
-                <button onclick="hideNotification('error')" class="text-rose-600 hover:text-rose-800">
-                    <i class="fas fa-times"></i>
-                </button>
+@if(session('error'))
+<div id="error-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
+    <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
             </div>
-            <div class="mt-2 w-full bg-rose-200 rounded-full h-1">
-                <div id="error-progress" class="bg-rose-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+            <div class="ml-3 flex-1">
+                <p class="font-medium">Terjadi Kesalahan!</p>
+                <p class="text-sm mt-1">{{ session('error') }}</p>
             </div>
+            <button type="button" onclick="hideNotification('error')" class="ml-4 text-red-600 hover:text-red-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mt-2 w-full bg-red-200 rounded-full h-1">
+            <div id="error-progress" class="bg-red-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
         </div>
     </div>
-    @endif
+</div>
+@endif
 
-    {{-- Modal Konfirmasi Hapus --}}
-    <div id="delete-modal" class="fixed inset-0 z-50 hidden" style="background-color: rgba(0, 0, 0, 0.5);">
-        <div class="min-h-screen flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto animate-fade-in">
-                <div class="p-6">
-                    {{-- Icon Warning --}}
-                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
-                    </div>
-                    
-                    {{-- Title --}}
-                    <h3 class="text-xl font-semibold text-gray-900 text-center mb-4">
-                        Konfirmasi Hapus User
-                    </h3>
-                    
-                    {{-- Message --}}
-                    <div class="mb-6">
-                        <p class="text-gray-600 text-center mb-4">
-                            Anda yakin ingin menghapus user berikut?
-                        </p>
-                        
-                        {{-- User Info Card --}}
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-                            <div class="flex items-center justify-center mb-3">
-                                <div class="h-12 w-12 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-sm">
-                                    <span id="modal-user-initial" class="text-white font-semibold text-lg"></span>
-                                </div>
-                            </div>
-                            <p class="font-semibold text-gray-800 text-lg text-center" id="modal-username"></p>
-                            <p class="text-gray-600 text-sm text-center mt-1" id="modal-level"></p>
-                        </div>
-                        
-                        {{-- Warning Message --}}
-                        <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm text-red-700">
-                                        Data yang dihapus <span class="font-semibold">tidak dapat dikembalikan</span>.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {{-- Action Buttons --}}
-                    <div class="flex justify-center gap-3">
-                        <button type="button" 
-                                onclick="closeDeleteModal()"
-                                class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[100px]">
-                            <i class="fas fa-times mr-2"></i> Batal
-                        </button>
-                        
-                        <form id="delete-form" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[100px]">
-                                <i class="fas fa-trash mr-2"></i> Hapus
-                            </button>
-                        </form>
-                    </div>
-                </div>
+<!-- Notifikasi Hapus - POSISI DI BAWAH -->
+<div id="delete-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
+    <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-trash-restore text-blue-500 text-xl"></i>
             </div>
+            <div class="ml-3 flex-1">
+                <p class="font-medium">User Dihapus!</p>
+                <p id="delete-message" class="text-sm mt-1"></p>
+            </div>
+            <button type="button" onclick="hideNotification('delete')" class="ml-4 text-blue-600 hover:text-blue-800">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-    </div>
-
-    {{-- Filter Card --}}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="p-5 border-b border-gray-200 bg-gray-50">
-            <h3 class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <i class="fas fa-filter text-indigo-500 text-xs"></i>
-                Filter Pencarian
-            </h3>
+        <div class="mt-2 w-full bg-blue-200 rounded-full h-1">
+            <div id="delete-progress" class="bg-blue-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
         </div>
     </div>
 </div>
@@ -311,189 +243,176 @@
     </form>
 </div>
 
-    {{-- Tabel User --}}
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Password</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Dibuat</th>
-                        <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($users as $index => $user)
-                    <tr class="hover:bg-gray-50 transition-colors duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            {{ ($users->currentPage() - 1) * $users->perPage() + $index + 1 }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10">
-                                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
-                                        <span class="text-white font-semibold text-sm">{{ strtoupper(substr($user->username, 0, 1)) }}</span>
-                                    </div>
-                                </div>
-                                <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $user->username }}</div>
+<!-- Tabel User -->
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Password</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Dibuat</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse($users as $index => $user)
+                <tr class="hover:bg-gray-50 transition duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {{ ($users->currentPage() - 1) * $users->perPage() + $index + 1 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span class="text-blue-600 font-semibold">{{ strtoupper(substr($user->username, 0, 1)) }}</span>
                                 </div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <span class="text-gray-400 tracking-wider font-mono">••••••••</span>
-                                <button class="ml-2 text-gray-400 hover:text-indigo-600 transition-colors" 
-                                        onclick="alert('Password telah dienkripsi untuk keamanan.\nGunakan fitur reset password jika lupa.')"
-                                        title="Password dienkripsi">
-                                    <i class="fas fa-info-circle text-sm"></i>
-                                </button>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ $user->username }}</div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            @php
-                                $levelColors = [
-                                    'admin' => 'bg-purple-100 text-purple-800 border border-purple-200',
-                                    'pegawai' => 'bg-blue-100 text-blue-800 border border-blue-200',
-                                    'pemimpin' => 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-                                    'admin_keuangan' => 'bg-amber-100 text-amber-800 border border-amber-200',
-                                ];
-                                $color = $levelColors[$user->level] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
-                            @endphp
-                            <span class="px-3 py-1.5 rounded-full text-xs font-medium {{ $color }} inline-flex items-center">
-                                <i class="fas fa-circle text-[6px] mr-1.5 opacity-70"></i>
-                                {{ ucfirst(str_replace('_', ' ', $user->level)) }}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="text-gray-400 tracking-wider">••••••••</span>
+                            <button class="ml-3 text-blue-600 hover:text-blue-800 text-sm" 
+                                    onclick="alert('Password telah dienkripsi untuk keamanan.\\nGunakan fitur reset password jika lupa.')"
+                                    title="Password dienkripsi">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        @php
+                            $levelColors = [
+                                'admin' => 'bg-purple-100 text-purple-800',
+                                'pegawai' => 'bg-blue-100 text-blue-800',
+                                'kadis' => 'bg-green-100 text-green-800',
+                            ];
+                            $color = $levelColors[$user->level] ?? 'bg-gray-100 text-gray-800';
+                        @endphp
+                        <span class="px-3 py-1 rounded-full text-xs font-medium {{ $color }}">
+                            {{ ucfirst(str_replace('_', ' ', $user->level)) }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ $user->created_at?->format('d/m/Y H:i') ?? '-' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex space-x-2">
+                            <a href="/user/{{ $user->id }}/edit" 
+                               class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
+                               title="Edit User">
+                                <i class="fas fa-edit mr-1"></i> Edit
+                            </a>
+                            
+                            @if($user->id != session('user')['id'])
+                            <!-- Tombol Hapus dengan Modal -->
+                            <button type="button" 
+                                    onclick="showDeleteConfirmation({{ $user->id }}, '{{ addslashes($user->username) }}', '{{ $user->level }}')"
+                                    class="text-red-600 hover:text-red-900 px-3 py-1 rounded hover:bg-red-50 transition duration-150"
+                                    title="Hapus User">
+                                <i class="fas fa-trash mr-1"></i> Hapus
+                            </button>
+                            @else
+                            <span class="text-gray-400 px-3 py-1 cursor-not-allowed" title="Tidak dapat menghapus akun sendiri">
+                                <i class="fas fa-trash mr-1"></i> Hapus
                             </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                            <div class="flex items-center">
-                                <i class="far fa-calendar-alt text-gray-400 mr-2 text-xs"></i>
-                                {{ $user->created_at?->format('d M Y H:i') ?? '-' }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div class="flex items-center gap-2">
-                                <a href="/user/{{ $user->id }}/edit" 
-                                   class="inline-flex items-center px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg transition-colors duration-200 text-xs"
-                                   title="Edit User">
-                                    <i class="fas fa-edit mr-1"></i>
-                                    Edit
-                                </a>
-                                
-                                @if($user->id != session('user')['id'])
-                                <button type="button" 
-                                        onclick="showDeleteModal({{ $user->id }}, '{{ addslashes($user->username) }}', '{{ $user->level }}')"
-                                        class="inline-flex items-center px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg transition-colors duration-200 text-xs"
-                                        title="Hapus User">
-                                    <i class="fas fa-trash mr-1"></i>
-                                    Hapus
-                                </button>
-                                @else
-                                <span class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg text-xs cursor-not-allowed" title="Tidak dapat menghapus akun sendiri">
-                                    <i class="fas fa-trash mr-1"></i>
-                                    Hapus
-                                </span>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center">
-                                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                                    <i class="fas fa-users text-gray-400 text-3xl"></i>
-                                </div>
-                                <p class="text-lg font-medium text-gray-800 mb-2">Belum Ada Data User</p>
-                                <p class="text-sm text-gray-500 mb-4">Mulai dengan menambahkan user baru ke sistem</p>
-                                <a href="/user/create" 
-                                   class="inline-flex items-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    Tambah User Pertama
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            @endif
+                        </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fas fa-users text-gray-300 text-4xl mb-3"></i>
+                            <p class="text-lg">Tidak ada data user</p>
+                            <p class="text-sm mt-1">Mulai dengan menambahkan user baru</p>
+                            <a href="/user/create" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Tambah User Pertama
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        {{-- Footer dengan Info Pagination --}}
-        @if($users->count() > 0)
-        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div class="text-sm text-gray-600">
-                    Menampilkan 
-                    <span class="font-medium text-gray-900">{{ $users->firstItem() ?: 0 }}</span> 
-                    sampai 
-                    <span class="font-medium text-gray-900">{{ $users->lastItem() ?: 0 }}</span> 
-                    dari 
-                    <span class="font-medium text-gray-900">{{ $users->total() }}</span> 
-                    data user
-                </div>
-                
-                {{-- Pagination Links --}}
-                <div class="flex items-center gap-1">
-                    @if ($users->onFirstPage())
-                        <span class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
-                            <i class="fas fa-chevron-left text-xs"></i>
-                        </span>
-                    @else
-                        <a href="{{ $users->previousPageUrl() }}" 
-                           class="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                            <i class="fas fa-chevron-left text-xs"></i>
-                        </a>
-                    @endif
-                    
-                    @php
-                        $current = $users->currentPage();
-                        $last = $users->lastPage();
-                        $start = max($current - 2, 1);
-                        $end = min($current + 2, $last);
-                    @endphp
-                    
-                    @if($start > 1)
-                        <a href="{{ $users->url(1) }}" 
-                           class="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-150 text-sm">1</a>
-                        @if($start > 2)
-                            <span class="w-9 h-9 flex items-center justify-center text-gray-500">...</span>
-                        @endif
-                    @endif
-                    
-                    @for ($page = $start; $page <= $end; $page++)
-                        @if ($page == $current)
-                            <span class="w-9 h-9 flex items-center justify-center rounded-lg bg-indigo-600 text-white text-sm font-medium shadow-sm">{{ $page }}</span>
-                        @else
-                            <a href="{{ $users->url($page) }}" 
-                               class="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-150 text-sm">{{ $page }}</a>
-                        @endif
-                    @endfor
-                    
-                    @if($end < $last)
-                        @if($end < $last - 1)
-                            <span class="w-9 h-9 flex items-center justify-center text-gray-500">...</span>
-                        @endif
-                        <a href="{{ $users->url($last) }}" 
-                           class="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-150 text-sm">{{ $last }}</a>
-                    @endif
-                    
-                    @if ($users->hasMorePages())
-                        <a href="{{ $users->nextPageUrl() }}" 
-                           class="w-9 h-9 flex items-center justify-center rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                            <i class="fas fa-chevron-right text-xs"></i>
-                        </a>
-                    @else
-                        <span class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed">
-                            <i class="fas fa-chevron-right text-xs"></i>
-                        </span>
-                    @endif
-                </div>
-            </div>
-        </div>
+<!-- Pagination -->
+@if($users->count()>0)
+<div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+    <div class="text-sm text-gray-700">
+        Menampilkan 
+        <span class="font-medium">{{ $users->firstItem() ?: 0 }}</span> 
+        sampai 
+        <span class="font-medium">{{ $users->lastItem() ?: 0 }}</span> 
+        dari 
+        <span class="font-medium">{{ $users->total() }}</span> 
+        user
+    </div>
+    
+    <div class="flex items-center space-x-1">
+        {{-- Previous Page Link --}}
+        @if ($users->onFirstPage())
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+                <i class="fas fa-chevron-left text-xs"></i>
+            </span>
+        @else
+            <a href="{{ $users->previousPageUrl() }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
+                <i class="fas fa-chevron-left text-xs"></i>
+            </a>
+        @endif
+        
+        {{-- Pagination Elements --}}
+        @php
+            $current = $users->currentPage();
+            $last = $users->lastPage();
+            $start = max($current - 2, 1);
+            $end = min($current + 2, $last);
+        @endphp
+        
+        @if($start > 1)
+            <a href="{{ $users->url(1) }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
+            @if($start > 2)
+                <span class="px-3 py-1.5 text-gray-500">...</span>
+            @endif
+        @endif
+        
+        @for ($page = $start; $page <= $end; $page++)
+            @if ($page == $current)
+                <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
+            @else
+                <a href="{{ $users->url($page) }}" 
+                   class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
+            @endif
+        @endfor
+        
+        @if($end < $last)
+            @if($end < $last - 1)
+                <span class="px-3 py-1.5 text-gray-500">...</span>
+            @endif
+            <a href="{{ $users->url($last) }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
+        @endif
+        
+        {{-- Next Page Link --}}
+        @if ($users->hasMorePages())
+            <a href="{{ $users->nextPageUrl() }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
+                <i class="fas fa-chevron-right text-xs"></i>
+            </a>
+        @else
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+                <i class="fas fa-chevron-right text-xs"></i>
+            </span>
         @endif
     </div>
 </div>
@@ -502,10 +421,6 @@
 
 @section('scripts')
 <script>
-// ========== VARIABLES ==========
-let currentDeleteId = null;
-let currentDeleteUsername = null;
-
 // ========== NOTIFICATION FUNCTIONS ==========
 function hideNotification(type) {
     const notification = document.getElementById(`${type}-notification`);
@@ -520,64 +435,56 @@ function hideNotification(type) {
 
 // Auto-hide notifications after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto hide success notification
-    const successNotif = document.getElementById('success-notification');
-    if (successNotif) {
-        setTimeout(() => hideNotification('success'), 5000);
-    }
-    
-    // Auto hide error notification
-    const errorNotif = document.getElementById('error-notification');
-    if (errorNotif) {
-        setTimeout(() => hideNotification('error'), 5000);
-    }
+    // Auto hide success/error notifications
+    setTimeout(() => {
+        const successNotif = document.getElementById('success-notification');
+        const errorNotif = document.getElementById('error-notification');
+        
+        if (successNotif) hideNotification('success');
+        if (errorNotif) hideNotification('error');
+    }, 5000);
 });
 
-// ========== DELETE MODAL FUNCTIONS ==========
-function showDeleteModal(id, username, level) {
+// ========== DELETE CONFIRMATION FUNCTIONS ==========
+let currentDeleteId = null;
+let currentDeleteUsername = null;
+
+function showDeleteConfirmation(id, username, level) {
     currentDeleteId = id;
     currentDeleteUsername = username;
     
     // Update modal content
-    document.getElementById('modal-username').textContent = username;
-    document.getElementById('modal-user-initial').textContent = username.charAt(0).toUpperCase();
+    document.getElementById('delete-username').textContent = username;
     
-    // Format level display
     let levelText = '';
     switch(level) {
         case 'admin':
-            levelText = 'Administrator';
+            levelText = 'Admin';
             break;
-        case 'pemimpin':
-            levelText = 'Pemimpin';
-            break;
-        case 'admin_keuangan':
-            levelText = 'Admin Keuangan';
-            break;
-        case 'pegawai':
-            levelText = 'Pegawai';
+        case 'kadis':
+            levelText = 'Kepala Dinas';
             break;
         default:
-            levelText = level;
+            levelText = 'Pegawai';
     }
-    document.getElementById('modal-level').textContent = `Level: ${levelText}`;
+    document.getElementById('delete-level').textContent = `Level: ${levelText}`;
     
     // Update form action
     const form = document.getElementById('delete-form');
     form.action = `/user/${id}`;
     
-    // Show modal
-    const modal = document.getElementById('delete-modal');
+    // Show modal with animation
+    const modal = document.getElementById('delete-confirm-modal');
     modal.classList.remove('hidden');
+    modal.style.display = 'block';
     
-    // Add animation to modal content
+    // Add animation class to modal content
     const modalContent = modal.querySelector('.bg-white');
-    modalContent.classList.remove('animate-fade-out');
     modalContent.classList.add('animate-fade-in');
 }
 
-function closeDeleteModal() {
-    const modal = document.getElementById('delete-modal');
+function hideDeleteModal() {
+    const modal = document.getElementById('delete-confirm-modal');
     const modalContent = modal.querySelector('.bg-white');
     
     // Add fade out animation
@@ -587,43 +494,27 @@ function closeDeleteModal() {
     // Hide modal after animation
     setTimeout(() => {
         modal.classList.add('hidden');
+        modal.style.display = 'none';
         modalContent.classList.remove('animate-fade-out');
         currentDeleteId = null;
         currentDeleteUsername = null;
     }, 300);
 }
 
-// Close modal when clicking backdrop
-document.getElementById('delete-modal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeDeleteModal();
-    }
-});
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('delete-modal');
-        if (!modal.classList.contains('hidden')) {
-            closeDeleteModal();
-        }
-    }
-});
-
-// ========== FORM SUBMIT WITH AJAX ==========
+// Handle form submission dengan AJAX untuk notifikasi lebih baik
 document.getElementById('delete-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const form = this;
     const formData = new FormData(form);
+    
+    // Tampilkan loading
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
-    
-    // Show loading state
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
     submitBtn.disabled = true;
     
-    // Send AJAX request
+    // Kirim request DELETE
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -635,61 +526,82 @@ document.getElementById('delete-form').addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Close modal
-            closeDeleteModal();
-            
-            // Reload page after 1 second
+            // Tampilkan notifikasi hapus sukses
+            showDeleteSuccess(currentDeleteUsername);
+            // Sembunyikan modal
+            hideDeleteModal();
+            // Refresh halaman setelah 2 detik
             setTimeout(() => {
                 window.location.reload();
-            }, 1000);
+            }, 2000);
         } else {
             throw new Error(data.message || 'Gagal menghapus data');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        
-        // Show error notification
-        showErrorNotification(error.message);
-        
-        // Reset button
+        // Jika error, tampilkan notifikasi error
+        showErrorNotification('Terjadi kesalahan saat menghapus data: ' + error.message);
+        // Reset tombol
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-        
-        // Close modal
-        closeDeleteModal();
     });
 });
 
-// Show error notification
+// Tampilkan notifikasi hapus sukses
+function showDeleteSuccess(username) {
+    const notification = document.getElementById('delete-notification');
+    const message = document.getElementById('delete-message');
+    
+    message.textContent = `User "${username}" berhasil dihapus.`;
+    
+    // Reset progress bar
+    const progress = document.getElementById('delete-progress');
+    progress.style.width = '100%';
+    progress.style.animation = 'none';
+    void progress.offsetWidth; // Trigger reflow
+    progress.style.animation = 'progressBar 5s linear forwards';
+    
+    // Show notification dengan animasi bawah
+    notification.classList.remove('hidden');
+    notification.style.display = 'block';
+    notification.classList.add('animate-slide-in-bottom');
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+        hideNotification('delete');
+    }, 5000);
+}
+
+// Tampilkan notifikasi error
 function showErrorNotification(message) {
-    // Create temporary error notification
+    // Buat elemen notifikasi error sementara
     const errorDiv = document.createElement('div');
     errorDiv.id = 'temp-error-notification';
     errorDiv.className = 'fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom';
     errorDiv.innerHTML = `
-        <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-800 p-4 rounded-lg shadow-lg">
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg">
             <div class="flex items-start">
                 <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-rose-500 text-xl"></i>
+                    <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
                 </div>
                 <div class="ml-3 flex-1">
                     <p class="font-medium">Terjadi Kesalahan!</p>
                     <p class="text-sm mt-1">${message}</p>
                 </div>
-                <button onclick="this.closest('#temp-error-notification').remove()" class="text-rose-600 hover:text-rose-800">
+                <button type="button" onclick="this.closest('#temp-error-notification').remove()" class="ml-4 text-red-600 hover:text-red-800">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="mt-2 w-full bg-rose-200 rounded-full h-1">
-                <div class="bg-rose-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+            <div class="mt-2 w-full bg-red-200 rounded-full h-1">
+                <div class="bg-red-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
             </div>
         </div>
     `;
     
     document.body.appendChild(errorDiv);
     
-    // Auto remove after 5 seconds
+    // Auto hide after 5 seconds
     setTimeout(() => {
         const notif = document.getElementById('temp-error-notification');
         if (notif) {
@@ -699,5 +611,19 @@ function showErrorNotification(message) {
         }
     }, 5000);
 }
+
+// Close modal when clicking outside
+document.getElementById('delete-confirm-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideDeleteModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hideDeleteModal();
+    }
+});
 </script>
 @endsection

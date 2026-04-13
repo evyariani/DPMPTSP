@@ -7,25 +7,15 @@
     <div class="flex justify-between items-center">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Edit User</h2>
-            <p class="text-gray-500">Edit informasi user yang sudah ada</p>
+            <p class="text-gray-500">Edit informasi user {{ $user->username }}</p>
         </div>
+        <a href="{{ route('user.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
+            <i class="fas fa-arrow-left mr-2"></i> Kembali
+        </a>
     </div>
 </div>
 
 <!-- Notifikasi -->
-@if(session('success'))
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <i class="fas fa-check-circle text-green-500"></i>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm">{{ session('success') }}</p>
-            </div>
-        </div>
-    </div>
-@endif
-
 @if(session('error'))
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
         <div class="flex">
@@ -88,35 +78,21 @@
                         <p class="mt-1 text-sm text-gray-500">Username harus unik dan minimal 3 karakter</p>
                     </div>
 
-                    <!-- Password -->
+                    <!-- Password (Opsional) -->
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                            Password Baru 
-                            <span class="text-xs text-gray-500">(Kosongkan jika tidak ingin mengubah)</span>
+                            Password <span class="text-gray-500 text-xs">(Kosongkan jika tidak diubah)</span>
                         </label>
                         <input type="password" 
                                id="password"
                                name="password" 
                                autocomplete="new-password"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('password') border-red-500 @enderror"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                placeholder="Masukkan password baru (minimal 3 karakter)">
                         @error('password')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-sm text-gray-500">Password minimal 3 karakter. Kosongkan jika tidak ingin mengubah password</p>
-                    </div>
-                    
-                    <!-- Konfirmasi Password -->
-                    <div>
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">
-                            Konfirmasi Password Baru
-                        </label>
-                        <input type="password" 
-                               id="password_confirmation"
-                               name="password_confirmation" 
-                               autocomplete="new-password"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Konfirmasi password baru">
+                        <p class="mt-1 text-sm text-gray-500">Kosongkan jika tidak ingin mengubah password</p>
                     </div>
                 </div>
 
@@ -129,60 +105,43 @@
                         </label>
                         
                         @php
-                            $currentUserLevel = $user->level;
-                            $adminExists = \App\Models\User::where('level', 'admin')->where('id', '!=', $user->id)->exists();
-                            $kadisExists = \App\Models\User::where('level', 'kadis')->where('id', '!=', $user->id)->exists();
-                            $selectedLevel = old('level', $user->level);
+                            $adminExists = \App\Models\User::where('level', 'admin')
+                                ->where('id', '!=', $user->id)
+                                ->exists();
+                            $kadisExists = \App\Models\User::where('level', 'kadis')
+                                ->where('id', '!=', $user->id)
+                                ->exists();
                         @endphp
                         
-                        <select id="level" 
-                                name="level" 
-                                required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('level') border-red-500 @enderror">
-                            <option value="">Pilih Level User</option>
-                            
-                            @if($currentUserLevel == 'admin' || !$adminExists)
-                                <option value="admin" {{ $selectedLevel == 'admin' ? 'selected' : '' }}>Admin</option>
-                            @endif
-                            
-                            <option value="pegawai" {{ $selectedLevel == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
-                            
-                            @if($currentUserLevel == 'kadis' || !$kadisExists)
-                                <option value="kadis" {{ $selectedLevel == 'kadis' ? 'selected' : '' }}>Kepala Dinas (Kadis)</option>
-                            @endif
-                        </select>
+                        @if($user->level == 'pegawai' && $adminExists && $kadisExists)
+                            {{-- Jika user adalah pegawai, dan admin & kadis sudah ada --}}
+                            <input type="hidden" name="level" value="pegawai">
+                            <div class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700">
+                                Pegawai (Otomatis - Admin & Kadis sudah ada)
+                            </div>
+                        @else
+                            {{-- Tampilkan dropdown --}}
+                            <select id="level" 
+                                    name="level" 
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 @error('level') border-red-500 @enderror">
+                                <option value="">Pilih Level User</option>
+                                
+                                @if(!$adminExists || $user->level == 'admin')
+                                    <option value="admin" {{ old('level', $user->level) == 'admin' ? 'selected' : '' }}>Admin</option>
+                                @endif
+                                
+                                <option value="pegawai" {{ old('level', $user->level) == 'pegawai' ? 'selected' : '' }}>Pegawai</option>
+                                
+                                @if(!$kadisExists || $user->level == 'kadis')
+                                    <option value="kadis" {{ old('level', $user->level) == 'kadis' ? 'selected' : '' }}>Kepala Dinas (Kadis)</option>
+                                @endif
+                            </select>
+                        @endif
                         
                         @error('level')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        <p class="mt-1 text-sm text-gray-500">
-                            @if($currentUserLevel == 'admin')
-                                <i class="fas fa-info-circle text-blue-500"></i> Anda sedang mengedit user dengan level Admin
-                            @elseif($currentUserLevel == 'kadis')
-                                <i class="fas fa-info-circle text-blue-500"></i> Anda sedang mengedit user dengan level Kadis
-                            @endif
-                        </p>
-                    </div>
-                    
-                    <!-- Informasi Tambahan -->
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Informasi User</h4>
-                        <div class="space-y-2 text-sm">
-                            <p class="text-gray-600">
-                                <i class="fas fa-calendar-alt mr-2 text-gray-400"></i>
-                                Dibuat pada: {{ $user->created_at ? $user->created_at->format('d/m/Y H:i') : '-' }}
-                            </p>
-                            <p class="text-gray-600">
-                                <i class="fas fa-edit mr-2 text-gray-400"></i>
-                                Terakhir diupdate: {{ $user->updated_at ? $user->updated_at->format('d/m/Y H:i') : '-' }}
-                            </p>
-                            @if($user->last_login)
-                                <p class="text-gray-600">
-                                    <i class="fas fa-sign-in-alt mr-2 text-gray-400"></i>
-                                    Login terakhir: {{ $user->last_login->format('d/m/Y H:i') }}
-                                </p>
-                            @endif
-                        </div>
                     </div>
                 </div>
             </div>
@@ -201,16 +160,18 @@
 </div>
 
 <script>
+// Clear password field on page load untuk mencegah cache
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-focus ke input username
     document.getElementById('username').focus();
+    
+    // Clear password field
+    document.getElementById('password').value = '';
 });
 
 // Validasi form sebelum submit
 document.getElementById('formUser').addEventListener('submit', function(e) {
     const username = document.getElementById('username');
-    const password = document.getElementById('password');
-    const passwordConfirmation = document.getElementById('password_confirmation');
     
     // Validasi Username
     if (!username.value.trim()) {
@@ -227,44 +188,7 @@ document.getElementById('formUser').addEventListener('submit', function(e) {
         return false;
     }
     
-    // Validasi Password (jika diisi)
-    if (password.value) {
-        if (password.value.length < 3) {
-            alert('Password minimal 3 karakter!');
-            e.preventDefault();
-            password.focus();
-            return false;
-        }
-        
-        if (password.value !== passwordConfirmation.value) {
-            alert('Password dan konfirmasi password tidak cocok!');
-            e.preventDefault();
-            passwordConfirmation.focus();
-            return false;
-        }
-    }
-    
     return true;
 });
-
-// Optional: Tambahkan konfirmasi sebelum menyimpan perubahan
-document.querySelector('form').addEventListener('submit', function(e) {
-    const hasChanges = checkForChanges();
-    if (hasChanges) {
-        if (!confirm('Apakah Anda yakin ingin menyimpan perubahan?')) {
-            e.preventDefault();
-        }
-    }
-});
-
-function checkForChanges() {
-    const username = document.getElementById('username').value;
-    const originalUsername = "{{ addslashes($user->username) }}";
-    const level = document.getElementById('level').value;
-    const originalLevel = "{{ $user->level }}";
-    const password = document.getElementById('password').value;
-    
-    return (username !== originalUsername || level !== originalLevel || password !== '');
-}
 </script>
 @endsection

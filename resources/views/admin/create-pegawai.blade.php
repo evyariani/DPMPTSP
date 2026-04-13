@@ -7,15 +7,12 @@
     <div class="flex justify-between items-center">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Tambah Pegawai Baru</h2>
-            <p class="text-gray-500">Isi formulir untuk menambahkan data pegawai baru</p>
+            <p class="text-gray-500">Isi formulir untuk menambahkan data pegawai</p>
         </div>
-        {{-- <a href="/pegawai" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
-            <i class="fas fa-arrow-left mr-2"></i> Kembali
-        </a> --}}
     </div>
 </div>
 
-<!-- Notifikasi -->
+<!-- Notifikasi Error -->
 @if(session('error'))
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
         <div class="flex">
@@ -50,13 +47,13 @@
 <!-- Form Tambah Pegawai -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="p-6">
-        <form action="/pegawai" method="POST" id="formPegawai">
+        <form action="{{ route('pegawai.store') }}" method="POST" id="formPegawai">
             @csrf
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Kolom 1 -->
-                <div class="space-y-6">
-                    <!-- Nama -->
+                <!-- Kolom Kiri -->
+                <div class="space-y-4">
+                    <!-- Nama Lengkap -->
                     <div>
                         <label for="nama" class="block text-sm font-medium text-gray-700 mb-2">
                             Nama Lengkap <span class="text-red-500">*</span>
@@ -67,90 +64,107 @@
                                value="{{ old('nama') }}"
                                required
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Masukkan nama lengkap">
-                        <p class="mt-1 text-sm text-gray-500">Nama lengkap tanpa gelar</p>
+                               placeholder="Contoh: Drs. Ahmad Fauzi, M.Si">
+                        <p class="mt-1 text-sm text-gray-500">Masukkan nama lengkap dengan gelar (jika ada)</p>
                     </div>
 
                     <!-- NIP -->
                     <div>
                         <label for="nip" class="block text-sm font-medium text-gray-700 mb-2">
-                            NIP
+                            NIP <span class="text-gray-400 text-xs">(opsional)</span>
                         </label>
                         <input type="text" 
                                id="nip" 
                                name="nip" 
                                value="{{ old('nip') }}"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Masukkan NIP (18 digit)">
-                        <p class="mt-1 text-sm text-gray-500">Format: 8 digit, 6 digit, 1 digit, 3 digit</p>
+                               placeholder="Contoh: 197501012005011002"
+                               maxlength="25">
+                        <p class="mt-1 text-sm text-gray-500">Nomor Induk Pegawai (18 digit)</p>
                     </div>
 
                     <!-- Pangkat -->
                     <div>
                         <label for="pangkat" class="block text-sm font-medium text-gray-700 mb-2">
-                            Pangkat
+                            Pangkat <span class="text-gray-400 text-xs">(opsional)</span>
                         </label>
                         <input type="text" 
                                id="pangkat" 
                                name="pangkat" 
                                value="{{ old('pangkat') }}"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Contoh: Penata Tk. I">
+                               placeholder="Contoh: Pembina Utama Muda">
+                        <p class="mt-1 text-sm text-gray-500">Pangkat/golongan ruang pegawai</p>
                     </div>
 
                     <!-- Golongan -->
                     <div>
                         <label for="gol" class="block text-sm font-medium text-gray-700 mb-2">
-                            Golongan
+                            Golongan <span class="text-gray-400 text-xs">(opsional)</span>
                         </label>
                         <input type="text" 
                                id="gol" 
                                name="gol" 
                                value="{{ old('gol') }}"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Contoh: III/d">
+                               placeholder="Contoh: IV/d">
+                        <p class="mt-1 text-sm text-gray-500">Golongan ruang (contoh: III/a, IV/b, dll)</p>
                     </div>
                 </div>
 
-                <!-- Kolom 2 -->
-                <div class="space-y-6">
-                    <!-- Jabatan -->
+                <!-- Kolom Kanan -->
+                <div class="space-y-4">
+                    <!-- Jabatan dengan Dropdown + Lainnya -->
                     <div>
                         <label for="jabatan" class="block text-sm font-medium text-gray-700 mb-2">
-                            Jabatan
+                            Jabatan <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="jabatan" 
-                               name="jabatan" 
-                               value="{{ old('jabatan') }}"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Masukkan jabatan">
+                        <select id="jabatan" 
+                                name="jabatan" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                            <option value="">Pilih Jabatan</option>
+                            @foreach($jabatanList as $jabatan)
+                                <option value="{{ $jabatan }}" {{ old('jabatan') == $jabatan ? 'selected' : '' }}>
+                                    {{ $jabatan }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">Pilih jabatan, jika tidak ada pilih "Lainnya"</p>
                     </div>
 
-                    <!-- Tunjangan Jalan -->
+                    <!-- Input Jabatan Lainnya (hidden by default) -->
+                    <div id="jabatan_lainnya_container" class="hidden">
+                        <label for="jabatan_lainnya" class="block text-sm font-medium text-gray-700 mb-2">
+                            Jabatan Lainnya <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="jabatan_lainnya" 
+                               name="jabatan_lainnya" 
+                               value="{{ old('jabatan_lainnya') }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Masukkan jabatan">
+                        <p class="mt-1 text-sm text-gray-500">Masukkan jabatan yang tidak ada dalam daftar</p>
+                    </div>
+
+                    <!-- TK Jalan -->
                     <div>
                         <label for="tk_jalan" class="block text-sm font-medium text-gray-700 mb-2">
-                            Tunjangan Jalan
+                            Tunjangan Kinerja Jalan <span class="text-gray-400 text-xs">(opsional)</span>
                         </label>
-                        <div class="relative">
-                            <input type="text" 
-                                   id="tk_jalan" 
-                                   name="tk_jalan" 
-                                   value="{{ old('tk_jalan') }}"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                   placeholder="Contoh: A, B, C, TK I, atau 100000">
-                        </div>
-                        <div class="mt-1 text-sm text-gray-500">
-                            <p class="mb-1">• Isi dengan huruf (A, B, C, TK I) atau angka (100000, 250000)</p>
-                            <p>• Huruf akan otomatis diubah ke UPPERCASE</p>
-                        </div>
+                        <input type="text" 
+                               id="tk_jalan" 
+                               name="tk_jalan" 
+                               value="{{ old('tk_jalan') }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Contoh: A, B, C, D, E, atau F">
+                        <p class="mt-1 text-sm text-gray-500">Kelas jabatan untuk tunjangan kinerja (A/B/C/D/E/F)</p>
                     </div>
                 </div>
             </div>
 
             <!-- Tombol Aksi -->
-            <div class="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-3">
-                <a href="/pegawai" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg flex items-center transition duration-200">
+            <div class="pt-6 mt-6 border-t border-gray-200 flex justify-end space-x-3">
+                <a href="{{ route('pegawai.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg flex items-center transition duration-200">
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
@@ -164,118 +178,47 @@
 
 @section('scripts')
 <script>
-// Format input NIP
-document.getElementById('nip').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 0) {
-        value = value.replace(/(\d{8})(\d{6})(\d{1})(\d{3})/, '$1 $2 $3 $4');
-    }
-    e.target.value = value;
-});
-
-// Handle input tunjangan jalan
-function handleTkJalanInput(input) {
-    let value = input.value;
+document.addEventListener('DOMContentLoaded', function() {
+    const jabatanSelect = document.getElementById('jabatan');
+    const jabatanLainnyaContainer = document.getElementById('jabatan_lainnya_container');
+    const jabatanLainnyaInput = document.getElementById('jabatan_lainnya');
     
-    // Jika input dimulai dengan angka, format sebagai mata uang
-    if (/^\d/.test(value)) {
-        // Hapus semua karakter selain angka
-        value = value.replace(/[^\d]/g, '');
-        
-        // Format dengan titik sebagai pemisah ribuan jika lebih dari 0
-        if (value.length > 0) {
-            value = parseInt(value, 10).toLocaleString('id-ID');
-        }
-    } else {
-        // Jika huruf, uppercase otomatis
-        value = value.toUpperCase();
-    }
-    
-    input.value = value;
-}
-
-// Auto uppercase untuk tk_jalan jika blur dan berisi huruf
-document.getElementById('tk_jalan').addEventListener('blur', function(e) {
-    let value = e.target.value.trim();
-    if (value && !/^\d/.test(value.replace(/\./g, ''))) {
-        e.target.value = value.toUpperCase();
-    }
-});
-
-// Auto format saat input untuk tk_jalan (angka)
-document.getElementById('tk_jalan').addEventListener('input', function(e) {
-    let value = e.target.value;
-    
-    // Jika input dimulai dengan angka, format sebagai mata uang
-    if (/^\d/.test(value)) {
-        // Hapus semua karakter selain angka
-        value = value.replace(/[^\d]/g, '');
-        
-        // Format dengan titik sebagai pemisah ribuan jika lebih dari 0
-        if (value.length > 0) {
-            value = parseInt(value, 10).toLocaleString('id-ID');
-        }
-    }
-    
-    e.target.value = value;
-});
-
-// Validasi sebelum submit
-document.getElementById('formPegawai').addEventListener('submit', function(e) {
-    // Untuk tk_jalan yang angka, hapus format titik sebelum submit
-    const tkJalanInput = document.getElementById('tk_jalan');
-    if (tkJalanInput.value) {
-        // Cek apakah value berupa angka (setelah hapus titik)
-        const numericValue = tkJalanInput.value.replace(/\./g, '');
-        if (/^\d+$/.test(numericValue)) {
-            // Jika angka, hapus titik dan submit angka saja
-            tkJalanInput.value = numericValue;
+    // Fungsi untuk toggle input jabatan lainnya
+    function toggleJabatanLainnya() {
+        if (jabatanSelect.value === 'Lainnya') {
+            jabatanLainnyaContainer.classList.remove('hidden');
+            jabatanLainnyaInput.setAttribute('required', 'required');
+            jabatanLainnyaInput.focus();
         } else {
-            // Jika huruf, uppercase dan trim
-            tkJalanInput.value = tkJalanInput.value.trim().toUpperCase();
+            jabatanLainnyaContainer.classList.add('hidden');
+            jabatanLainnyaInput.removeAttribute('required');
+            jabatanLainnyaInput.value = '';
         }
     }
     
-    // Validasi NIP jika diisi harus 18 digit
-    const nipInput = document.getElementById('nip');
-    if (nipInput.value) {
-        const nipDigits = nipInput.value.replace(/\s/g, '').replace(/\D/g, '');
-        if (nipDigits.length !== 18) {
-            alert('NIP harus 18 digit angka');
+    // Event listener untuk perubahan dropdown
+    jabatanSelect.addEventListener('change', toggleJabatanLainnya);
+    
+    // Cek saat halaman dimuat (untuk old value)
+    toggleJabatanLainnya();
+    
+    // Validasi form sebelum submit
+    document.getElementById('formPegawai').addEventListener('submit', function(e) {
+        if (jabatanSelect.value === 'Lainnya' && !jabatanLainnyaInput.value.trim()) {
+            alert('Jabatan lainnya harus diisi');
             e.preventDefault();
-            nipInput.focus();
+            jabatanLainnyaInput.focus();
             return false;
         }
-    }
-    
-    // Validasi Nama wajib diisi
-    const namaInput = document.getElementById('nama');
-    if (!namaInput.value.trim()) {
-        alert('Nama lengkap wajib diisi');
-        e.preventDefault();
-        namaInput.focus();
-        return false;
-    }
-    
-    return true;
-});
-
-// Auto-focus ke input nama saat halaman dimuat
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('nama').focus();
-    
-    // Set placeholder contoh untuk tk_jalan
-    const tkJalanInput = document.getElementById('tk_jalan');
-    tkJalanInput.addEventListener('focus', function() {
-        if (!this.value) {
-            this.placeholder = 'Contoh: A, B, C, TK I, atau 100000';
+        
+        if (!jabatanSelect.value) {
+            alert('Jabatan harus dipilih');
+            e.preventDefault();
+            jabatanSelect.focus();
+            return false;
         }
-    });
-    
-    tkJalanInput.addEventListener('blur', function() {
-        if (!this.value) {
-            this.placeholder = 'Contoh: A, B, C, TK I, atau 100000';
-        }
+        
+        return true;
     });
 });
 </script>
