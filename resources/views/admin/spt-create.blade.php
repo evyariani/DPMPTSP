@@ -57,19 +57,45 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Kolom Kiri -->
                 <div class="space-y-6">
-                    <!-- Nomor Surat -->
+                    <!-- Nomor Surat - INPUT NOMOR URUT SAJA -->
                     <div>
-                        <label for="nomor_surat" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
                             Nomor Surat <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="nomor_surat" 
-                               name="nomor_surat" 
-                               value="{{ old('nomor_surat') }}"
-                               required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Contoh: SPT-001/2024">
-                        <p class="mt-1 text-sm text-gray-500">Masukkan nomor surat dengan format yang sesuai</p>
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-1">
+                                    <input type="number" 
+                                           name="nomor_urut" 
+                                           id="nomor_urut"
+                                           value="{{ old('nomor_urut') }}"
+                                           min="1" 
+                                           max="999"
+                                           required
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                           placeholder="Masukkan nomor urut (contoh: 1, 2, 3, ...)">
+                                </div>
+                                <button type="button"
+                                        id="btn-auto-nomor"
+                                        onclick="getNextNomorUrut()"
+                                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    <i class="fas fa-magic mr-1"></i> Auto
+                                </button>
+                            </div>
+                            
+                            <!-- Preview Nomor Surat -->
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <div class="flex items-start space-x-2">
+                                    <i class="fas fa-file-alt text-blue-500 mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <p class="text-sm text-gray-600 mb-1">Preview format lengkap:</p>
+                                        <p class="font-mono text-md font-semibold text-blue-700 break-all" id="preview-nomor-surat">
+                                            800.1.11.1/<span id="preview-nomor-urut" class="text-gray-400">___</span>/DPMPTSP/<span id="preview-tahun">{{ date('Y') }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tanggal -->
@@ -83,7 +109,7 @@
                                value="{{ old('tanggal', date('Y-m-d')) }}"
                                required
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
-                        <p class="mt-1 text-sm text-gray-500">Tanggal pembuatan surat</p>
+                        <p class="mt-1 text-sm text-gray-500">Tanggal pembuatan surat (tahun akan digunakan untuk format nomor surat)</p>
                     </div>
 
                     <!-- Lokasi - DEFAULT PELAIHARI DAN DISABLE -->
@@ -144,7 +170,7 @@
                                    value="{{ $value }}"
                                    required
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                   placeholder="Contoh: Undangan Rapat Nomor ...">
+                                   placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
                         </div>
                         <button type="button" 
                                 class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
@@ -159,7 +185,7 @@
                 </button>
             </div>
 
-            <!-- PEGAWAI YANG DITUGASKAN (Dynamic Fields seperti Dasar) -->
+            <!-- PEGAWAI YANG DITUGASKAN (Dynamic Fields) -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     Pegawai yang Ditugaskan <span class="text-red-500">*</span>
@@ -232,15 +258,104 @@
 
 @section('scripts')
 <script>
+// ========== FUNGSI PREVIEW NOMOR SURAT ==========
+function updatePreviewNomorSurat() {
+    const nomorUrut = document.getElementById('nomor_urut').value;
+    const tanggalInput = document.getElementById('tanggal');
+    let tahun = new Date().getFullYear();
+    
+    if (tanggalInput && tanggalInput.value) {
+        tahun = new Date(tanggalInput.value).getFullYear();
+    }
+    
+    const previewNomor = document.getElementById('preview-nomor-urut');
+    const previewTahun = document.getElementById('preview-tahun');
+    
+    if (nomorUrut && nomorUrut !== '') {
+        previewNomor.textContent = String(nomorUrut).padStart(3, '0');
+        previewNomor.className = 'font-bold text-blue-700';
+    } else {
+        previewNomor.textContent = '___';
+        previewNomor.className = 'text-gray-400';
+    }
+    
+    previewTahun.textContent = tahun;
+}
+
+// ========== FUNGSI GET NOMOR URUT OTOMATIS ==========
+function getNextNomorUrut() {
+    const btn = document.getElementById('btn-auto-nomor');
+    const originalHtml = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...';
+    btn.disabled = true;
+    
+    // Ambil tahun dari input tanggal atau gunakan tahun saat ini
+    let tahun = new Date().getFullYear();
+    const tanggalInput = document.getElementById('tanggal');
+    if (tanggalInput && tanggalInput.value) {
+        tahun = new Date(tanggalInput.value).getFullYear();
+    }
+    
+    fetch(`{{ route('spt.api-get-next-nomor-urut') }}?tahun=${tahun}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('nomor_urut').value = data.nomor_urut;
+                updatePreviewNomorSurat();
+                showNotification('success', `Nomor urut otomatis: ${data.nomor_urut}`);
+            } else {
+                showNotification('error', 'Gagal mendapatkan nomor urut otomatis');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Terjadi kesalahan saat mengambil nomor urut');
+        })
+        .finally(() => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+}
+
+// ========== NOTIFIKASI SEDERHANA ==========
+function showNotification(type, message) {
+    // Buat elemen notifikasi
+    const notification = document.createElement('div');
+    notification.className = `fixed bottom-6 right-6 z-50 bg-${type === 'success' ? 'green' : 'red'}-500 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-y-0 opacity-100`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Hapus notifikasi setelah 3 detik
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
 // ========== DASAR DYNAMIC FIELDS ==========
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-focus ke input nomor surat
-    document.getElementById('nomor_surat').focus();
+    // Focus ke input nomor urut
+    document.getElementById('nomor_urut').focus();
     
     // Setup dasar fields
     updateDasarButtons();
     setupPegawaiFields();
     updatePegawaiPreview();
+    updatePreviewNomorSurat();
+    
+    // Event listener untuk update preview saat nomor urut berubah
+    document.getElementById('nomor_urut').addEventListener('input', updatePreviewNomorSurat);
+    document.getElementById('tanggal').addEventListener('change', updatePreviewNomorSurat);
     
     // Tambah dasar baru
     document.getElementById('tambah-dasar').addEventListener('click', function() {
@@ -253,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function() {
                        name="dasar[]" 
                        required
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                       placeholder="Contoh: Undangan Rapat Nomor ...">
+                       placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
             </div>
             <button type="button" 
                     class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
@@ -428,7 +543,7 @@ function updatePegawaiPreview() {
             badge.title = `${nip} - ${jabatan}`;
             badge.innerHTML = `
                 <i class="fas fa-user mr-1"></i>
-                ${nama}
+                ${nama.length > 20 ? nama.substring(0, 20) + '...' : nama}
             `;
             preview.appendChild(badge);
         }
@@ -438,7 +553,7 @@ function updatePegawaiPreview() {
     if (selectedData.length === 0) {
         const emptyMsg = document.createElement('span');
         emptyMsg.className = 'text-gray-400 text-sm';
-        emptyMsg.textContent = 'Belum ada pegawai dipilih';
+        emptyMsg.innerHTML = '<i class="fas fa-user-slash mr-1"></i> Belum ada pegawai dipilih';
         preview.appendChild(emptyMsg);
     }
 }
@@ -473,12 +588,12 @@ function disableSelectedPegawaiOptions() {
 
 // ========== VALIDASI FORM ==========
 document.getElementById('formSPT').addEventListener('submit', function(e) {
-    // Validasi Nomor Surat
-    const nomorSurat = document.getElementById('nomor_surat');
-    if (!nomorSurat.value.trim()) {
-        alert('Nomor Surat wajib diisi');
+    // Validasi Nomor Urut
+    const nomorUrut = document.getElementById('nomor_urut');
+    if (!nomorUrut.value || nomorUrut.value < 1 || nomorUrut.value > 999) {
+        alert('Nomor urut surat wajib diisi dengan angka 1-999');
         e.preventDefault();
-        nomorSurat.focus();
+        nomorUrut.focus();
         return false;
     }
     
@@ -538,17 +653,6 @@ document.getElementById('formSPT').addEventListener('submit', function(e) {
     }
     
     return true;
-});
-
-// ========== AUTO FORMAT NOMOR SURAT ==========
-document.getElementById('nomor_surat').addEventListener('input', function(e) {
-    this.value = this.value.replace(/\s+/g, ' ').trim();
-});
-
-// ========== AUTO UPDATE PREVIEW SAAT LOAD ==========
-document.addEventListener('DOMContentLoaded', function() {
-    // Update preview pegawai
-    updatePegawaiPreview();
 });
 </script>
 @endsection

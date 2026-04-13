@@ -143,17 +143,47 @@
 .pegawai-count-badge {
     @apply ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded;
 }
+
+/* Loading spinner untuk export */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-loading {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.btn-loading i {
+    animation: spin 1s linear infinite;
+}
 </style>
 
 <div class="mb-6">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center flex-wrap gap-4">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Surat Perintah Tugas (SPT)</h2>
             <p class="text-gray-500">Kelola data Surat Perintah Tugas</p>
         </div>
-        <a href="{{ route('spt.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
-            <i class="fas fa-plus mr-2"></i> Tambah SPT
-        </a>
+        <div class="flex space-x-2">
+            <!-- SATU TOMBOL EXPORT - akan mengambil semua filter yang aktif -->
+            <button type="button" 
+                    onclick="exportData()"
+                    id="btn-export"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
+            
+            <!-- Tombol Tambah SPT -->
+            <a href="{{ route('spt.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+                <i class="fas fa-plus mr-2"></i> Tambah SPT
+            </a>
+        </div>
     </div>
 </div>
 
@@ -283,54 +313,56 @@
 
 <!-- Filter dan Search -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
-    <form method="GET" action="{{ route('spt.index') }}" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-        <div class="flex-1">
-            <input type="text" name="search" placeholder="Cari nomor surat, tujuan, lokasi, atau nama pegawai..." 
-                   value="{{ request('search') }}"
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-        </div>
-        <div class="flex flex-wrap gap-2">
-            <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Bulan</option>
-                <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
-                <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
-                <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
-                <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
-                <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
-                <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
-                <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
-                <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
-                <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
-                <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
-                <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
-                <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
-            </select>
-            
-            <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Tahun</option>
-                @for($year = date('Y'); $year >= date('Y')-5; $year--)
-                    <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                @endfor
-            </select>
-            
-            <select name="penanda_tangan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Penanda Tangan</option>
-                @foreach($pegawais ?? [] as $pegawai)
-                    <option value="{{ $pegawai->id_pegawai }}" {{ request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : '' }}>
-                        {{ $pegawai->nama }}
-                    </option>
-                @endforeach
-            </select>
-            
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-search mr-2"></i> Cari
-            </button>
-            
-            @if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan'))
-                <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
-                    <i class="fas fa-redo mr-2"></i> Reset
-                </a>
-            @endif
+    <form method="GET" action="{{ route('spt.index') }}" id="filter-form">
+        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div class="flex-1">
+                <input type="text" name="search" placeholder="Cari nomor surat, tujuan, lokasi, atau nama pegawai..." 
+                       value="{{ request('search') }}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Semua Bulan</option>
+                    <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
+                    <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
+                    <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
+                    <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
+                    <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
+                    <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
+                    <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
+                    <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
+                    <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
+                    <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                    <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                    <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                </select>
+                
+                <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Semua Tahun</option>
+                    @for($year = date('Y'); $year >= date('Y')-5; $year--)
+                        <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                    @endfor
+                </select>
+                
+                <select name="penanda_tangan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Semua Penanda Tangan</option>
+                    @foreach($pegawais ?? [] as $pegawai)
+                        <option value="{{ $pegawai->id_pegawai }}" {{ request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : '' }}>
+                            {{ $pegawai->nama }}
+                        </option>
+                    @endforeach
+                </select>
+                
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                    <i class="fas fa-search mr-2"></i> Cari
+                </button>
+                
+                @if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan'))
+                    <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+                        <i class="fas fa-redo mr-2"></i> Reset
+                    </a>
+                @endif
+            </div>
         </div>
     </form>
 </div>
@@ -435,7 +467,6 @@
                                     </div>
                                 @endforeach
                             </div>
-                            {{-- <span class="pegawai-count-badge">{{ count($pegawaiList) }} orang</span> --}}
                         @else
                             <span class="text-gray-400 text-sm">-</span>
                         @endif
@@ -505,15 +536,6 @@
                     <!-- Kolom Aksi -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex flex-col space-y-2">
-                            {{-- <div class="flex space-x-2">
-                                @if(isset($spt->id_spt))
-                                <a href="{{ route('spt.show', $spt->id_spt) }}" 
-                                   class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
-                                   title="Detail SPT">
-                                    <i class="fas fa-eye mr-1"></i> Detail
-                                </a>
-                                @endif
-                            </div> --}}
                             <div class="flex space-x-2">
                                 @if(isset($spt->id_spt))
                                 <a href="{{ route('spt.edit', $spt->id_spt) }}" 
@@ -522,22 +544,22 @@
                                     <i class="fas fa-edit mr-1"></i> Edit
                                 </a>
                                 
-                                <!-- Tombol Print -->
-                               <!-- Di view spt/index.blade.php, bagian tombol aksi -->
-<a href="{{ route('spt.print', $spt->id_spt) }}" 
-   target="_blank"
-   class="text-purple-600 hover:text-purple-900 px-3 py-1 rounded hover:bg-purple-50 transition duration-150"
-   title="Download PDF SPT">
-    <i class="fas fa-download mr-1"></i> PDF
-</a>
+                                <!-- Tombol Print PDF -->
+                                <a href="{{ route('spt.print', $spt->id_spt) }}" 
+                                   target="_blank"
+                                   class="text-purple-600 hover:text-purple-900 px-3 py-1 rounded hover:bg-purple-50 transition duration-150"
+                                   title="Download PDF SPT">
+                                    <i class="fas fa-download mr-1"></i> PDF
+                                </a>
 
-<!-- Tambahkan tombol preview jika diperlukan -->
-<a href="{{ route('spt.preview-pdf', $spt->id_spt) }}" 
-   target="_blank"
-   class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
-   title="Preview PDF SPT">
-    <i class="fas fa-eye mr-1"></i> Preview
-</a>
+                                <!-- Tombol Preview PDF -->
+                                <a href="{{ route('spt.preview-pdf', $spt->id_spt) }}" 
+                                   target="_blank"
+                                   class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
+                                   title="Preview PDF SPT">
+                                    <i class="fas fa-eye mr-1"></i> Preview
+                                </a>
+                                
                                 <!-- Tombol Hapus dengan Modal -->
                                 <button type="button" 
                                         onclick="showDeleteConfirmation(
@@ -550,8 +572,9 @@
                                     <i class="fas fa-trash mr-1"></i> Hapus
                                 </button>
                                 @else
-                                <span class="text-gray-400 px-3 py-1">Detail</span>
                                 <span class="text-gray-400 px-3 py-1">Edit</span>
+                                <span class="text-gray-400 px-3 py-1">PDF</span>
+                                <span class="text-gray-400 px-3 py-1">Preview</span>
                                 <span class="text-gray-400 px-3 py-1">Hapus</span>
                                 @endif
                             </div>
@@ -586,7 +609,7 @@
     }
 @endphp
 
-@if($showPagination)
+@if($showPagination && $spts->count() > 0)
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
@@ -662,6 +685,39 @@
 
 @section('scripts')
 <script>
+// ========== EXPORT FUNCTION (SATU UNTUK SEMUA FILTER) ==========
+function exportData() {
+    const btn = document.getElementById('btn-export');
+    const originalHtml = btn.innerHTML;
+    
+    // Show loading state
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    
+    // Get all filter values from the form
+    const form = document.getElementById('filter-form');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (value && value !== '') {
+            params.append(key, value);
+        }
+    }
+    
+    // Redirect to export URL with filters (gunakan route spt.export)
+    const exportUrl = "{{ route('spt.export') }}?" + params.toString();
+    window.location.href = exportUrl;
+    
+    // Reset button after 2 seconds
+    setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+    }, 2000);
+}
+
 // ========== NOTIFICATION FUNCTIONS ==========
 function hideNotification(type) {
     const notification = document.getElementById(`${type}-notification`);
@@ -670,6 +726,7 @@ function hideNotification(type) {
         notification.classList.add('animate-slide-out-bottom');
         setTimeout(() => {
             notification.style.display = 'none';
+            notification.classList.add('hidden');
         }, 300);
     }
 }

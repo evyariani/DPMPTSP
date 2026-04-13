@@ -58,19 +58,45 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Kolom Kiri -->
                 <div class="space-y-6">
-                    <!-- Nomor Surat -->
+                    <!-- Nomor Surat - INPUT NOMOR URUT SAJA -->
                     <div>
-                        <label for="nomor_surat" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
                             Nomor Surat <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="nomor_surat" 
-                               name="nomor_surat" 
-                               value="{{ old('nomor_surat', $spt->nomor_surat) }}"
-                               required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Contoh: SPT-001/2024">
-                        <p class="mt-1 text-sm text-gray-500">Masukkan nomor surat dengan format yang sesuai</p>
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="flex-1">
+                                    <input type="number" 
+                                           name="nomor_urut" 
+                                           id="nomor_urut"
+                                           value="{{ old('nomor_urut', $nomorUrut ?? '') }}"
+                                           min="1" 
+                                           max="999"
+                                           required
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                           placeholder="Masukkan nomor urut (contoh: 1, 2, 3, ...)">
+                                </div>
+                                <button type="button"
+                                        id="btn-auto-nomor"
+                                        onclick="getNextNomorUrut()"
+                                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                                    <i class="fas fa-magic mr-1"></i> Auto
+                                </button>
+                            </div>
+                            
+                            <!-- Preview Nomor Surat -->
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <div class="flex items-start space-x-2">
+                                    <i class="fas fa-file-alt text-blue-500 mt-0.5"></i>
+                                    <div class="flex-1">
+                                        <p class="text-sm text-gray-600 mb-1">Preview format lengkap:</p>
+                                        <p class="font-mono text-md font-semibold text-blue-700 break-all" id="preview-nomor-surat">
+                                            800.1.11.1/<span id="preview-nomor-urut" class="text-gray-400">___</span>/DPMPTSP/<span id="preview-tahun">{{ date('Y', strtotime($spt->tanggal)) }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tanggal -->
@@ -84,7 +110,7 @@
                                value="{{ old('tanggal', $spt->tanggal->format('Y-m-d')) }}"
                                required
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
-                        <p class="mt-1 text-sm text-gray-500">Tanggal pembuatan surat</p>
+                        <p class="mt-1 text-sm text-gray-500">Tanggal pembuatan surat (tahun akan digunakan untuk format nomor surat)</p>
                     </div>
 
                     <!-- Lokasi - DEFAULT PELAIHARI DAN DISABLE -->
@@ -136,7 +162,10 @@
                 </label>
                 <div id="dasar-container" class="space-y-3">
                     @php
-                        $dasarList = old('dasar', $spt->dasar ?? ['']);
+                        $dasarList = old('dasar', is_array($spt->dasar) ? $spt->dasar : (json_decode($spt->dasar ?? '[]', true) ?: ['']));
+                        if (!is_array($dasarList)) {
+                            $dasarList = ['']; // Fallback jika bukan array
+                        }
                     @endphp
                     @foreach($dasarList as $index => $value)
                     <div class="flex items-start space-x-2 dasar-item">
@@ -146,7 +175,7 @@
                                    value="{{ $value }}"
                                    required
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                   placeholder="Contoh: Undangan Rapat Nomor ...">
+                                   placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
                         </div>
                         <button type="button" 
                                 class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
@@ -161,14 +190,17 @@
                 </button>
             </div>
 
-            <!-- PEGAWAI YANG DITUGASKAN (Dynamic Fields seperti Dasar) -->
+            <!-- PEGAWAI YANG DITUGASKAN (Dynamic Fields) -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     Pegawai yang Ditugaskan <span class="text-red-500">*</span>
                 </label>
                 <div id="pegawai-container" class="space-y-3">
                     @php
-                        $pegawaiList = old('pegawai', $spt->pegawai ?? ['']);
+                        $pegawaiList = old('pegawai', is_array($spt->pegawai) ? $spt->pegawai : (json_decode($spt->pegawai ?? '[]', true) ?: ['']));
+                        if (!is_array($pegawaiList)) {
+                            $pegawaiList = ['']; // Fallback jika bukan array
+                        }
                     @endphp
                     @foreach($pegawaiList as $index => $value)
                     <div class="flex items-start space-x-2 pegawai-item">
@@ -234,15 +266,104 @@
 
 @section('scripts')
 <script>
+// ========== FUNGSI PREVIEW NOMOR SURAT ==========
+function updatePreviewNomorSurat() {
+    const nomorUrut = document.getElementById('nomor_urut').value;
+    const tanggalInput = document.getElementById('tanggal');
+    let tahun = new Date().getFullYear();
+    
+    if (tanggalInput && tanggalInput.value) {
+        tahun = new Date(tanggalInput.value).getFullYear();
+    }
+    
+    const previewNomor = document.getElementById('preview-nomor-urut');
+    const previewTahun = document.getElementById('preview-tahun');
+    
+    if (nomorUrut && nomorUrut !== '') {
+        previewNomor.textContent = String(nomorUrut).padStart(3, '0');
+        previewNomor.className = 'font-bold text-blue-700';
+    } else {
+        previewNomor.textContent = '___';
+        previewNomor.className = 'text-gray-400';
+    }
+    
+    previewTahun.textContent = tahun;
+}
+
+// ========== FUNGSI GET NOMOR URUT OTOMATIS ==========
+function getNextNomorUrut() {
+    const btn = document.getElementById('btn-auto-nomor');
+    const originalHtml = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...';
+    btn.disabled = true;
+    
+    // Ambil tahun dari input tanggal atau gunakan tahun saat ini
+    let tahun = new Date().getFullYear();
+    const tanggalInput = document.getElementById('tanggal');
+    if (tanggalInput && tanggalInput.value) {
+        tahun = new Date(tanggalInput.value).getFullYear();
+    }
+    
+    fetch(`{{ route('spt.api-get-next-nomor-urut') }}?tahun=${tahun}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('nomor_urut').value = data.nomor_urut;
+                updatePreviewNomorSurat();
+                showNotification('success', `Nomor urut otomatis: ${data.nomor_urut}`);
+            } else {
+                showNotification('error', 'Gagal mendapatkan nomor urut otomatis');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'Terjadi kesalahan saat mengambil nomor urut');
+        })
+        .finally(() => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+}
+
+// ========== NOTIFIKASI SEDERHANA ==========
+function showNotification(type, message) {
+    // Buat elemen notifikasi
+    const notification = document.createElement('div');
+    notification.className = `fixed bottom-6 right-6 z-50 bg-${type === 'success' ? 'green' : 'red'}-500 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-y-0 opacity-100`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Hapus notifikasi setelah 3 detik
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
 // ========== DASAR DYNAMIC FIELDS ==========
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-focus ke input nomor surat
-    document.getElementById('nomor_surat').focus();
+    // Focus ke input nomor urut
+    document.getElementById('nomor_urut').focus();
     
     // Setup dasar fields
     updateDasarButtons();
     setupPegawaiFields();
     updatePegawaiPreview();
+    updatePreviewNomorSurat();
+    
+    // Event listener untuk update preview saat nomor urut berubah
+    document.getElementById('nomor_urut').addEventListener('input', updatePreviewNomorSurat);
+    document.getElementById('tanggal').addEventListener('change', updatePreviewNomorSurat);
     
     // Tambah dasar baru
     document.getElementById('tambah-dasar').addEventListener('click', function() {
@@ -255,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
                        name="dasar[]" 
                        required
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                       placeholder="Contoh: Undangan Rapat Nomor ...">
+                       placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
             </div>
             <button type="button" 
                     class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
@@ -306,58 +427,61 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========== PEGAWAI DYNAMIC FIELDS ==========
 function setupPegawaiFields() {
     // Tambah pegawai baru
-    document.getElementById('tambah-pegawai').addEventListener('click', function() {
-        const container = document.getElementById('pegawai-container');
-        const newItem = document.createElement('div');
-        newItem.className = 'flex items-start space-x-2 pegawai-item';
-        
-        // Clone select options dari item pertama
-        const firstSelect = document.querySelector('.pegawai-select');
-        let options = '';
-        if (firstSelect) {
-            options = firstSelect.innerHTML;
-        } else {
-            // Generate options dari data semuaPegawai
-            options = `<option value="">Pilih Pegawai</option>`;
-            @foreach($semuaPegawai as $pegawai)
-                options += `<option value="{{ $pegawai->id_pegawai }}" 
-                    data-nama="{{ $pegawai->nama }}"
-                    data-nip="{{ $pegawai->nip }}"
-                    data-jabatan="{{ $pegawai->jabatan }}">
-                    {{ $pegawai->nama }} - {{ $pegawai->nip }} ({{ $pegawai->jabatan }})
-                </option>`;
-            @endforeach
-        }
-        
-        newItem.innerHTML = `
-            <div class="flex-grow">
-                <select name="pegawai[]" 
-                        required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pegawai-select">
-                    ${options}
-                </select>
-            </div>
-            <button type="button" 
-                    class="remove-pegawai bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
-                    title="Hapus pegawai">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        container.appendChild(newItem);
-        
-        // Focus ke select baru
-        newItem.querySelector('select').focus();
-        
-        // Update event listener untuk select baru
-        newItem.querySelector('select').addEventListener('change', updatePegawaiPreview);
-        newItem.querySelector('select').addEventListener('change', function() {
+    const tambahBtn = document.getElementById('tambah-pegawai');
+    if (tambahBtn) {
+        tambahBtn.addEventListener('click', function() {
+            const container = document.getElementById('pegawai-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'flex items-start space-x-2 pegawai-item';
+            
+            // Clone select options dari item pertama
+            const firstSelect = document.querySelector('.pegawai-select');
+            let options = '';
+            if (firstSelect) {
+                options = firstSelect.innerHTML;
+            } else {
+                // Generate options dari data semuaPegawai
+                options = `<option value="">Pilih Pegawai</option>`;
+                @foreach($semuaPegawai as $pegawai)
+                    options += `<option value="{{ $pegawai->id_pegawai }}" 
+                        data-nama="{{ $pegawai->nama }}"
+                        data-nip="{{ $pegawai->nip }}"
+                        data-jabatan="{{ $pegawai->jabatan }}">
+                        {{ $pegawai->nama }} - {{ $pegawai->nip }} ({{ $pegawai->jabatan }})
+                    </option>`;
+                @endforeach
+            }
+            
+            newItem.innerHTML = `
+                <div class="flex-grow">
+                    <select name="pegawai[]" 
+                            required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pegawai-select">
+                        ${options}
+                    </select>
+                </div>
+                <button type="button" 
+                        class="remove-pegawai bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
+                        title="Hapus pegawai">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(newItem);
+            
+            // Focus ke select baru
+            newItem.querySelector('select').focus();
+            
+            // Update event listener untuk select baru
+            newItem.querySelector('select').addEventListener('change', updatePegawaiPreview);
+            newItem.querySelector('select').addEventListener('change', function() {
+                disableSelectedPegawaiOptions();
+            });
+            
+            // Update tombol remove
+            updatePegawaiButtons();
             disableSelectedPegawaiOptions();
         });
-        
-        // Update tombol remove
-        updatePegawaiButtons();
-        disableSelectedPegawaiOptions();
-    });
+    }
     
     // Update tombol remove pegawai
     updatePegawaiButtons();
@@ -407,6 +531,8 @@ function removePegawai(e) {
 
 function updatePegawaiPreview() {
     const preview = document.getElementById('selected-pegawai-preview');
+    if (!preview) return;
+    
     const selects = document.querySelectorAll('.pegawai-select');
     const selectedData = [];
     
@@ -430,7 +556,7 @@ function updatePegawaiPreview() {
             badge.title = `${nip} - ${jabatan}`;
             badge.innerHTML = `
                 <i class="fas fa-user mr-1"></i>
-                ${nama}
+                ${nama.length > 20 ? nama.substring(0, 20) + '...' : nama}
             `;
             preview.appendChild(badge);
         }
@@ -440,7 +566,7 @@ function updatePegawaiPreview() {
     if (selectedData.length === 0) {
         const emptyMsg = document.createElement('span');
         emptyMsg.className = 'text-gray-400 text-sm';
-        emptyMsg.textContent = 'Belum ada pegawai dipilih';
+        emptyMsg.innerHTML = '<i class="fas fa-user-slash mr-1"></i> Belum ada pegawai dipilih';
         preview.appendChild(emptyMsg);
     }
 }
@@ -474,83 +600,75 @@ function disableSelectedPegawaiOptions() {
 }
 
 // ========== VALIDASI FORM ==========
-document.getElementById('formSPT').addEventListener('submit', function(e) {
-    // Validasi Nomor Surat
-    const nomorSurat = document.getElementById('nomor_surat');
-    if (!nomorSurat.value.trim()) {
-        alert('Nomor Surat wajib diisi');
-        e.preventDefault();
-        nomorSurat.focus();
-        return false;
-    }
-    
-    // Validasi Dasar (minimal 1)
-    const dasarInputs = document.querySelectorAll('input[name="dasar[]"]');
-    let dasarValid = false;
-    dasarInputs.forEach(input => {
-        if (input.value.trim()) dasarValid = true;
+const form = document.getElementById('formSPT');
+if (form) {
+    form.addEventListener('submit', function(e) {
+        // Validasi Nomor Urut
+        const nomorUrut = document.getElementById('nomor_urut');
+        if (!nomorUrut.value || nomorUrut.value < 1 || nomorUrut.value > 999) {
+            alert('Nomor urut surat wajib diisi dengan angka 1-999');
+            e.preventDefault();
+            nomorUrut.focus();
+            return false;
+        }
+        
+        // Validasi Dasar (minimal 1)
+        const dasarInputs = document.querySelectorAll('input[name="dasar[]"]');
+        let dasarValid = false;
+        dasarInputs.forEach(input => {
+            if (input.value.trim()) dasarValid = true;
+        });
+        
+        if (!dasarValid) {
+            alert('Minimal 1 dasar harus diisi');
+            e.preventDefault();
+            document.querySelector('input[name="dasar[]"]').focus();
+            return false;
+        }
+        
+        // Validasi Pegawai (minimal 1)
+        const pegawaiSelects = document.querySelectorAll('select[name="pegawai[]"]');
+        let pegawaiValid = false;
+        pegawaiSelects.forEach(select => {
+            if (select.value) pegawaiValid = true;
+        });
+        
+        if (!pegawaiValid) {
+            alert('Minimal 1 pegawai harus dipilih');
+            e.preventDefault();
+            document.querySelector('select[name="pegawai[]"]').focus();
+            return false;
+        }
+        
+        // Validasi Tujuan
+        const tujuan = document.getElementById('tujuan');
+        if (!tujuan.value.trim()) {
+            alert('Tujuan wajib diisi');
+            e.preventDefault();
+            tujuan.focus();
+            return false;
+        }
+        
+        // Validasi Tanggal
+        const tanggal = document.getElementById('tanggal');
+        if (!tanggal.value) {
+            alert('Tanggal wajib diisi');
+            e.preventDefault();
+            tanggal.focus();
+            return false;
+        }
+        
+        // Validasi Penanda Tangan
+        const penandaTangan = document.getElementById('penanda_tangan');
+        if (!penandaTangan.value) {
+            alert('Penanda Tangan wajib dipilih');
+            e.preventDefault();
+            penandaTangan.focus();
+            return false;
+        }
+        
+        return true;
     });
-    
-    if (!dasarValid) {
-        alert('Minimal 1 dasar harus diisi');
-        e.preventDefault();
-        document.querySelector('input[name="dasar[]"]').focus();
-        return false;
-    }
-    
-    // Validasi Pegawai (minimal 1)
-    const pegawaiSelects = document.querySelectorAll('select[name="pegawai[]"]');
-    let pegawaiValid = false;
-    pegawaiSelects.forEach(select => {
-        if (select.value) pegawaiValid = true;
-    });
-    
-    if (!pegawaiValid) {
-        alert('Minimal 1 pegawai harus dipilih');
-        e.preventDefault();
-        document.querySelector('select[name="pegawai[]"]').focus();
-        return false;
-    }
-    
-    // Validasi Tujuan
-    const tujuan = document.getElementById('tujuan');
-    if (!tujuan.value.trim()) {
-        alert('Tujuan wajib diisi');
-        e.preventDefault();
-        tujuan.focus();
-        return false;
-    }
-    
-    // Validasi Tanggal
-    const tanggal = document.getElementById('tanggal');
-    if (!tanggal.value) {
-        alert('Tanggal wajib diisi');
-        e.preventDefault();
-        tanggal.focus();
-        return false;
-    }
-    
-    // Validasi Penanda Tangan
-    const penandaTangan = document.getElementById('penanda_tangan');
-    if (!penandaTangan.value) {
-        alert('Penanda Tangan wajib dipilih');
-        e.preventDefault();
-        penandaTangan.focus();
-        return false;
-    }
-    
-    return true;
-});
-
-// ========== AUTO FORMAT NOMOR SURAT ==========
-document.getElementById('nomor_surat').addEventListener('input', function(e) {
-    this.value = this.value.replace(/\s+/g, ' ').trim();
-});
-
-// ========== AUTO UPDATE PREVIEW SAAT LOAD ==========
-document.addEventListener('DOMContentLoaded', function() {
-    // Update preview pegawai
-    updatePegawaiPreview();
-});
+}
 </script>
 @endsection
