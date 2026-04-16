@@ -52,7 +52,7 @@
     <div class="p-6">
         <form action="{{ route('spt.store') }}" method="POST" id="formSPT">
             @csrf
-            
+
             <!-- Grid 2 kolom untuk informasi dasar -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Kolom Kiri -->
@@ -62,40 +62,14 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Nomor Surat <span class="text-red-500">*</span>
                         </label>
-                        <div class="flex flex-col space-y-3">
-                            <div class="flex items-center space-x-2">
-                                <div class="flex-1">
-                                    <input type="number" 
-                                           name="nomor_urut" 
-                                           id="nomor_urut"
-                                           value="{{ old('nomor_urut') }}"
-                                           min="1" 
-                                           max="999"
-                                           required
-                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                                           placeholder="Masukkan nomor urut (contoh: 1, 2, 3, ...)">
-                                </div>
-                                <button type="button"
-                                        id="btn-auto-nomor"
-                                        onclick="getNextNomorUrut()"
-                                        class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-200">
-                                    <i class="fas fa-magic mr-1"></i> Auto
-                                </button>
-                            </div>
-                            
-                            <!-- Preview Nomor Surat -->
-                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <div class="flex items-start space-x-2">
-                                    <i class="fas fa-file-alt text-blue-500 mt-0.5"></i>
-                                    <div class="flex-1">
-                                        <p class="text-sm text-gray-600 mb-1">Preview format lengkap:</p>
-                                        <p class="font-mono text-md font-semibold text-blue-700 break-all" id="preview-nomor-surat">
-                                            800.1.11.1/<span id="preview-nomor-urut" class="text-gray-400">___</span>/DPMPTSP/<span id="preview-tahun">{{ date('Y') }}</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <input type="text"
+                               id="nomor_surat"
+                               name="nomor_surat"
+                               value="{{ old('nomor_surat') }}"
+                               required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Contoh: SPT-001/2024">
+                        <p class="mt-1 text-sm text-gray-500">Masukkan nomor surat dengan format yang sesuai</p>
                     </div>
 
                     <!-- Tanggal -->
@@ -103,9 +77,9 @@
                         <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-2">
                             Tanggal <span class="text-red-500">*</span>
                         </label>
-                        <input type="date" 
-                               id="tanggal" 
-                               name="tanggal" 
+                        <input type="date"
+                               id="tanggal"
+                               name="tanggal"
                                value="{{ old('tanggal', date('Y-m-d')) }}"
                                required
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
@@ -117,9 +91,9 @@
                         <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-2">
                             Lokasi <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" 
-                               id="lokasi" 
-                               name="lokasi" 
+                        <input type="text"
+                               id="lokasi"
+                               name="lokasi"
                                value="Pelaihari"
                                required
                                disabled
@@ -137,8 +111,8 @@
                         <label for="penanda_tangan" class="block text-sm font-medium text-gray-700 mb-2">
                             Penanda Tangan <span class="text-red-500">*</span>
                         </label>
-                        <select id="penanda_tangan" 
-                                name="penanda_tangan" 
+                        <select id="penanda_tangan"
+                                name="penanda_tangan"
                                 required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                             <option value="">Pilih Penanda Tangan</option>
@@ -165,14 +139,14 @@
                     @foreach($oldDasar as $index => $value)
                     <div class="flex items-start space-x-2 dasar-item">
                         <div class="flex-grow">
-                            <input type="text" 
-                                   name="dasar[]" 
+                            <input type="text"
+                                   name="dasar[]"
                                    value="{{ $value }}"
                                    required
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                    placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
                         </div>
-                        <button type="button" 
+                        <button type="button"
                                 class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
                                 title="Hapus dasar">
                             <i class="fas fa-times"></i>
@@ -197,12 +171,12 @@
                     @foreach($oldPegawai as $index => $value)
                     <div class="flex items-start space-x-2 pegawai-item">
                         <div class="flex-grow">
-                            <select name="pegawai[]" 
+                            <select name="pegawai[]"
                                     required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pegawai-select">
                                 <option value="">Pilih Pegawai</option>
                                 @foreach($semuaPegawai as $pegawai)
-                                    <option value="{{ $pegawai->id_pegawai }}" 
+                                    <option value="{{ $pegawai->id_pegawai }}"
                                         data-nama="{{ $pegawai->nama }}"
                                         data-nip="{{ $pegawai->nip }}"
                                         data-jabatan="{{ $pegawai->jabatan }}"
@@ -212,7 +186,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="button" 
+                        <button type="button"
                                 class="remove-pegawai bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
                                 title="Hapus pegawai">
                             <i class="fas fa-times"></i>
@@ -223,7 +197,7 @@
                 <button type="button" id="tambah-pegawai" class="mt-2 text-blue-600 hover:text-blue-800 text-sm flex items-center">
                     <i class="fas fa-plus-circle mr-1"></i> Tambah Pegawai Lainnya
                 </button>
-                
+
                 <!-- Preview Pegawai yang Dipilih -->
                 <div id="selected-pegawai-preview" class="mt-3 flex flex-wrap gap-2"></div>
             </div>
@@ -233,8 +207,8 @@
                 <label for="tujuan" class="block text-sm font-medium text-gray-700 mb-2">
                     Tujuan <span class="text-red-500">*</span>
                 </label>
-                <textarea id="tujuan" 
-                          name="tujuan" 
+                <textarea id="tujuan"
+                          name="tujuan"
                           rows="4"
                           required
                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
@@ -263,14 +237,14 @@ function updatePreviewNomorSurat() {
     const nomorUrut = document.getElementById('nomor_urut').value;
     const tanggalInput = document.getElementById('tanggal');
     let tahun = new Date().getFullYear();
-    
+
     if (tanggalInput && tanggalInput.value) {
         tahun = new Date(tanggalInput.value).getFullYear();
     }
-    
+
     const previewNomor = document.getElementById('preview-nomor-urut');
     const previewTahun = document.getElementById('preview-tahun');
-    
+
     if (nomorUrut && nomorUrut !== '') {
         previewNomor.textContent = String(nomorUrut).padStart(3, '0');
         previewNomor.className = 'font-bold text-blue-700';
@@ -278,7 +252,7 @@ function updatePreviewNomorSurat() {
         previewNomor.textContent = '___';
         previewNomor.className = 'text-gray-400';
     }
-    
+
     previewTahun.textContent = tahun;
 }
 
@@ -286,17 +260,17 @@ function updatePreviewNomorSurat() {
 function getNextNomorUrut() {
     const btn = document.getElementById('btn-auto-nomor');
     const originalHtml = btn.innerHTML;
-    
+
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Memproses...';
     btn.disabled = true;
-    
+
     // Ambil tahun dari input tanggal atau gunakan tahun saat ini
     let tahun = new Date().getFullYear();
     const tanggalInput = document.getElementById('tanggal');
     if (tanggalInput && tanggalInput.value) {
         tahun = new Date(tanggalInput.value).getFullYear();
     }
-    
+
     fetch(`{{ route('spt.api-get-next-nomor-urut') }}?tahun=${tahun}`)
         .then(response => response.json())
         .then(data => {
@@ -329,9 +303,9 @@ function showNotification(type, message) {
             <span>${message}</span>
         </div>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Hapus notifikasi setelah 3 detik
     setTimeout(() => {
         notification.style.opacity = '0';
@@ -344,19 +318,14 @@ function showNotification(type, message) {
 
 // ========== DASAR DYNAMIC FIELDS ==========
 document.addEventListener('DOMContentLoaded', function() {
-    // Focus ke input nomor urut
-    document.getElementById('nomor_urut').focus();
-    
+    // Auto-focus ke input nomor surat
+    document.getElementById('nomor_surat').focus();
+
     // Setup dasar fields
     updateDasarButtons();
     setupPegawaiFields();
     updatePegawaiPreview();
-    updatePreviewNomorSurat();
-    
-    // Event listener untuk update preview saat nomor urut berubah
-    document.getElementById('nomor_urut').addEventListener('input', updatePreviewNomorSurat);
-    document.getElementById('tanggal').addEventListener('change', updatePreviewNomorSurat);
-    
+
     // Tambah dasar baru
     document.getElementById('tambah-dasar').addEventListener('click', function() {
         const container = document.getElementById('dasar-container');
@@ -364,31 +333,31 @@ document.addEventListener('DOMContentLoaded', function() {
         newItem.className = 'flex items-start space-x-2 dasar-item';
         newItem.innerHTML = `
             <div class="flex-grow">
-                <input type="text" 
-                       name="dasar[]" 
+                <input type="text"
+                       name="dasar[]"
                        required
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                        placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
             </div>
-            <button type="button" 
+            <button type="button"
                     class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
                     title="Hapus dasar">
                 <i class="fas fa-times"></i>
             </button>
         `;
         container.appendChild(newItem);
-        
+
         // Focus ke input baru
         newItem.querySelector('input').focus();
-        
+
         // Update tombol remove
         updateDasarButtons();
     });
-    
+
     // Fungsi untuk update tombol remove dasar
     function updateDasarButtons() {
         const items = document.querySelectorAll('.dasar-item');
-        
+
         items.forEach((item, index) => {
             const removeBtn = item.querySelector('.remove-dasar');
             if (items.length === 1) {
@@ -397,18 +366,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 removeBtn.style.display = 'block';
             }
         });
-        
+
         // Event listener untuk remove
         document.querySelectorAll('.remove-dasar').forEach(btn => {
             btn.removeEventListener('click', removeDasar);
             btn.addEventListener('click', removeDasar);
         });
     }
-    
+
     function removeDasar(e) {
         const item = e.currentTarget.closest('.dasar-item');
         const container = document.getElementById('dasar-container');
-        
+
         if (container.children.length > 1) {
             item.remove();
             updateDasarButtons();
@@ -423,7 +392,7 @@ function setupPegawaiFields() {
         const container = document.getElementById('pegawai-container');
         const newItem = document.createElement('div');
         newItem.className = 'flex items-start space-x-2 pegawai-item';
-        
+
         // Clone select options dari item pertama
         const firstSelect = document.querySelector('.pegawai-select');
         let options = '';
@@ -433,7 +402,7 @@ function setupPegawaiFields() {
             // Generate options dari data semuaPegawai
             options = `<option value="">Pilih Pegawai</option>`;
             @foreach($semuaPegawai as $pegawai)
-                options += `<option value="{{ $pegawai->id_pegawai }}" 
+                options += `<option value="{{ $pegawai->id_pegawai }}"
                     data-nama="{{ $pegawai->nama }}"
                     data-nip="{{ $pegawai->nip }}"
                     data-jabatan="{{ $pegawai->jabatan }}">
@@ -441,40 +410,40 @@ function setupPegawaiFields() {
                 </option>`;
             @endforeach
         }
-        
+
         newItem.innerHTML = `
             <div class="flex-grow">
-                <select name="pegawai[]" 
+                <select name="pegawai[]"
                         required
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pegawai-select">
                     ${options}
                 </select>
             </div>
-            <button type="button" 
+            <button type="button"
                     class="remove-pegawai bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
                     title="Hapus pegawai">
                 <i class="fas fa-times"></i>
             </button>
         `;
         container.appendChild(newItem);
-        
+
         // Focus ke select baru
         newItem.querySelector('select').focus();
-        
+
         // Update event listener untuk select baru
         newItem.querySelector('select').addEventListener('change', updatePegawaiPreview);
         newItem.querySelector('select').addEventListener('change', function() {
             disableSelectedPegawaiOptions();
         });
-        
+
         // Update tombol remove
         updatePegawaiButtons();
         disableSelectedPegawaiOptions();
     });
-    
+
     // Update tombol remove pegawai
     updatePegawaiButtons();
-    
+
     // Event listener untuk semua select pegawai
     document.querySelectorAll('.pegawai-select').forEach(select => {
         select.addEventListener('change', updatePegawaiPreview);
@@ -482,14 +451,14 @@ function setupPegawaiFields() {
             disableSelectedPegawaiOptions();
         });
     });
-    
+
     // Initial disable options
     disableSelectedPegawaiOptions();
 }
 
 function updatePegawaiButtons() {
     const items = document.querySelectorAll('.pegawai-item');
-    
+
     items.forEach((item, index) => {
         const removeBtn = item.querySelector('.remove-pegawai');
         if (items.length === 1) {
@@ -498,7 +467,7 @@ function updatePegawaiButtons() {
             removeBtn.style.display = 'block';
         }
     });
-    
+
     // Event listener untuk remove
     document.querySelectorAll('.remove-pegawai').forEach(btn => {
         btn.removeEventListener('click', removePegawai);
@@ -509,7 +478,7 @@ function updatePegawaiButtons() {
 function removePegawai(e) {
     const item = e.currentTarget.closest('.pegawai-item');
     const container = document.getElementById('pegawai-container');
-    
+
     if (container.children.length > 1) {
         item.remove();
         updatePegawaiButtons();
@@ -522,22 +491,22 @@ function updatePegawaiPreview() {
     const preview = document.getElementById('selected-pegawai-preview');
     const selects = document.querySelectorAll('.pegawai-select');
     const selectedData = [];
-    
+
     preview.innerHTML = '';
-    
+
     selects.forEach(select => {
         const selectedOption = select.options[select.selectedIndex];
         if (selectedOption && selectedOption.value) {
             const nama = selectedOption.getAttribute('data-nama') || selectedOption.text.split(' - ')[0];
             const nip = selectedOption.getAttribute('data-nip') || '';
             const jabatan = selectedOption.getAttribute('data-jabatan') || '';
-            
+
             selectedData.push({
                 nama: nama,
                 nip: nip,
                 jabatan: jabatan
             });
-            
+
             const badge = document.createElement('span');
             badge.className = 'bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded flex items-center';
             badge.title = `${nip} - ${jabatan}`;
@@ -548,7 +517,7 @@ function updatePegawaiPreview() {
             preview.appendChild(badge);
         }
     });
-    
+
     // Jika tidak ada pegawai dipilih
     if (selectedData.length === 0) {
         const emptyMsg = document.createElement('span');
@@ -562,14 +531,14 @@ function updatePegawaiPreview() {
 function disableSelectedPegawaiOptions() {
     const selects = document.querySelectorAll('.pegawai-select');
     const selectedValues = [];
-    
+
     // Kumpulkan semua nilai yang sudah dipilih
     selects.forEach(select => {
         if (select.value) {
             selectedValues.push(select.value);
         }
     });
-    
+
     // Loop semua select
     selects.forEach(select => {
         // Loop semua option dalam select
@@ -596,35 +565,35 @@ document.getElementById('formSPT').addEventListener('submit', function(e) {
         nomorUrut.focus();
         return false;
     }
-    
+
     // Validasi Dasar (minimal 1)
     const dasarInputs = document.querySelectorAll('input[name="dasar[]"]');
     let dasarValid = false;
     dasarInputs.forEach(input => {
         if (input.value.trim()) dasarValid = true;
     });
-    
+
     if (!dasarValid) {
         alert('Minimal 1 dasar harus diisi');
         e.preventDefault();
         document.querySelector('input[name="dasar[]"]').focus();
         return false;
     }
-    
+
     // Validasi Pegawai (minimal 1)
     const pegawaiSelects = document.querySelectorAll('select[name="pegawai[]"]');
     let pegawaiValid = false;
     pegawaiSelects.forEach(select => {
         if (select.value) pegawaiValid = true;
     });
-    
+
     if (!pegawaiValid) {
         alert('Minimal 1 pegawai harus dipilih');
         e.preventDefault();
         document.querySelector('select[name="pegawai[]"]').focus();
         return false;
     }
-    
+
     // Validasi Tujuan
     const tujuan = document.getElementById('tujuan');
     if (!tujuan.value.trim()) {
@@ -633,7 +602,7 @@ document.getElementById('formSPT').addEventListener('submit', function(e) {
         tujuan.focus();
         return false;
     }
-    
+
     // Validasi Tanggal
     const tanggal = document.getElementById('tanggal');
     if (!tanggal.value) {
@@ -642,7 +611,7 @@ document.getElementById('formSPT').addEventListener('submit', function(e) {
         tanggal.focus();
         return false;
     }
-    
+
     // Validasi Penanda Tangan
     const penandaTangan = document.getElementById('penanda_tangan');
     if (!penandaTangan.value) {
@@ -651,7 +620,7 @@ document.getElementById('formSPT').addEventListener('submit', function(e) {
         penandaTangan.focus();
         return false;
     }
-    
+
     return true;
 });
 </script>

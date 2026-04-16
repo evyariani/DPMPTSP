@@ -9,7 +9,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
@@ -17,7 +17,7 @@
             color: #000;
             line-height: 1.2;
         }
-        
+
         /* KOP SURAT */
         .kop-table {
             width: 100%;
@@ -25,34 +25,34 @@
             margin-bottom: 10px;
             border: none;
         }
-        
+
         .kop-table td {
             border: none;
             padding: 0;
             vertical-align: middle;
         }
-        
+
         .logo-cell {
             width: 55px;
             padding-right: 5px;
         }
-        
+
         .logo {
             width: 55px;
             height: 55px;
         }
-        
+
         .logo img {
             width: 100%;
             height: auto;
             display: block;
         }
-        
+
         .header-text {
             width: 100%;
             text-align: center;
         }
-        
+
         .header-text .pemkab {
             font-family: Arial, sans-serif;
             font-size: 16px;
@@ -64,7 +64,7 @@
             letter-spacing: 0.5px;
             white-space: nowrap;
         }
-        
+
         .header-text .dinas {
             font-family: Arial, sans-serif;
             font-size: 16px;
@@ -76,7 +76,7 @@
             white-space: nowrap;
             letter-spacing: -0.2px;
         }
-        
+
         .header-text .alamat {
             font-family: Arial, sans-serif;
             font-size: 11px;
@@ -85,7 +85,7 @@
             line-height: 1.2;
             white-space: nowrap;
         }
-        
+
         .header-text .kontak {
             font-family: Arial, sans-serif;
             font-size: 11px;
@@ -94,7 +94,7 @@
             line-height: 1.2;
             white-space: nowrap;
         }
-        
+
         /* GARIS KOP */
         .garis-kop {
             width: 100%;
@@ -104,13 +104,13 @@
             border-bottom: 3px solid #000;
             height: 2px;
         }
-        
+
         /* JUDUL SURAT */
         .judul-surat {
             text-align: center;
             margin-bottom: 20px;
         }
-        
+
         .judul-surat h1 {
             font-family: 'Times New Roman', Times, serif;
             font-size: 16px;
@@ -118,13 +118,13 @@
             text-transform: uppercase;
             margin: 0;
         }
-        
+
         .judul-surat .nomor {
             font-family: 'Times New Roman', Times, serif;
             font-size: 14px;
             margin-top: 5px;
         }
-        
+
         /* MEMERINTAHKAN - tanpa margin berlebihan */
         .memerintahkan {
             text-align: center;
@@ -134,13 +134,13 @@
             text-transform: uppercase;
             margin: 0; /* HAPUS SEMUA MARGIN */
         }
-        
+
         /* TABEL UNTUK DASAR/KEPADA/UNTUK */
         .content-table {
             width: 100%;
             border-collapse: collapse;
         }
-        
+
         .content-table td {
             padding: 1px 2px;
             vertical-align: top;
@@ -148,49 +148,49 @@
             font-size: 12pt;
             font-family: 'Times New Roman', Times, serif;
         }
-        
+
         .label-col {
             width: 60px;
             font-weight: normal;
         }
-        
+
         .titikdua-col {
             width: 15px;
             text-align: center;
         }
-        
+
         .nomor-col {
             width: 25px;
             text-align: right;
         }
-        
+
         .sub-label-col {
             width: 80px;
             padding-left: 5px;
         }
-        
+
         .sub-titikdua-col {
             width: 15px;
             text-align: center;
         }
-        
+
         .content-col {
             text-align: left;
         }
-        
+
         .spacer-row td {
             height: 5px;
         }
-        
+
         .pegawai-spacer td {
             height: 15px; /* Space antar pegawai */
         }
-        
+
         /* SPACE UNTUK JARAK ANTAR SECTION - SEMUA SAMA 2 ENTER */
         .section-spacer {
             height: 24px; /* 2 ENTER (12px x 2) */
         }
-        
+
         /* TANDA TANGAN */
         .tanda-tangan {
             float: right;
@@ -200,36 +200,36 @@
             font-size: 12pt;
             font-family: 'Times New Roman', Times, serif;
         }
-        
+
         .tempat-tanggal {
             font-size: 12pt;
             margin-bottom: 5px;
         }
-        
+
         .jabatan-ttd {
             font-size: 12pt;
             margin-bottom: 15px;
         }
-        
+
         .enter-dua-kali {
             height: 40px;
         }
-        
+
         .nama-ttd {
             font-size: 12pt;
             text-decoration: underline;
             margin-bottom: 2px;
         }
-        
+
         .pangkat-ttd {
             font-size: 12pt;
             margin-bottom: 2px;
         }
-        
+
         .nip-ttd {
             font-size: 12pt;
         }
-        
+
         .clearfix {
             clear: both;
         }
@@ -252,7 +252,7 @@
             </td>
         </tr>
     </table>
-    
+
     <!-- GARIS KOP -->
     <div class="garis-kop"></div>
 
@@ -395,19 +395,19 @@
                 'November' => 'November',
                 'December' => 'Desember'
             ];
-            
+
             // Format tanggal dengan bulan Indonesia
-            $tanggal = $spt->tanggal->format('d') . ' ' . 
-                       $bulanIndonesia[$spt->tanggal->format('F')] . ' ' . 
+            $tanggal = $spt->tanggal->format('d') . ' ' .
+                       $bulanIndonesia[$spt->tanggal->format('F')] . ' ' .
                        $spt->tanggal->format('Y');
         @endphp
-        
+
         <div class="tempat-tanggal">Pelaihari, {{ $tanggal }}</div>
         <div class="jabatan-ttd">{{ $spt->penandaTangan->jabatan ?? 'Kepala Dinas' }}</div>
-        
+
         <!-- ENTER 2 KALI UNTUK TANDA TANGAN -->
         <div style="height: 50px;"></div>
-        
+
         <div class="nama-ttd">{{ $spt->penandaTangan->nama ?? '-' }}</div>
         <div class="pangkat-ttd">
             @if($spt->penandaTangan->pangkat && $spt->penandaTangan->gol)
@@ -420,7 +420,7 @@
         </div>
         <div class="nip-ttd">NIP. {{ $spt->penandaTangan->nip ?? '-' }}</div>
     </div>
-    
+
     <div class="clearfix"></div>
 </body>
 </html>

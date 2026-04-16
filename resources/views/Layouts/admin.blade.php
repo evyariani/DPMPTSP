@@ -197,9 +197,9 @@
 
                         <!-- SPD BELAKANG -->
                         <li>
-                            <a href="/laporan"
+                            <a href="/spd2"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('laporan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      {{ request()->is('spd2*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-chart-bar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">SPD Belakang</span>
@@ -317,9 +317,9 @@
 
                         <!-- SPD BELAKANG -->
                         <li>
-                            <a href="/laporan"
+                            <a href="/spd2"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('laporan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      {{ request()->is('spd2*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-chart-bar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">SPD Belakang</span>
@@ -364,19 +364,16 @@
 
         <!-- MAIN CONTENT AREA -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- TOP NAVBAR dengan tema biru -->
+            <!-- TOP NAVBAR dengan tema biru - Ikon notifikasi telah dihapus -->
             <header class="bg-white shadow-md border-b border-blue-100 sticky top-0 z-40">
                 <div class="px-6 py-3">
                     <div class="flex items-center justify-between">
                         <!-- Page Title dengan gradien biru -->
                         <h2 class="text-lg font-semibold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">@yield('title')</h2>
 
-                        <!-- Notifications -->
+                        <!-- Area kosong untuk menjaga keseimbangan layout (ikon notifikasi telah dihapus) -->
                         <div class="flex items-center gap-3">
-                            <button class="relative p-2 rounded-lg hover:bg-blue-50 transition-colors">
-                                <i class="fas fa-bell text-blue-500 text-lg"></i>
-                                <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
-                            </button>
+                            <!-- Ikon notifikasi dan indikator telah dihapus sesuai permintaan -->
                         </div>
                     </div>
                 </div>
@@ -406,11 +403,18 @@
     <script>
         // Deteksi mobile
         window.addEventListener('resize', function() {
-            Alpine.reactive({ isMobile: window.innerWidth <= 768 });
+            // Update reactive property untuk Alpine jika diperlukan
+            if (window.Alpine && document.querySelector('[x-data]') && document.querySelector('[x-data]').__x) {
+                // Alternatif sederhana: reload state? Atau biarkan saja karena Alpine akan menangani properti reaktif
+                // Namun karena kita menggunakan Alpine.reactive, lebih baik panggil ulang
+                const component = document.querySelector('[x-data]').__x;
+                if (component && component.$data) {
+                    component.$data.isMobile = window.innerWidth <= 768;
+                }
+            }
         });
     </script>
 
     @yield('scripts')
 </body>
 </html>
-

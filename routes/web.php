@@ -100,29 +100,29 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
     // SPT MANAGEMENT - SEMUA USER BISA AKSES (PEGAWAI, ADMIN, KADIS)
     Route::prefix('spt')->group(function () {
         // ========== URUTAN ROUTE YANG BENAR (DARI YANG PALING SPESIFIK KE GENERIK) ==========
-        
+
         // 1. Route untuk EXPORT (tanpa parameter)
         Route::get('/export', [SPTController::class, 'export'])->name('spt.export');
-        
+
         // 2. Route untuk API Get Next Nomor Urut (tanpa parameter atau dengan query string)
         Route::get('/get-next-nomor-urut', [SPTController::class, 'apiGetNextNomorUrut'])->name('spt.api-get-next-nomor-urut');
-        
+
         // 3. Route untuk CREATE (tanpa parameter)
         Route::get('/create', [SPTController::class, 'create'])->name('spt.create');
-        
+
         // 4. Route untuk INDEX (GET /spt) - HARUS DILETAKKAN SEBELUM ROUTE DENGAN PARAMETER {id}
         Route::get('/', [SPTController::class, 'index'])->name('spt.index');
-        
+
         // 5. Route untuk STORE (POST)
         Route::post('/', [SPTController::class, 'store'])->name('spt.store');
-        
+
         // 6. Route untuk PDF (dengan parameter spesifik)
         Route::get('/print/{id}', [SPTController::class, 'print'])->name('spt.print');
         Route::get('/preview-pdf/{id}', [SPTController::class, 'previewPdf'])->name('spt.preview-pdf');
-        
+
         // 7. Route untuk API get pegawai (dengan parameter spesifik)
         Route::get('/get-pegawai/{id}', [SPTController::class, 'getPegawaiData'])->name('spt.get-pegawai');
-        
+
         // 8. Route dengan parameter {id} (diletakkan PALING AKHIR)
         Route::get('/{id}/edit', [SPTController::class, 'edit'])->name('spt.edit');
         Route::put('/{id}', [SPTController::class, 'update'])->name('spt.update');
