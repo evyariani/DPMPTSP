@@ -1,8 +1,6 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Surat Perintah Tugas (SPT)'); ?>
 
-@section('title', 'Surat Perintah Tugas (SPT)')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <style>
 /* Animasi untuk notifikasi bawah */
 @keyframes slideInFromBottom {
@@ -210,7 +208,7 @@
             </button>
             
             <!-- Tombol Tambah SPT -->
-            <a href="{{ route('spt.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+            <a href="<?php echo e(route('spt.create')); ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-plus mr-2"></i> Tambah SPT
             </a>
         </div>
@@ -218,7 +216,7 @@
 </div>
 
 <!-- Notifikasi Toast - POSISI DI BAWAH -->
-@if(session('success'))
+<?php if(session('success')): ?>
 <div id="success-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -227,7 +225,7 @@
             </div>
             <div class="ml-3 flex-1">
                 <p class="font-medium">Berhasil!</p>
-                <p class="text-sm mt-1">{{ session('success') }}</p>
+                <p class="text-sm mt-1"><?php echo e(session('success')); ?></p>
             </div>
             <button type="button" onclick="hideNotification('success')" class="ml-4 text-green-600 hover:text-green-800">
                 <i class="fas fa-times"></i>
@@ -238,9 +236,9 @@
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
-@if(session('error'))
+<?php if(session('error')): ?>
 <div id="error-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -249,7 +247,7 @@
             </div>
             <div class="ml-3 flex-1">
                 <p class="font-medium">Terjadi Kesalahan!</p>
-                <p class="text-sm mt-1">{{ session('error') }}</p>
+                <p class="text-sm mt-1"><?php echo e(session('error')); ?></p>
             </div>
             <button type="button" onclick="hideNotification('error')" class="ml-4 text-red-600 hover:text-red-800">
                 <i class="fas fa-times"></i>
@@ -260,9 +258,9 @@
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
-@if(session('warning'))
+<?php if(session('warning')): ?>
 <div id="warning-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -271,7 +269,7 @@
             </div>
             <div class="ml-3 flex-1">
                 <p class="font-medium">Perhatian!</p>
-                <p class="text-sm mt-1">{{ session('warning') }}</p>
+                <p class="text-sm mt-1"><?php echo e(session('warning')); ?></p>
             </div>
             <button type="button" onclick="hideNotification('warning')" class="ml-4 text-yellow-600 hover:text-yellow-800">
                 <i class="fas fa-times"></i>
@@ -282,7 +280,7 @@
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
 <!-- Notifikasi Hapus - POSISI DI BAWAH -->
 <div id="delete-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
@@ -350,8 +348,8 @@
                     </button>
                     
                     <form id="delete-form" method="POST" class="inline">
-                        @csrf
-                        @method('DELETE')
+                        <?php echo csrf_field(); ?>
+                        <?php echo method_field('DELETE'); ?>
                         <button type="submit" 
                                 class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
                             <i class="fas fa-trash mr-2"></i> Hapus
@@ -365,55 +363,56 @@
 
 <!-- Filter dan Search -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
-    <form method="GET" action="{{ route('spt.index') }}" id="filter-form">
+    <form method="GET" action="<?php echo e(route('spt.index')); ?>" id="filter-form">
         <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex-1">
                 <input type="text" name="search" placeholder="Cari nomor surat, tujuan, lokasi, atau nama pegawai..." 
-                       value="{{ request('search') }}"
+                       value="<?php echo e(request('search')); ?>"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             <div class="flex flex-wrap gap-2">
                 <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">Semua Bulan</option>
-                    <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
-                    <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
-                    <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
-                    <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
-                    <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
-                    <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
-                    <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
-                    <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
-                    <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
-                    <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
-                    <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
-                    <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                    <option value="1" <?php echo e(request('bulan') == '1' ? 'selected' : ''); ?>>Januari</option>
+                    <option value="2" <?php echo e(request('bulan') == '2' ? 'selected' : ''); ?>>Februari</option>
+                    <option value="3" <?php echo e(request('bulan') == '3' ? 'selected' : ''); ?>>Maret</option>
+                    <option value="4" <?php echo e(request('bulan') == '4' ? 'selected' : ''); ?>>April</option>
+                    <option value="5" <?php echo e(request('bulan') == '5' ? 'selected' : ''); ?>>Mei</option>
+                    <option value="6" <?php echo e(request('bulan') == '6' ? 'selected' : ''); ?>>Juni</option>
+                    <option value="7" <?php echo e(request('bulan') == '7' ? 'selected' : ''); ?>>Juli</option>
+                    <option value="8" <?php echo e(request('bulan') == '8' ? 'selected' : ''); ?>>Agustus</option>
+                    <option value="9" <?php echo e(request('bulan') == '9' ? 'selected' : ''); ?>>September</option>
+                    <option value="10" <?php echo e(request('bulan') == '10' ? 'selected' : ''); ?>>Oktober</option>
+                    <option value="11" <?php echo e(request('bulan') == '11' ? 'selected' : ''); ?>>November</option>
+                    <option value="12" <?php echo e(request('bulan') == '12' ? 'selected' : ''); ?>>Desember</option>
                 </select>
                 
                 <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">Semua Tahun</option>
-                    @for($year = date('Y'); $year >= date('Y')-5; $year--)
-                        <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                    @endfor
+                    <?php for($year = date('Y'); $year >= date('Y')-5; $year--): ?>
+                        <option value="<?php echo e($year); ?>" <?php echo e(request('tahun') == $year ? 'selected' : ''); ?>><?php echo e($year); ?></option>
+                    <?php endfor; ?>
                 </select>
                 
                 <select name="penanda_tangan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">Semua Penanda Tangan</option>
-                    @foreach($pegawais ?? [] as $pegawai)
-                        <option value="{{ $pegawai->id_pegawai }}" {{ request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : '' }}>
-                            {{ $pegawai->nama }}
+                    <?php $__currentLoopData = $pegawais ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($pegawai->id_pegawai); ?>" <?php echo e(request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : ''); ?>>
+                            <?php echo e($pegawai->nama); ?>
+
                         </option>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
                 
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
                     <i class="fas fa-search mr-2"></i> Cari
                 </button>
                 
-                @if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan'))
-                    <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+                <?php if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan')): ?>
+                    <a href="<?php echo e(route('spt.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
                         <i class="fas fa-redo mr-2"></i> Reset
                     </a>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </form>
@@ -437,170 +436,181 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @php
+                <?php
                     // Pastikan $spts selalu ada dan bisa di-loop
                     $spts = $spts ?? collect([]);
                     $isPaginated = method_exists($spts, 'currentPage');
-                @endphp
+                ?>
                 
-                @forelse($spts as $index => $spt)
+                <?php $__empty_1 = true; $__currentLoopData = $spts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $spt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr class="hover:bg-gray-50 transition duration-150">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        @if($isPaginated)
-                            {{ ($spts->currentPage() - 1) * $spts->perPage() + $index + 1 }}
-                        @else
-                            {{ $index + 1 }}
-                        @endif
+                        <?php if($isPaginated): ?>
+                            <?php echo e(($spts->currentPage() - 1) * $spts->perPage() + $index + 1); ?>
+
+                        <?php else: ?>
+                            <?php echo e($index + 1); ?>
+
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Nomor Surat -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-nomor table-cell-hover">
-                        <div class="text-sm font-medium text-gray-900" title="{{ $spt->nomor_surat }}">
-                            {{ Str::limit($spt->nomor_surat, 30) }}
+                        <div class="text-sm font-medium text-gray-900" title="<?php echo e($spt->nomor_surat); ?>">
+                            <?php echo e(Str::limit($spt->nomor_surat, 30)); ?>
+
                         </div>
-                        @if(strlen($spt->nomor_surat) > 30)
+                        <?php if(strlen($spt->nomor_surat) > 30): ?>
                             <button type="button" 
-                                    onclick="showFullText(this, '{{ addslashes($spt->nomor_surat) }}', 'Nomor Surat')"
+                                    onclick="showFullText(this, '<?php echo e(addslashes($spt->nomor_surat)); ?>', 'Nomor Surat')"
                                     class="mt-1 text-xs text-blue-600 hover:text-blue-800">
                                 Lihat selengkapnya
                             </button>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Dasar -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-dasar table-cell-hover">
-                        @if(!empty($spt->dasar))
-                            @php $dasarList = $spt->dasar_list; @endphp
-                            @if(count($dasarList) > 1)
+                        <?php if(!empty($spt->dasar)): ?>
+                            <?php $dasarList = $spt->dasar_list; ?>
+                            <?php if(count($dasarList) > 1): ?>
                                 <div class="space-y-1">
-                                    @foreach(array_slice($dasarList, 0, 2) as $dasar)
-                                        <div class="text-sm text-gray-700">• {{ Str::limit($dasar, 30) }}</div>
-                                    @endforeach
-                                    @if(count($dasarList) > 2)
+                                    <?php $__currentLoopData = array_slice($dasarList, 0, 2); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dasar): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <div class="text-sm text-gray-700">• <?php echo e(Str::limit($dasar, 30)); ?></div>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if(count($dasarList) > 2): ?>
                                         <button type="button" 
-                                                onclick="showFullDasar(this, {{ json_encode($dasarList) }})"
+                                                onclick="showFullDasar(this, <?php echo e(json_encode($dasarList)); ?>)"
                                                 class="mt-1 text-xs text-blue-600 hover:text-blue-800">
-                                            + {{ count($dasarList) - 2 }} dasar lainnya
+                                            + <?php echo e(count($dasarList) - 2); ?> dasar lainnya
                                         </button>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
-                            @else
-                                <div class="text-sm text-gray-700">{{ Str::limit($dasarList[0] ?? '', 50) }}</div>
-                                @if(strlen($dasarList[0] ?? '') > 50)
+                            <?php else: ?>
+                                <div class="text-sm text-gray-700"><?php echo e(Str::limit($dasarList[0] ?? '', 50)); ?></div>
+                                <?php if(strlen($dasarList[0] ?? '') > 50): ?>
                                     <button type="button" 
-                                            onclick="showFullText(this, '{{ addslashes($dasarList[0]) }}', 'Dasar')"
+                                            onclick="showFullText(this, '<?php echo e(addslashes($dasarList[0])); ?>', 'Dasar')"
                                             class="mt-1 text-xs text-blue-600 hover:text-blue-800">
                                         Lihat selengkapnya
                                     </button>
-                                @endif
-                            @endif
-                        @else
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Pegawai -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-pegawai table-cell-hover">
-                        @if(!empty($spt->pegawai))
-                            @php $pegawaiList = $spt->pegawai_list; @endphp
+                        <?php if(!empty($spt->pegawai)): ?>
+                            <?php $pegawaiList = $spt->pegawai_list; ?>
                             <div class="space-y-2">
-                                @foreach($pegawaiList as $pegawai)
+                                <?php $__currentLoopData = $pegawaiList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="flex items-center tooltip">
                                         <div class="flex-shrink-0 h-6 w-6 mr-2">
                                             <div class="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center">
                                                 <span class="text-indigo-600 font-semibold text-xs">
-                                                    {{ strtoupper(substr($pegawai->nama, 0, 1)) }}
+                                                    <?php echo e(strtoupper(substr($pegawai->nama, 0, 1))); ?>
+
                                                 </span>
                                             </div>
                                         </div>
-                                        <div class="text-sm text-gray-900" title="{{ $pegawai->nama }}">
-                                            {{ Str::limit($pegawai->nama, 25) }}
+                                        <div class="text-sm text-gray-900" title="<?php echo e($pegawai->nama); ?>">
+                                            <?php echo e(Str::limit($pegawai->nama, 25)); ?>
+
                                         </div>
                                         <span class="tooltip-text">
-                                            {{ $pegawai->nama }}<br>
-                                            NIP: {{ $pegawai->nip ?? '-' }}<br>
-                                            Jabatan: {{ $pegawai->jabatan ?? '-' }}
+                                            <?php echo e($pegawai->nama); ?><br>
+                                            NIP: <?php echo e($pegawai->nip ?? '-'); ?><br>
+                                            Jabatan: <?php echo e($pegawai->jabatan ?? '-'); ?>
+
                                         </span>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
-                        @else
+                        <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Tujuan -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-tujuan table-cell-hover">
-                        <div class="text-sm text-gray-900" title="{{ $spt->tujuan }}">
-                            {{ Str::limit($spt->tujuan, 80) }}
+                        <div class="text-sm text-gray-900" title="<?php echo e($spt->tujuan); ?>">
+                            <?php echo e(Str::limit($spt->tujuan, 80)); ?>
+
                         </div>
-                        @if(strlen($spt->tujuan) > 80)
+                        <?php if(strlen($spt->tujuan) > 80): ?>
                             <button type="button" 
-                                    onclick="showFullText(this, '{{ addslashes($spt->tujuan) }}', 'Tujuan')"
+                                    onclick="showFullText(this, '<?php echo e(addslashes($spt->tujuan)); ?>', 'Tujuan')"
                                     class="mt-1 text-xs text-blue-600 hover:text-blue-800">
                                 Lihat selengkapnya
                             </button>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Tanggal -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 fixed-col-tanggal">
-                        @if($spt->tanggal)
-                            <div class="font-medium">{{ $spt->tanggal->format('d/m/Y') }}</div>
-                            <div class="text-xs text-gray-500">{{ $spt->tanggal->format('l') }}</div>
-                        @else
+                        <?php if($spt->tanggal): ?>
+                            <div class="font-medium"><?php echo e($spt->tanggal->format('d/m/Y')); ?></div>
+                            <div class="text-xs text-gray-500"><?php echo e($spt->tanggal->format('l')); ?></div>
+                        <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Lokasi -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-lokasi table-cell-hover">
-                        <div class="text-sm text-gray-900" title="{{ $spt->lokasi }}">
-                            {{ Str::limit($spt->lokasi, 30) }}
+                        <div class="text-sm text-gray-900" title="<?php echo e($spt->lokasi); ?>">
+                            <?php echo e(Str::limit($spt->lokasi, 30)); ?>
+
                         </div>
-                        @if(strlen($spt->lokasi) > 30)
+                        <?php if(strlen($spt->lokasi) > 30): ?>
                             <button type="button" 
-                                    onclick="showFullText(this, '{{ addslashes($spt->lokasi) }}', 'Lokasi')"
+                                    onclick="showFullText(this, '<?php echo e(addslashes($spt->lokasi)); ?>', 'Lokasi')"
                                     class="mt-1 text-xs text-blue-600 hover:text-blue-800">
                                 Lihat selengkapnya
                             </button>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Penanda Tangan -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-penandatangan table-cell-hover">
-                        @if($spt->penandaTangan)
+                        <?php if($spt->penandaTangan): ?>
                             <div class="flex items-center tooltip">
                                 <div class="flex-shrink-0 h-8 w-8 mr-3">
                                     <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
                                         <span class="text-green-600 font-semibold text-sm">
-                                            {{ strtoupper(substr($spt->penandaTangan->nama, 0, 1)) }}
+                                            <?php echo e(strtoupper(substr($spt->penandaTangan->nama, 0, 1))); ?>
+
                                         </span>
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900" title="{{ $spt->penandaTangan->nama }}">
-                                        {{ Str::limit($spt->penandaTangan->nama, 30) }}
+                                    <div class="text-sm font-medium text-gray-900" title="<?php echo e($spt->penandaTangan->nama); ?>">
+                                        <?php echo e(Str::limit($spt->penandaTangan->nama, 30)); ?>
+
                                     </div>
-                                    <div class="text-xs text-gray-500">{{ $spt->penandaTangan->jabatan ?? '-' }}</div>
+                                    <div class="text-xs text-gray-500"><?php echo e($spt->penandaTangan->jabatan ?? '-'); ?></div>
                                 </div>
                                 <span class="tooltip-text">
-                                    {{ $spt->penandaTangan->nama }}<br>
-                                    NIP: {{ $spt->penandaTangan->nip ?? '-' }}<br>
-                                    Jabatan: {{ $spt->penandaTangan->jabatan ?? '-' }}
+                                    <?php echo e($spt->penandaTangan->nama); ?><br>
+                                    NIP: <?php echo e($spt->penandaTangan->nip ?? '-'); ?><br>
+                                    Jabatan: <?php echo e($spt->penandaTangan->jabatan ?? '-'); ?>
+
                                 </span>
                             </div>
-                        @else
+                        <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Aksi -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex flex-wrap gap-2">
-                            @if(isset($spt->id_spt))
+                            <?php if(isset($spt->id_spt)): ?>
                             <!-- Tombol Edit -->
-                            <a href="{{ route('spt.edit', $spt->id_spt) }}" 
+                            <a href="<?php echo e(route('spt.edit', $spt->id_spt)); ?>" 
                                class="text-green-600 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50 transition duration-150 tooltip"
                                title="Edit SPT">
                                 <i class="fas fa-edit"></i>
@@ -608,25 +618,19 @@
                             </a>
                             
                             <!-- Tombol Buat SPD dari SPT -->
-                            <a href="{{ route('spd.create-from-spt', $spt->id_spt) }}" 
+                            <a href="<?php echo e(route('spd.create-from-spt', $spt->id_spt)); ?>" 
                                class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50 transition duration-150 tooltip"
                                title="Buat SPD dari SPT ini"
-                               onclick="return confirmCreateSpd('{{ addslashes($spt->nomor_surat) }}')">
+                               onclick="return confirmCreateSpd('<?php echo e(addslashes($spt->nomor_surat)); ?>')">
                                 <i class="fas fa-file-signature"></i>
                                 <span class="tooltip-text">Buat SPD dari SPT ini</span>
                             </a>
                             
                             <!-- Tombol Print PDF -->
-                            {{-- <a href="{{ route('spt.print', $spt->id_spt) }}" 
-                               target="_blank"
-                               class="text-purple-600 hover:text-purple-900 px-2 py-1 rounded hover:bg-purple-50 transition duration-150 tooltip"
-                               title="Download PDF SPT">
-                                <i class="fas fa-download"></i>
-                                <span class="tooltip-text">Download PDF SPT</span>
-                            </a> --}}
+                            
 
                             <!-- Tombol Preview PDF -->
-                            <a href="{{ route('spt.preview-pdf', $spt->id_spt) }}" 
+                            <a href="<?php echo e(route('spt.preview-pdf', $spt->id_spt)); ?>" 
                                target="_blank"
                                class="text-indigo-600 hover:text-indigo-900 px-2 py-1 rounded hover:bg-indigo-50 transition duration-150 tooltip"
                                title="Preview PDF SPT">
@@ -637,124 +641,124 @@
                             <!-- Tombol Hapus dengan Modal -->
                             <button type="button" 
                                     onclick="showDeleteConfirmation(
-                                        {{ $spt->id_spt }}, 
-                                        '{{ addslashes(Str::limit($spt->nomor_surat, 30)) }}', 
-                                        '{{ addslashes(Str::limit($spt->tujuan, 50)) }}'
+                                        <?php echo e($spt->id_spt); ?>, 
+                                        '<?php echo e(addslashes(Str::limit($spt->nomor_surat, 30))); ?>', 
+                                        '<?php echo e(addslashes(Str::limit($spt->tujuan, 50))); ?>'
                                     )"
                                     class="text-red-600 hover:text-red-900 px-2 py-1 rounded hover:bg-red-50 transition duration-150 tooltip"
                                     title="Hapus SPT">
                                 <i class="fas fa-trash"></i>
                                 <span class="tooltip-text">Hapus SPT</span>
                             </button>
-                            @else
+                            <?php else: ?>
                             <span class="text-gray-400 px-2 py-1">-</span>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="9" class="px-6 py-8 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <i class="fas fa-file-alt text-gray-300 text-4xl mb-3"></i>
                             <p class="text-lg">Tidak ada data SPT</p>
                             <p class="text-sm mt-1">Mulai dengan menambahkan Surat Perintah Tugas baru</p>
-                            <a href="{{ route('spt.create') }}" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                            <a href="<?php echo e(route('spt.create')); ?>" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
                                 <i class="fas fa-plus mr-2"></i> Tambah SPT Pertama
                             </a>
                         </div>
                     </td>
                 </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
 
 <!-- Pagination -->
-@php
+<?php
     // Cek apakah $spts ada dan memiliki method hasPages
     $showPagination = false;
     if (isset($spts) && method_exists($spts, 'hasPages') && $spts->hasPages()) {
         $showPagination = true;
     }
-@endphp
+?>
 
-@if($showPagination && $spts->count() > 0)
+<?php if($showPagination && $spts->count() > 0): ?>
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
-        <span class="font-medium">{{ $spts->firstItem() ?: 0 }}</span> 
+        <span class="font-medium"><?php echo e($spts->firstItem() ?: 0); ?></span> 
         sampai 
-        <span class="font-medium">{{ $spts->lastItem() ?: 0 }}</span> 
+        <span class="font-medium"><?php echo e($spts->lastItem() ?: 0); ?></span> 
         dari 
-        <span class="font-medium">{{ $spts->total() }}</span> 
+        <span class="font-medium"><?php echo e($spts->total()); ?></span> 
         Surat Perintah Tugas
     </div>
     
     <div class="flex items-center space-x-1">
-        {{-- Previous Page Link --}}
-        @if ($spts->onFirstPage())
+        
+        <?php if($spts->onFirstPage()): ?>
             <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
                 <i class="fas fa-chevron-left text-xs"></i>
             </span>
-        @else
-            <a href="{{ $spts->previousPageUrl() }}" 
+        <?php else: ?>
+            <a href="<?php echo e($spts->previousPageUrl()); ?>" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-left text-xs"></i>
             </a>
-        @endif
+        <?php endif; ?>
         
-        {{-- Pagination Elements --}}
-        @php
+        
+        <?php
             $current = $spts->currentPage();
             $last = $spts->lastPage();
             $start = max($current - 2, 1);
             $end = min($current + 2, $last);
-        @endphp
+        ?>
         
-        @if($start > 1)
-            <a href="{{ $spts->url(1) }}" 
+        <?php if($start > 1): ?>
+            <a href="<?php echo e($spts->url(1)); ?>" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
-            @if($start > 2)
+            <?php if($start > 2): ?>
                 <span class="px-3 py-1.5 text-gray-500">...</span>
-            @endif
-        @endif
+            <?php endif; ?>
+        <?php endif; ?>
         
-        @for ($page = $start; $page <= $end; $page++)
-            @if ($page == $current)
-                <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
-            @else
-                <a href="{{ $spts->url($page) }}" 
-                   class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
-            @endif
-        @endfor
+        <?php for($page = $start; $page <= $end; $page++): ?>
+            <?php if($page == $current): ?>
+                <span class="px-3 py-1.5 border rounded bg-blue-600 text-white"><?php echo e($page); ?></span>
+            <?php else: ?>
+                <a href="<?php echo e($spts->url($page)); ?>" 
+                   class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150"><?php echo e($page); ?></a>
+            <?php endif; ?>
+        <?php endfor; ?>
         
-        @if($end < $last)
-            @if($end < $last - 1)
+        <?php if($end < $last): ?>
+            <?php if($end < $last - 1): ?>
                 <span class="px-3 py-1.5 text-gray-500">...</span>
-            @endif
-            <a href="{{ $spts->url($last) }}" 
-               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
-        @endif
+            <?php endif; ?>
+            <a href="<?php echo e($spts->url($last)); ?>" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150"><?php echo e($last); ?></a>
+        <?php endif; ?>
         
-        {{-- Next Page Link --}}
-        @if ($spts->hasMorePages())
-            <a href="{{ $spts->nextPageUrl() }}" 
+        
+        <?php if($spts->hasMorePages()): ?>
+            <a href="<?php echo e($spts->nextPageUrl()); ?>" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
-        @else
+        <?php else: ?>
             <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
                 <i class="fas fa-chevron-right text-xs"></i>
             </span>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
-@endif
-@endsection
+<?php endif; ?>
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 <script>
 // ========== CONFIRM CREATE SPD FROM SPT ==========
 function confirmCreateSpd(nomorSurat) {
@@ -783,7 +787,7 @@ function exportData() {
     }
     
     // Redirect to export URL with filters (gunakan route spt.export)
-    const exportUrl = "{{ route('spt.export') }}?" + params.toString();
+    const exportUrl = "<?php echo e(route('spt.export')); ?>?" + params.toString();
     window.location.href = exportUrl;
     
     // Reset button after 2 seconds
@@ -1076,4 +1080,5 @@ document.addEventListener('keydown', function(e) {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/spt.blade.php ENDPATH**/ ?>

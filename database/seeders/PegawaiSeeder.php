@@ -39,14 +39,6 @@ class PegawaiSeeder extends Seeder
                 'tk_jalan' => 'C'
             ],
             [
-                'nama' => 'BUDI ANDRIAN SUTANTO, S. Sos, M.M',
-                'nip' => '19760218 200701 1 006',
-                'pangkat' => 'Pembina',
-                'gol' => 'IV/a',
-                'jabatan' => 'Kabid Perizinan dan Non Perizinan Tertentu',
-                'tk_jalan' => 'C'
-            ],
-            [
                 'nama' => 'M. HAYAT, S. Sos',
                 'nip' => '19701013 199203 1 006',
                 'pangkat' => 'Pembina',

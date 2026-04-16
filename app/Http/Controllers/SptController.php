@@ -6,6 +6,7 @@ use App\Models\SPT;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -20,7 +21,6 @@ class SPTController extends Controller
      */
     public function index(Request $request)
     {
-        // ... kode index tetap sama ...
         try {
             $query = SPT::with('penandaTangan');
             
@@ -221,15 +221,32 @@ class SPTController extends Controller
         
         // Simpan data
         try {
+            DB::beginTransaction();
+            
             $data = $validated;
             $data['nomor_surat'] = $nomorSurat;
             unset($data['nomor_urut']); // Hapus nomor_urut karena tidak ada di tabel
             
-            SPT::create($data);
+            $spt = SPT::create($data);
+            
+            // ========== OTOMATIS BUAT SPD DARI SPT ==========
+            // Panggil SPDController untuk membuat SPD otomatis
+            $spdController = new SPDController();
+            $spd = $spdController->createSpdFromSpt($spt);
+            
+            DB::commit();
+            
+            $message = "Data SPT berhasil ditambahkan. Nomor Surat: {$nomorSurat}";
+            if ($spd) {
+                $message .= " SPD juga telah dibuat otomatis dengan nomor: {$spd->nomor_surat}";
+            }
             
             return redirect()->route('spt.index')
-                ->with('success', "Data SPT berhasil ditambahkan. Nomor Surat: {$nomorSurat}");
+                ->with('success', $message);
+                
         } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan SPT: ' . $e->getMessage());
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Gagal menambahkan data SPT: ' . $e->getMessage());
@@ -241,7 +258,6 @@ class SPTController extends Controller
      */
     public function show($id)
     {
-        // ... kode show tetap sama ...
         try {
             $spt = SPT::with('penandaTangan')->findOrFail($id);
             $pegawaiList = $spt->pegawai_list;
@@ -259,7 +275,6 @@ class SPTController extends Controller
      */
     public function edit($id)
     {
-        // ... kode edit tetap sama dengan tambahan data nomor urut ...
         try {
             $spt = SPT::findOrFail($id);
             
@@ -368,6 +383,8 @@ class SPTController extends Controller
                     ->with('error', "Nomor surat dengan urutan {$request->nomor_urut} untuk tahun {$tahun} sudah ada. Gunakan nomor urut lain.");
             }
             
+            DB::beginTransaction();
+            
             // Update data
             $data = $validated;
             $data['nomor_surat'] = $nomorSuratBaru;
@@ -375,9 +392,49 @@ class SPTController extends Controller
             
             $spt->update($data);
             
+            // ========== UPDATE SPD YANG SUDAH ADA (jika perlu) ==========
+            // Cek apakah sudah ada SPD dari SPT ini
+            $spdController = new SPDController();
+            $existingSpd = \App\Models\SPD::where('spt_id', $spt->id_spt)->first();
+            
+            if ($existingSpd) {
+                // Update SPD yang sudah ada dengan data terbaru dari SPT
+                $existingSpd->update([
+                    'maksud_perjadin' => $spt->tujuan,
+                    'tanggal_berangkat' => $spt->tanggal,
+                    'tempat_berangkat' => $spt->lokasi ?? 'Pelaihari',
+                    'keterangan' => "Diperbarui dari SPT Nomor: {$spt->nomor_surat}"
+                ]);
+                
+                // Update pelaksana perjalanan dinas
+                $pegawaiList = $spt->pegawai_list;
+                $pelaksanaIds = [];
+                if ($pegawaiList && count($pegawaiList) > 0) {
+                    foreach ($pegawaiList as $pegawai) {
+                        $pelaksanaIds[] = $pegawai->id_pegawai;
+                    }
+                }
+                if (!empty($pelaksanaIds)) {
+                    $existingSpd->syncPelaksana($pelaksanaIds);
+                }
+            } else {
+                // Buat SPD baru jika belum ada
+                $spdController->createSpdFromSpt($spt);
+            }
+            
+            DB::commit();
+            
+            $message = "Data SPT berhasil diperbarui. Nomor Surat: {$nomorSuratBaru}";
+            if ($existingSpd) {
+                $message .= " SPD juga telah diperbarui.";
+            }
+            
             return redirect()->route('spt.index')
-                ->with('success', "Data SPT berhasil diperbarui. Nomor Surat: {$nomorSuratBaru}");
+                ->with('success', $message);
+                
         } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal memperbarui SPT: ' . $e->getMessage());
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Gagal memperbarui data SPT: ' . $e->getMessage());
@@ -389,11 +446,22 @@ class SPTController extends Controller
      */
     public function destroy($id)
     {
-        // ... kode destroy tetap sama ...
         try {
             $spt = SPT::findOrFail($id);
             $nomorSurat = $spt->nomor_surat;
+            
+            DB::beginTransaction();
+            
+            // Hapus juga SPD yang terkait jika ada
+            $spd = \App\Models\SPD::where('spt_id', $id)->first();
+            if ($spd) {
+                $spd->pelaksanaPerjadin()->detach();
+                $spd->delete();
+            }
+            
             $spt->delete();
+            
+            DB::commit();
             
             // Jika request AJAX
             if (request()->ajax() || request()->wantsJson()) {
@@ -405,7 +473,11 @@ class SPTController extends Controller
             
             return redirect()->route('spt.index')
                 ->with('success', "Data SPT dengan nomor '{$nomorSurat}' berhasil dihapus.");
+                
         } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menghapus SPT: ' . $e->getMessage());
+            
             // Jika request AJAX
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
@@ -439,7 +511,6 @@ class SPTController extends Controller
      */
     public function export(Request $request)
     {
-        // ... kode export tetap sama ...
         try {
             $query = SPT::with('penandaTangan');
             
@@ -678,7 +749,6 @@ class SPTController extends Controller
      */
     public function print($id)
     {
-        // ... kode print tetap sama ...
         try {
             $spt = SPT::with('penandaTangan')->findOrFail($id);
             $pegawaiList = $spt->pegawai_list;
@@ -707,7 +777,6 @@ class SPTController extends Controller
      */
     public function previewPdf($id)
     {
-        // ... kode previewPdf tetap sama ...
         try {
             $spt = SPT::with('penandaTangan')->findOrFail($id);
             $pegawaiList = $spt->pegawai_list;
@@ -733,7 +802,6 @@ class SPTController extends Controller
      */
     public function getPegawaiData($id)
     {
-        // ... kode getPegawaiData tetap sama ...
         try {
             $pegawai = Pegawai::findOrFail($id);
             

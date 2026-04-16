@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - @yield('title')</title>
+    <title>Admin - <?php echo $__env->yieldContent('title'); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -83,7 +83,7 @@
             <div class="relative overflow-hidden bg-white border-b border-blue-100">
                 <div class="p-4" :class="{'px-3 py-4': !sidebarOpen}">
                     <div class="flex items-center gap-3" :class="{'justify-center': !sidebarOpen}">
-                        <img src="{{ asset('image/dpm.png') }}" 
+                        <img src="<?php echo e(asset('image/dpm.png')); ?>" 
                              alt="Logo DPMPTSP" 
                              class="h-16 w-auto object-contain drop-shadow-md">
                         <div x-show="sidebarOpen" x-transition.opacity.duration.200>
@@ -111,8 +111,8 @@
                         <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
                     </div>
                     <div x-show="sidebarOpen" class="overflow-hidden">
-                        <div class="font-semibold text-gray-800 text-sm truncate">{{ session('user')['username'] ?? 'Admin' }}</div>
-                        <div class="text-xs text-blue-600 font-medium capitalize">{{ session('user')['level'] ?? 'Admin' }}</div>
+                        <div class="font-semibold text-gray-800 text-sm truncate"><?php echo e(session('user')['username'] ?? 'Admin'); ?></div>
+                        <div class="text-xs text-blue-600 font-medium capitalize"><?php echo e(session('user')['level'] ?? 'Admin'); ?></div>
                     </div>
                 </div>
             </div>
@@ -120,17 +120,17 @@
             <!-- Navigation Menu dengan tema biru -->
             <nav class="flex-1 overflow-y-auto scrollbar-thin py-4">
                 <ul class="space-y-1 px-3">
-                    @php
+                    <?php
                         $userLevel = session('user')['level'] ?? 'guest';
-                    @endphp
+                    ?>
                     
                     <!-- MENU UNTUK ADMIN (HANYA DATA MASTER) -->
-                    @if($userLevel == 'admin')
+                    <?php if($userLevel == 'admin'): ?>
                         <!-- User -->
                         <li>
                             <a href="/user" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('user*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('user*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-users text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">User</span>
@@ -141,7 +141,7 @@
                         <li>
                             <a href="/pegawai" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('pegawai*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('pegawai*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-building text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Pegawai</span>
@@ -152,7 +152,7 @@
                         <li>
                             <a href="/program" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('program*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('program*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-boxes text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Program</span>
@@ -163,7 +163,7 @@
                         <li>
                             <a href="/uang-harian" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-money-bill-wave text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Uang Harian</span>
@@ -171,12 +171,12 @@
                         </li>
                         
                     <!-- MENU UNTUK PEGAWAI (HANYA SPT, SPD, DLL) -->
-                    @elseif($userLevel == 'pegawai')
+                    <?php elseif($userLevel == 'pegawai'): ?>
                         <!-- SPT -->
                         <li>
                             <a href="/spt" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-file-invoice-dollar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">SPT</span>
@@ -188,7 +188,7 @@
                         <li>
                             <a href="/spd" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-exchange-alt text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">SPD</span>
@@ -199,7 +199,7 @@
                         <li>
                             <a href="/pengaturan" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-cog text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Rincian Bidang</span>
@@ -210,7 +210,7 @@
                         <li>
                             <a href="/kwitansi" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-file-invoice text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Kwitansi Bidang</span>
@@ -218,7 +218,7 @@
                         </li>
                         
                     <!-- MENU UNTUK KADIS (SEMUA MENU) -->
-                    @elseif($userLevel == 'kadis')
+                    <?php elseif($userLevel == 'kadis'): ?>
                         <!-- Data Master Section -->
                         <li class="mb-2">
                             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2" x-show="sidebarOpen">
@@ -230,7 +230,7 @@
                         <li>
                             <a href="/user" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('user*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('user*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-users text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">User</span>
@@ -241,7 +241,7 @@
                         <li>
                             <a href="/pegawai" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('pegawai*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('pegawai*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-building text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Pegawai</span>
@@ -252,7 +252,7 @@
                         <li>
                             <a href="/program" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('program*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('program*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-boxes text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Program</span>
@@ -263,7 +263,7 @@
                         <li>
                             <a href="/uang-harian" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-money-bill-wave text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Uang Harian</span>
@@ -285,7 +285,7 @@
                         <li>
                             <a href="/spt" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-file-invoice-dollar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">SPT</span>
@@ -297,7 +297,7 @@
                         <li>
                             <a href="/spd" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-exchange-alt text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">SPD Depan</span>
@@ -308,7 +308,7 @@
                         <li>
                             <a href="/pengaturan" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-cog text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Rincian Bidang</span>
@@ -319,13 +319,13 @@
                         <li>
                             <a href="/kwitansi" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      <?php echo e(request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-file-invoice text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Kwitansi Bidang</span>
                             </a>
                         </li>
-                    @endif
+                    <?php endif; ?>
                 </ul>
             </nav>
 
@@ -347,7 +347,7 @@
                 <div class="px-6 py-3">
                     <div class="flex items-center justify-between">
                         <!-- Page Title dengan gradien biru -->
-                        <h2 class="text-lg font-semibold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">@yield('title')</h2>
+                        <h2 class="text-lg font-semibold bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent"><?php echo $__env->yieldContent('title'); ?></h2>
 
                         <!-- Notifications -->
                         <div class="flex items-center gap-3">
@@ -363,19 +363,19 @@
             <!-- MAIN CONTENT -->
             <main class="flex-1 overflow-y-auto bg-gray-50">
                 <!-- PAGE HEADER (if needed) -->
-                @hasSection('subtitle')
+                <?php if (! empty(trim($__env->yieldContent('subtitle')))): ?>
                 <div class="bg-gradient-to-r from-white to-blue-50 border-b border-blue-100 px-6 py-4">
                     <div class="max-w-7xl mx-auto">
                         <p class="text-gray-600 text-sm bg-white/50 inline-block px-3 py-1.5 rounded-lg border border-blue-100 shadow-sm">
-                            <i class="fas fa-info-circle text-blue-500 mr-2"></i>@yield('subtitle')
+                            <i class="fas fa-info-circle text-blue-500 mr-2"></i><?php echo $__env->yieldContent('subtitle'); ?>
                         </p>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
 
                 <!-- CONTENT -->
                 <div class="p-6">
-                    @yield('content')
+                    <?php echo $__env->yieldContent('content'); ?>
                 </div>
             </main>
         </div>
@@ -388,6 +388,6 @@
         });
     </script>
     
-    @yield('scripts')
+    <?php echo $__env->yieldContent('scripts'); ?>
 </body>
-</html>
+</html><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/layouts/admin.blade.php ENDPATH**/ ?>
