@@ -232,21 +232,21 @@
 </head>
 <body>
 
-    @php
+    <?php
         $pelaksanaList = $spd->pelaksanaPerjadin ?? collect();
 
         if($pelaksanaList->count() == 0) {
             $pelaksanaList = collect([(object)['nama' => '-', 'nip' => '-', 'pangkat' => '-', 'gol' => '-', 'jabatan' => '-']]);
         }
-    @endphp
+    ?>
 
-    @foreach($pelaksanaList as $index => $pegawai)
-        <div class="spd-page" @if(!$loop->last) style="page-break-after: always;" @endif>
+    <?php $__currentLoopData = $pelaksanaList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="spd-page" <?php if(!$loop->last): ?> style="page-break-after: always;" <?php endif; ?>>
             <table class="kop-table">
                 <tr>
                     <td class="logo-cell">
                         <div class="logo">
-                            <img src="{{ public_path('image/Logo_Tala-removebg-preview (2).png') }}" alt="Logo Kabupaten Tanah Laut">
+                            <img src="<?php echo e(public_path('image/Logo_Tala-removebg-preview (2).png')); ?>" alt="Logo Kabupaten Tanah Laut">
                         </div>
                     </td>
                     <td class="header-text">
@@ -262,7 +262,7 @@
 
             <div class="judul-surat">
                 <h1>SURAT PERJALANAN DINAS (SPD)</h1>
-                <div class="nomor">{{ $spd->nomor_surat ?? '-' }}</div>
+                <div class="nomor"><?php echo e($spd->nomor_surat ?? '-'); ?></div>
             </div>
 
             <table class="spd-table">
@@ -274,12 +274,12 @@
                         <div class="align-row">
                             <span class="align-label">Nama</span>
                             <span class="align-colon">:</span>
-                            <span class="align-value">{{ $spd->penggunaAnggaran->nama ?? '-' }}</span>
+                            <span class="align-value"><?php echo e($spd->penggunaAnggaran->nama ?? '-'); ?></span>
                         </div>
                         <div class="align-row">
                             <span class="align-label">NIP</span>
                             <span class="align-colon">:</span>
-                            <span class="align-value">{{ $spd->penggunaAnggaran->nip ?? '-' }}</span>
+                            <span class="align-value"><?php echo e($spd->penggunaAnggaran->nip ?? '-'); ?></span>
                         </div>
                     </td>
                 </tr>
@@ -292,12 +292,12 @@
                         <div class="align-row">
                             <span class="align-label">Nama</span>
                             <span class="align-colon">:</span>
-                            <span class="align-value">{{ $pegawai->nama ?? '-' }}</span>
+                            <span class="align-value"><?php echo e($pegawai->nama ?? '-'); ?></span>
                         </div>
                         <div class="align-row">
                             <span class="align-label">NIP</span>
                             <span class="align-colon">:</span>
-                            <span class="align-value">{{ $pegawai->nip ?? '-' }}</span>
+                            <span class="align-value"><?php echo e($pegawai->nip ?? '-'); ?></span>
                         </div>
                     </td>
                 </tr>
@@ -307,8 +307,8 @@
                     <td class="col-nomor">3.</td>
                     <td class="col-label">a. Pangkat dan Golongan<br>b. Jabatan / Instansi<br>c. Tingkat biaya perjalanan dinas</td>
                     <td colspan="2">
-                        a. {{ $pegawai->pangkat ?? '-' }} ({{ $pegawai->gol ?? '-' }})<br>
-                        b. {{ $pegawai->jabatan ?? '-' }} / {{ $spd->skpd ?? 'DPMPTSP Kab. Tanah Laut' }}<br>
+                        a. <?php echo e($pegawai->pangkat ?? '-'); ?> (<?php echo e($pegawai->gol ?? '-'); ?>)<br>
+                        b. <?php echo e($pegawai->jabatan ?? '-'); ?> / <?php echo e($spd->skpd ?? 'DPMPTSP Kab. Tanah Laut'); ?><br>
                         c. D
                     </td>
                 </tr>
@@ -317,14 +317,14 @@
                 <tr>
                     <td class="col-nomor">4.</td>
                     <td class="col-label">Maksud perjalanan dinas</td>
-                    <td colspan="2">{{ $spd->maksud_perjadin ?? '-' }}</td>
+                    <td colspan="2"><?php echo e($spd->maksud_perjadin ?? '-'); ?></td>
                 </tr>
 
                 <!-- ROW 5 -->
                 <tr>
                     <td class="col-nomor">5.</td>
                     <td class="col-label">Alat angkut yang digunakan</td>
-                    <td colspan="2">{{ $spd->label_alat_transportasi ?? '-' }}</td>
+                    <td colspan="2"><?php echo e($spd->label_alat_transportasi ?? '-'); ?></td>
                 </tr>
 
                 <!-- ROW 6 -->
@@ -332,8 +332,9 @@
                     <td class="col-nomor">6.</td>
                     <td class="col-label">a. Tempat berangkat<br>b. Tempat tujuan</td>
                     <td colspan="2">
-                        a. {{ $spd->tempat_berangkat ?? 'Pelaihari' }}<br>
-                        b. {{ $spd->nama_tempat_tujuan ?? '-' }}
+                        a. <?php echo e($spd->tempat_berangkat ?? 'Pelaihari'); ?><br>
+                        b. <?php echo e($spd->nama_tempat_tujuan ?? '-'); ?>
+
                     </td>
                 </tr>
 
@@ -342,7 +343,7 @@
                     <td class="col-nomor">7.</td>
                     <td class="col-label">a. Lamanya perjalanan dinas<br>b. Tanggal berangkat<br>c. Tanggal harus kembali / tiba di tempat baru</td>
                     <td colspan="2">
-                        @php
+                        <?php
                             $lama = $spd->lama_perjadin ?? 1;
                             $lamaTerbilang = '';
                             if($lama == 1) $lamaTerbilang = 'satu';
@@ -351,10 +352,11 @@
                             elseif($lama == 4) $lamaTerbilang = 'empat';
                             elseif($lama == 5) $lamaTerbilang = 'lima';
                             else $lamaTerbilang = $lama;
-                        @endphp
-                        a. {{ $lama }} ({{ $lamaTerbilang }}) hari<br>
-                        b. {{ $spd->tanggal_berangkat ? \Carbon\Carbon::parse($spd->tanggal_berangkat)->translatedFormat('d F Y') : '-' }}<br>
-                        c. {{ $spd->tanggal_kembali ? \Carbon\Carbon::parse($spd->tanggal_kembali)->translatedFormat('d F Y') : '-' }}
+                        ?>
+                        a. <?php echo e($lama); ?> (<?php echo e($lamaTerbilang); ?>) hari<br>
+                        b. <?php echo e($spd->tanggal_berangkat ? \Carbon\Carbon::parse($spd->tanggal_berangkat)->translatedFormat('d F Y') : '-'); ?><br>
+                        c. <?php echo e($spd->tanggal_kembali ? \Carbon\Carbon::parse($spd->tanggal_kembali)->translatedFormat('d F Y') : '-'); ?>
+
                     </td>
                 </tr>
 
@@ -365,7 +367,7 @@
                     <td class="col-tgl-lahir">Tanggal lahir</td>
                     <td class="col-keterangan">Keterangan</td>
                 </tr>
-                @php
+                <?php
                     $pengikutList = $spd->pengikut ?? [];
                     if(count($pengikutList) == 0) {
                         $pengikutList = [
@@ -376,23 +378,24 @@
                             (object)['nama' => '', 'tgl_lahir' => '', 'keterangan' => '']
                         ];
                     }
-                @endphp
-                @foreach($pengikutList as $idx => $pengikut)
+                ?>
+                <?php $__currentLoopData = $pengikutList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $pengikut): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
                     <td class="col-nomor"></td>
-                    <td class="col-label">{{ $idx + 1 }}. {{ $pengikut->nama ?? '-' }}</td>
-                    <td class="col-tgl-lahir">{{ $pengikut->tgl_lahir ?? '-' }}</td>
-                    <td class="col-keterangan">{{ $pengikut->keterangan ?? '-' }}</td>
+                    <td class="col-label"><?php echo e($idx + 1); ?>. <?php echo e($pengikut->nama ?? '-'); ?></td>
+                    <td class="col-tgl-lahir"><?php echo e($pengikut->tgl_lahir ?? '-'); ?></td>
+                    <td class="col-keterangan"><?php echo e($pengikut->keterangan ?? '-'); ?></td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                 <!-- ROW 9 -->
                 <tr>
                     <td class="col-nomor">9.</td>
                     <td class="col-label">a. SKPD<br>b. Kode rekening</td>
                     <td colspan="2">
-                        a. {{ $spd->skpd ?? 'Dinas Penanaman Modal dan PTSP Kab. Tanah Laut' }}<br>
-                        b. {{ $spd->kode_rek ?? $spd->pejabat_teknis_kode_rekening ?? '-' }}
+                        a. <?php echo e($spd->skpd ?? 'Dinas Penanaman Modal dan PTSP Kab. Tanah Laut'); ?><br>
+                        b. <?php echo e($spd->kode_rek ?? $spd->pejabat_teknis_kode_rekening ?? '-'); ?>
+
                     </td>
                 </tr>
 
@@ -400,12 +403,12 @@
                 <tr>
                     <td class="col-nomor">10.</td>
                     <td class="col-label">Keterangan lain-lain</td>
-                    <td colspan="2">{{ $spd->keterangan ?? '-' }}</td>
+                    <td colspan="2"><?php echo e($spd->keterangan ?? '-'); ?></td>
                 </tr>
             </table>
 
             <div class="tanda-tangan">
-                @php
+                <?php
                     $bulanIndonesia = [
                         'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
                         'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
@@ -423,21 +426,22 @@
                     $ttdNip = $spd->penggunaAnggaran->nip ?? '-';
                     $ttdPangkat = $spd->penggunaAnggaran->pangkat ?? '';
                     $ttdJabatan = $spd->penggunaAnggaran->jabatan ?? 'Pengguna Anggaran';
-                @endphp
+                ?>
 
-                <div class="tempat-tanggal">Dikeluarkan di : {{ $tempatDikeluarkan }}</div>
-                <div class="tempat-tanggal">Pada Tanggal : {{ $tanggal }}</div>
+                <div class="tempat-tanggal">Dikeluarkan di : <?php echo e($tempatDikeluarkan); ?></div>
+                <div class="tempat-tanggal">Pada Tanggal : <?php echo e($tanggal); ?></div>
 
                 <div class="ttd-space"></div>
 
-                <div class="jabatan-ttd">{{ $ttdJabatan }}</div>
-                <div class="nama-ttd">{{ $ttdNama }}</div>
-                <div class="nip-ttd">NIP. {{ $ttdNip }}</div>
+                <div class="jabatan-ttd"><?php echo e($ttdJabatan); ?></div>
+                <div class="nama-ttd"><?php echo e($ttdNama); ?></div>
+                <div class="nip-ttd">NIP. <?php echo e($ttdNip); ?></div>
             </div>
 
             <div class="clearfix"></div>
         </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 </body>
 </html>
+<?php /**PATH C:\PKL POLITALA\dpmptsp\resources\views/admin/spd-pdf-depan.blade.php ENDPATH**/ ?>
