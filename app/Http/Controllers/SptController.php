@@ -234,11 +234,18 @@ class SPTController extends Controller
             $spdController = new SPDController();
             $spd = $spdController->createSpdFromSpt($spt);
             
+            // ========== OTOMATIS BUAT LHPD DARI SPT ==========
+            $lhpdController = new LhpdController();
+            $lhpd = $lhpdController->createLhpdFromSpt($spt);
+            
             DB::commit();
             
             $message = "Data SPT berhasil ditambahkan. Nomor Surat: {$nomorSurat}";
             if ($spd) {
                 $message .= " SPD juga telah dibuat otomatis dengan nomor: {$spd->nomor_surat}";
+            }
+            if ($lhpd) {
+                $message .= " LHPD juga telah dibuat otomatis.";
             }
             
             return redirect()->route('spt.index')
@@ -422,12 +429,23 @@ class SPTController extends Controller
                 $spdController->createSpdFromSpt($spt);
             }
             
+            // ========== UPDATE LHPD OTOMATIS ==========
+            $lhpdController = new LhpdController();
+            if ($existingSpd) {
+                // Update LHPD berdasarkan SPD yang sudah ada
+                $lhpdController->updateLhpdFromSpd($existingSpd);
+            } else {
+                // Buat LHPD baru dari SPT
+                $lhpdController->createLhpdFromSpt($spt);
+            }
+            
             DB::commit();
             
             $message = "Data SPT berhasil diperbarui. Nomor Surat: {$nomorSuratBaru}";
             if ($existingSpd) {
                 $message .= " SPD juga telah diperbarui.";
             }
+            $message .= " LHPD juga telah diperbarui.";
             
             return redirect()->route('spt.index')
                 ->with('success', $message);
@@ -457,6 +475,15 @@ class SPTController extends Controller
             if ($spd) {
                 $spd->pelaksanaPerjadin()->detach();
                 $spd->delete();
+            }
+            
+            // Hapus juga LHPD yang terkait
+            $lhpdController = new LhpdController();
+            $lhpd = \App\Models\Lhpd::where('tujuan', $spt->tujuan)
+                ->where('tanggal_berangkat', $spt->tanggal)
+                ->first();
+            if ($lhpd) {
+                $lhpd->delete();
             }
             
             $spt->delete();

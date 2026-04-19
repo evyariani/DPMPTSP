@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SPD extends Model
 {
@@ -119,8 +120,16 @@ class SPD extends Model
             'id_pegawai'
         )->withTimestamps();
     }
+    
+    /**
+     * Relasi one-to-one ke RincianBidang
+     */
+    public function rincianBidang(): HasOne
+    {
+        return $this->hasOne(RincianBidang::class, 'spd_id', 'id_spd');
+    }
 
-    // ========== ACCESSORS PENANDA TANGAN (AMAN - TIDAK KONFLIK) ==========
+    // ========== ACCESSORS PENANDA TANGAN ==========
     
     /**
      * Mendapatkan informasi lengkap penanda tangan dalam satu string
@@ -538,6 +547,49 @@ class SPD extends Model
     }
     
     /**
+     * Sync/Update RincianBidang otomatis
+     */
+    public function syncRincianBidang(array $additionalData = []): RincianBidang
+    {
+        return RincianBidang::syncFromSpd($this, $additionalData);
+    }
+    
+    /**
+     * Override booted method untuk auto sync RincianBidang
+     */
+    protected static function booted()
+    {
+        // Event saat SPD dibuat
+        static::created(function ($spd) {
+            $spd->syncRincianBidang();
+        });
+        
+        // // Event saat SPD diupdate
+        // static::updated(function ($spd) {
+        //     // Cek apakah ada perubahan pada data yang mempengaruhi RincianBidang
+        //     $dirtyFields = ['nomor_surat', 'tempat_tujuan', 'tanggal_berangkat', 'tanggal_kembali', 'lama_perjadin'];
+        //     $isRelatedChanged = false;
+            
+        //     foreach ($dirtyFields as $field) {
+        //         if ($spd->isDirty($field)) {
+        //             $isRelatedChanged = true;
+        //             break;
+        //         }
+        //     }
+            
+        //     // Jika ada perubahan pada pelaksana
+        //     if ($spd->isDirty('pelaksana_perjadin') || $isRelatedChanged) {
+        //         $spd->syncRincianBidang();
+        //     }
+        // });
+        
+        // // Event setelah sync pelaksana
+        // static::saved(function ($spd) {
+        //     // Optional: sync ulang jika diperlukan
+        // });
+    }
+    
+    /**
      * Ambil point pertama dari tujuan SPT untuk dijadikan maksud perjadin
      */
     public static function extractMaksudPerjadinFromSptTujuan($tujuan)
@@ -600,6 +652,7 @@ class SPD extends Model
             $spd->syncPelaksana($pelaksanaIds);
         }
         
+        // RincianBidang akan otomatis dibuat via booted created event
         return $spd;
     }
 }

@@ -8,6 +8,8 @@ use App\Http\Controllers\UangHarianController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SPTController;
 use App\Http\Controllers\SPDController;
+use App\Http\Controllers\LhpdController;
+use App\Http\Controllers\RincianBidangController;
 
 /*
 |--------------------------------------------------------------------------
@@ -163,7 +165,53 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::get('/{id}', [SPDController::class, 'show'])->name('spd.show');
     });
 
-    // MODUL LAINNYA
+    // ========== LHPD MANAGEMENT - SEMUA USER BISA AKSES ==========
+    Route::prefix('lhpd')->group(function () {
+        // API Routes (diletakkan paling atas)
+        Route::get('/export', [LhpdController::class, 'export'])->name('lhpd.export');
+        Route::get('/api/get-fotos/{id}', [LhpdController::class, 'getFotos'])->name('lhpd.api.get-fotos');
+        Route::get('/api/get-by-spt/{sptId}', [LhpdController::class, 'getBySptId'])->name('lhpd.api.get-by-spt');
+        Route::get('/api/get-by-spd/{spdId}', [LhpdController::class, 'getBySpdId'])->name('lhpd.api.get-by-spd');
+        
+        // Main Routes
+        Route::get('/', [LhpdController::class, 'index'])->name('lhpd.index');
+        Route::get('/create', [LhpdController::class, 'create'])->name('lhpd.create');
+        Route::post('/', [LhpdController::class, 'store'])->name('lhpd.store');
+        
+        // PDF Routes
+        Route::get('/print/{id}', [LhpdController::class, 'print'])->name('lhpd.print');
+        Route::get('/preview-pdf/{id}', [LhpdController::class, 'previewPdf'])->name('lhpd.preview-pdf');
+        
+        // CRUD Routes (diletakkan paling akhir)
+        Route::get('/{id}/edit', [LhpdController::class, 'edit'])->name('lhpd.edit');
+        Route::put('/{id}', [LhpdController::class, 'update'])->name('lhpd.update');
+        Route::delete('/{id}', [LhpdController::class, 'destroy'])->name('lhpd.destroy');
+        Route::get('/{id}', [LhpdController::class, 'show'])->name('lhpd.show');
+    });
+
+    // ========== RINCIAN BIDANG - SEMUA USER BISA AKSES ==========
+    Route::prefix('rincian')->name('rincian.')->group(function () {
+        // ========== API ROUTES (diletakkan paling atas) ==========
+        Route::post('/sync-all', [RincianBidangController::class, 'syncAll'])->name('sync-all');
+        Route::get('/sync-all', [RincianBidangController::class, 'syncAll'])->name('sync-all.get'); // Alternative GET method
+        Route::get('/spd/{spdId}/json', [RincianBidangController::class, 'getBySpd'])->name('get-by-spd');
+        Route::get('/spd/{spdId}/cetak', [RincianBidangController::class, 'cetakBySpd'])->name('cetak-by-spd');
+        
+        // ========== PDF ROUTES ==========
+        Route::get('/cetak/{id}', [RincianBidangController::class, 'cetak'])->name('cetak');
+        Route::get('/preview/{id}', [RincianBidangController::class, 'previewPdf'])->name('preview');
+        
+        // ========== MAIN ROUTES (CRUD) ==========
+        Route::get('/', [RincianBidangController::class, 'index'])->name('index');
+        Route::get('/create', [RincianBidangController::class, 'create'])->name('create');
+        Route::post('/', [RincianBidangController::class, 'store'])->name('store');
+        Route::get('/{id}', [RincianBidangController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [RincianBidangController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [RincianBidangController::class, 'update'])->name('update');
+        Route::delete('/{id}', [RincianBidangController::class, 'destroy'])->name('destroy');
+    });
+
+    // MODUL LAINNYA (HANYA ADMIN & KADIS)
     Route::middleware(['role:admin|kadis'])->group(function () {
         Route::get('/unit', function () {
             return view('admin.unit');

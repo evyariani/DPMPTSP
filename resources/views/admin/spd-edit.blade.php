@@ -419,6 +419,7 @@
                            value="{{ old('tempat_berangkat', $spd->tempat_berangkat) }}"
                            class="form-input"
                            placeholder="Contoh: Pelaihari"
+                           readonly
                            required>
                 </div>
                 
@@ -493,21 +494,28 @@
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
-                        Pengguna Anggaran (Kepala Dinas)
-                    </label>
-                    <select name="pengguna_anggaran" 
-                            class="form-input"
-                            required>
-                        <option value="">Pilih Kepala Dinas</option>
-                        @foreach($semuaPegawai as $pegawai)
-                            <option value="{{ $pegawai->id_pegawai }}" 
-                                {{ old('pengguna_anggaran', $spd->pengguna_anggaran) == $pegawai->id_pegawai ? 'selected' : '' }}>
-                                {{ $pegawai->nama }} - {{ $pegawai->nip }} ({{ $pegawai->jabatan }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
+        Pengguna Anggaran (Kepala Dinas)
+    </label>
+    
+    @php
+        // Cari data Kepala Dinas dari koleksi $semuaPegawai
+        // Sesuaikan kondisi pencarian Kadis dengan database Anda
+        $kadis = $semuaPegawai->firstWhere('jabatan', 'Kepala Dinas'); 
+        // Atau bisa pakai: $semuaPegawai->where('is_kadis', true)->first();
+        
+        $idKadis = $kadis->id_pegawai ?? '';
+        $namaKadis = $kadis ? $kadis->nama . ' - ' . $kadis->nip . ' (' . $kadis->jabatan . ')' : 'Kepala Dinas tidak ditemukan';
+    @endphp
+    
+    <input type="text" 
+           class="form-input bg-gray-100" 
+           value="{{ $namaKadis }}"
+           readonly
+           disabled>
+    
+    <input type="hidden" name="pengguna_anggaran" value="{{ $idKadis }}">
+</div>
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -517,6 +525,7 @@
                            name="skpd" 
                            value="{{ old('skpd', $spd->skpd) }}"
                            class="form-input"
+                           readonly
                            placeholder="Contoh: Dinas Penanaman Modal dan PTSP">
                 </div>
                 
@@ -528,6 +537,7 @@
                            name="tempat_dikeluarkan" 
                            value="{{ old('tempat_dikeluarkan', $spd->tempat_dikeluarkan) }}"
                            class="form-input"
+                           readonly
                            placeholder="Contoh: Pelaihari">
                 </div>
                 
@@ -538,7 +548,8 @@
                     <input type="date" 
                            name="tanggal_dikeluarkan" 
                            value="{{ old('tanggal_dikeluarkan', $spd->tanggal_dikeluarkan ? $spd->tanggal_dikeluarkan->format('Y-m-d') : '') }}"
-                           class="form-input">
+                           class="form-input"
+                           readonly>
                 </div>
             </div>
         </div>

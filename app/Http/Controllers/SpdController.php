@@ -342,101 +342,116 @@ class SPDController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage (Edit Halaman Depan)
-     */
-    public function update(Request $request, $id)
-    {
-        try {
-            $spd = SPD::findOrFail($id);
+/**
+ * Update the specified resource in storage (Edit Halaman Depan)
+ */
+public function update(Request $request, $id)
+{
+    try {
+        $spd = SPD::findOrFail($id);
 
-            $validated = $request->validate([
-                'nomor_urut' => 'required|integer|min:1|max:999',
-                'pengguna_anggaran' => 'required|exists:tb_pegawai,id_pegawai',
-                'maksud_perjadin' => 'required|string',
-                'alat_transportasi' => 'required|in:transportasi_darat,transportasi_udara,transportasi_darat_udara,angkutan_darat,kendaraan_dinas,angkutan_umum',
-                'tempat_berangkat' => 'required|string|max:255',
-                'tempat_tujuan' => 'required|exists:tb_daerah,id',
-                'tanggal_berangkat' => 'required|date',
-                'tanggal_kembali' => 'required|date|after_or_equal:tanggal_berangkat',
-                'lama_perjadin' => 'nullable|integer|min:1',
-                'skpd' => 'nullable|string|max:100',
-                'kode_rek' => 'nullable|string|max:50',
-                'tempat_dikeluarkan' => 'nullable|string|max:100',
-                'tanggal_dikeluarkan' => 'nullable|date',
-                'pelaksana_perjadin' => 'required|array|min:1',
-                'pelaksana_perjadin.*' => 'required|exists:tb_pegawai,id_pegawai',
-                'pejabat_teknis_id' => 'required|exists:tb_program,id_program',
-            ]);
+        $validated = $request->validate([
+            'nomor_urut' => 'required|integer|min:1|max:999',
+            'pengguna_anggaran' => 'required|exists:tb_pegawai,id_pegawai',
+            'maksud_perjadin' => 'required|string',
+            'alat_transportasi' => 'required|in:transportasi_darat,transportasi_udara,transportasi_darat_udara,angkutan_darat,kendaraan_dinas,angkutan_umum',
+            'tempat_berangkat' => 'required|string|max:255',
+            'tempat_tujuan' => 'required|exists:tb_daerah,id',
+            'tanggal_berangkat' => 'required|date',
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_berangkat',
+            'lama_perjadin' => 'nullable|integer|min:1',
+            'skpd' => 'nullable|string|max:100',
+            'kode_rek' => 'nullable|string|max:50',
+            'tempat_dikeluarkan' => 'nullable|string|max:100',
+            'tanggal_dikeluarkan' => 'nullable|date',
+            'pelaksana_perjadin' => 'required|array|min:1',
+            'pelaksana_perjadin.*' => 'required|exists:tb_pegawai,id_pegawai',
+            'pejabat_teknis_id' => 'required|exists:tb_program,id_program',
+        ]);
 
-            if (empty($validated['lama_perjadin'])) {
-                $start = new \DateTime($validated['tanggal_berangkat']);
-                $end = new \DateTime($validated['tanggal_kembali']);
-                $interval = $start->diff($end);
-                $validated['lama_perjadin'] = $interval->days + 1;
-            }
+        if (empty($validated['lama_perjadin'])) {
+            $start = new \DateTime($validated['tanggal_berangkat']);
+            $end = new \DateTime($validated['tanggal_kembali']);
+            $interval = $start->diff($end);
+            $validated['lama_perjadin'] = $interval->days + 1;
+        }
 
-            $tahun = date('Y', strtotime($request->tanggal_berangkat));
-            $nomorSuratBaru = $this->generateNomorSurat($request->nomor_urut, $tahun);
-            
-            $exists = SPD::where('nomor_surat', $nomorSuratBaru)
-                ->where('id_spd', '!=', $id)
-                ->exists();
-            
-            if ($exists) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', "Nomor surat dengan urutan {$request->nomor_urut} untuk tahun {$tahun} sudah ada. Gunakan nomor urut lain.");
-            }
-
-            $program = Program::with('pegawai')->find($request->pejabat_teknis_id);
-            
-            if (!$program) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'Data program tidak ditemukan');
-            }
-
-            DB::beginTransaction();
-            
-            $data = [
-                'nomor_surat' => $nomorSuratBaru,
-                'pengguna_anggaran' => $validated['pengguna_anggaran'],
-                'maksud_perjadin' => $validated['maksud_perjadin'],
-                'alat_transportasi' => $validated['alat_transportasi'],
-                'tempat_berangkat' => $validated['tempat_berangkat'],
-                'tempat_tujuan' => $validated['tempat_tujuan'],
-                'tanggal_berangkat' => $validated['tanggal_berangkat'],
-                'tanggal_kembali' => $validated['tanggal_kembali'],
-                'lama_perjadin' => $validated['lama_perjadin'],
-                'skpd' => $validated['skpd'] ?? null,
-                'kode_rek' => $validated['kode_rek'] ?? null,
-                'tempat_dikeluarkan' => $validated['tempat_dikeluarkan'] ?? null,
-                'tanggal_dikeluarkan' => $validated['tanggal_dikeluarkan'] ?? null,
-                'pejabat_teknis_id' => $validated['pejabat_teknis_id'],
-                'pejabat_teknis_pegawai_id' => $program->id_pegawai,
-                'pejabat_teknis_kode_rekening' => $program->kode_rekening,
-                'pejabat_teknis_program' => $program->program,
-                'pejabat_teknis_kegiatan' => $program->kegiatan,
-                'pejabat_teknis_sub_kegiatan' => $program->sub_kegiatan,
-            ];
-
-            $spd->update($data);
-            $spd->syncPelaksana($request->pelaksana_perjadin);
-            
-            DB::commit();
-
-            return redirect()->route('spd.index')
-                ->with('success', "Data SPD halaman depan berhasil diperbarui. Nomor Surat: {$nomorSuratBaru}");
-                
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error di SPDController@update: ' . $e->getMessage());
+        $tahun = date('Y', strtotime($request->tanggal_berangkat));
+        $nomorSuratBaru = $this->generateNomorSurat($request->nomor_urut, $tahun);
+        
+        $exists = SPD::where('nomor_surat', $nomorSuratBaru)
+            ->where('id_spd', '!=', $id)
+            ->exists();
+        
+        if ($exists) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal memperbarui data SPD: ' . $e->getMessage());
+                ->with('error', "Nomor surat dengan urutan {$request->nomor_urut} untuk tahun {$tahun} sudah ada. Gunakan nomor urut lain.");
         }
+
+        $program = Program::with('pegawai')->find($request->pejabat_teknis_id);
+        
+        if (!$program) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Data program tidak ditemukan');
+        }
+
+        DB::beginTransaction();
+        
+        $data = [
+            'nomor_surat' => $nomorSuratBaru,
+            'pengguna_anggaran' => $validated['pengguna_anggaran'],
+            'maksud_perjadin' => $validated['maksud_perjadin'],
+            'alat_transportasi' => $validated['alat_transportasi'],
+            'tempat_berangkat' => $validated['tempat_berangkat'],
+            'tempat_tujuan' => $validated['tempat_tujuan'],
+            'tanggal_berangkat' => $validated['tanggal_berangkat'],
+            'tanggal_kembali' => $validated['tanggal_kembali'],
+            'lama_perjadin' => $validated['lama_perjadin'],
+            'skpd' => $validated['skpd'] ?? null,
+            'kode_rek' => $validated['kode_rek'] ?? null,
+            'tempat_dikeluarkan' => $validated['tempat_dikeluarkan'] ?? null,
+            'tanggal_dikeluarkan' => $validated['tanggal_dikeluarkan'] ?? null,
+            'pejabat_teknis_id' => $validated['pejabat_teknis_id'],
+            'pejabat_teknis_pegawai_id' => $program->id_pegawai,
+            'pejabat_teknis_kode_rekening' => $program->kode_rekening,
+            'pejabat_teknis_program' => $program->program,
+            'pejabat_teknis_kegiatan' => $program->kegiatan,
+            'pejabat_teknis_sub_kegiatan' => $program->sub_kegiatan,
+        ];
+
+        $spd->update($data);
+        $spd->syncPelaksana($request->pelaksana_perjadin);
+        
+        // ========== UPDATE RINCIAN BIDANG OTOMATIS ==========
+        // TAMBAHKAN INI - Sync RincianBidang setelah SPD diupdate
+        try {
+            $spd->syncRincianBidang();
+        } catch (\Exception $e) {
+            Log::warning('Gagal sync RincianBidang: ' . $e->getMessage());
+            // Lanjutkan proses, jangan rollback
+        }
+        
+        // ========== UPDATE LHPD OTOMATIS ==========
+        $lhpdController = new LhpdController();
+        $lhpdController->updateLhpdFromSpd($spd);
+        
+        DB::commit();
+
+        return redirect()->route('spd.index')
+            ->with('success', "Data SPD halaman depan berhasil diperbarui. Nomor Surat: {$nomorSuratBaru}, Rincian Bidang dan LHPD juga telah diperbarui.");
+            
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error di SPDController@update: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
+        
+        return redirect()->back()
+            ->withInput()
+            ->with('error', 'Gagal memperbarui data SPD: ' . $e->getMessage());
     }
+}
 
     /**
      * Remove the specified resource from storage.
@@ -448,19 +463,33 @@ class SPDController extends Controller
             $nomorSurat = $spd->nomor_surat;
             
             DB::beginTransaction();
+            
+            // Hapus relasi pelaksana
             $spd->pelaksanaPerjadin()->detach();
+            
+            // Hapus LHPD yang terkait jika ada
+            if ($spd->spt) {
+                $lhpd = \App\Models\Lhpd::where('tujuan', $spd->spt->tujuan)
+                    ->where('tanggal_berangkat', $spd->spt->tanggal)
+                    ->first();
+                if ($lhpd) {
+                    $lhpd->delete();
+                    Log::info('LHPD terkait SPD dihapus, ID LHPD: ' . $lhpd->id_lhpd);
+                }
+            }
+            
             $spd->delete();
             DB::commit();
 
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => "Data SPD dengan nomor '{$nomorSurat}' berhasil dihapus."
+                    'message' => "Data SPD dengan nomor '{$nomorSurat}' dan LHPD terkait berhasil dihapus."
                 ]);
             }
 
             return redirect()->route('spd.index')
-                ->with('success', "Data SPD dengan nomor '{$nomorSurat}' berhasil dihapus.");
+                ->with('success', "Data SPD dengan nomor '{$nomorSurat}' dan LHPD terkait berhasil dihapus.");
                 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -532,6 +561,11 @@ class SPDController extends Controller
             if (!empty($pelaksanaIds)) {
                 $spd->syncPelaksana($pelaksanaIds);
             }
+            
+            // ========== BUAT LHPD OTOMATIS ==========
+            $lhpdController = new LhpdController();
+            $lhpdController->createLhpdFromSpt($spt);
+            
             DB::commit();
             
             Log::info('SPD berhasil dibuat dari SPT ID: ' . $spt->id_spt . ', Nomor Surat: ' . $nomorSurat);
@@ -555,7 +589,7 @@ class SPDController extends Controller
             
             if ($spd) {
                 return redirect()->route('spd.belakang', $spd->id_spd)
-                    ->with('success', "SPD berhasil dibuat dari SPT. Silakan lengkapi data penanda tangan.");
+                    ->with('success', "SPD berhasil dibuat dari SPT. Silakan lengkapi data penanda tangan. LHPD juga telah dibuat otomatis.");
             } else {
                 return redirect()->route('spt.index')
                     ->with('error', 'Gagal membuat SPD dari SPT.');
