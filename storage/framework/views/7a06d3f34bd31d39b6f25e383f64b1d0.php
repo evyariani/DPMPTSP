@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Edit Rincian Biaya Perjalanan Dinas'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -138,60 +136,89 @@
             </div>
 
             <!-- BENDAHARA PENGELUARAN (READONLY - TIDAK BISA DIUBAH) -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Bendahara Pengeluaran
-                </label>
-                <div class="border border-gray-300 rounded-lg overflow-hidden">
-                    <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                        <div class="text-sm font-medium text-gray-700">Data dari sistem (Tidak dapat diubah)</div>
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">
+        Bendahara Pengeluaran
+    </label>
+    <div class="border border-gray-300 rounded-lg overflow-hidden">
+        <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+            <div class="text-sm font-medium text-gray-700">Data dari sistem (Tidak dapat diubah)</div>
+        </div>
+        <div class="p-4">
+            <?php
+                // Gunakan snapshot bendahara jika ada
+                $bendahara = $rincian->bendahara_snapshot;
+            ?>
+            <?php if($bendahara && ($bendahara->nama || $rincian->bendahara_nama)): ?>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
                     </div>
-                    <div class="p-4">
-                        <?php
-                            $bendahara = $rincian->bendaharaPengeluaran;
-                        ?>
-                        <?php if($bendahara): ?>
-                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="font-medium text-gray-800"><?php echo e($bendahara->nama); ?></div>
-                                    <div class="text-xs text-gray-500">
-                                        NIP: <?php echo e($bendahara->nip ?? '-'); ?> | Jabatan: <?php echo e($bendahara->jabatan ?? '-'); ?>
+                    <div>
+                        <div class="font-medium text-gray-800"><?php echo e($bendahara->nama ?? $rincian->bendahara_nama); ?></div>
+                        <div class="text-xs text-gray-500">
+                            NIP: <?php echo e($bendahara->nip ?? $rincian->bendahara_nip ?? '-'); ?> | 
+                            Jabatan: <?php echo e($bendahara->jabatan ?? $rincian->bendahara_jabatan ?? '-'); ?>
 
-                                    </div>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <div class="font-medium text-yellow-800">Belum ditentukan</div>
-                                    <div class="text-xs text-yellow-600">Bendahara pengeluaran belum dipilih</div>
-                                </div>
+                        </div>
+                        <?php if($rincian->bendahara_nama): ?>
+                            <div class="text-xs text-blue-500 mt-1">
+                                <i class="fas fa-camera mr-1"></i> Data snapshot (tidak berubah meskipun data master berubah)
                             </div>
                         <?php endif; ?>
-                        
-                        <!-- Hidden input untuk mengirim bendahara yang sudah ada -->
-                        <input type="hidden" name="bendahara_pengeluaran_id" value="<?php echo e($rincian->bendahara_pengeluaran_id); ?>">
-                        
-                        <p class="text-xs text-gray-500 mt-3">
-                            <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            Bendahara pengeluaran diambil dari data pegawai dengan jabatan "Bendahara Pengeluaran" dan tidak dapat diubah di sini.
-                        </p>
                     </div>
                 </div>
-            </div>
+            <?php elseif($rincian->bendahara_pengeluaran_id && $rincian->bendaharaPengeluaran): ?>
+                
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-medium text-gray-800"><?php echo e($rincian->bendaharaPengeluaran->nama); ?></div>
+                        <div class="text-xs text-gray-500">
+                            NIP: <?php echo e($rincian->bendaharaPengeluaran->nip ?? '-'); ?> | 
+                            Jabatan: <?php echo e($rincian->bendaharaPengeluaran->jabatan ?? '-'); ?>
 
+                        </div>
+                        <div class="text-xs text-yellow-500 mt-1">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Data dari relasi (akan berubah jika data master berubah)
+                        </div>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="font-medium text-yellow-800">Belum ditentukan</div>
+                        <div class="text-xs text-yellow-600">Bendahara pengeluaran belum dipilih</div>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
+            <!-- Hidden input untuk mengirim bendahara yang sudah ada -->
+            <input type="hidden" name="bendahara_pengeluaran_id" value="<?php echo e($rincian->bendahara_pengeluaran_id); ?>">
+            
+            <p class="text-xs text-gray-500 mt-3">
+                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Bendahara pengeluaran diambil dari snapshot saat Rincian Biaya dibuat dan tidak dapat diubah di sini.
+                <?php if($rincian->bendahara_nama): ?>
+                    
+                <?php endif; ?>
+            </p>
+        </div>
+    </div>
+</div>
             <!-- RINGKASAN PERHITUNGAN -->
             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <h3 class="font-semibold text-gray-800 mb-3">Ringkasan Perhitungan Biaya</h3>

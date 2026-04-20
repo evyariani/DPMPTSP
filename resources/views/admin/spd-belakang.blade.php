@@ -314,26 +314,58 @@
             <i class="fas fa-users text-teal-500 mr-2"></i>
             Pelaksana Perjalanan Dinas
         </h3>
-        <span class="info-badge info-badge-blue ml-3">Jumlah: {{ $spd->pelaksanaPerjadin->count() }} orang</span>
+        @php
+            // Gunakan snapshot jika ada, fallback ke relasi
+            $pelaksanaCount = 0;
+            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                $pelaksanaCount = count($spd->pelaksana_snapshot);
+            } elseif ($spd->pelaksanaPerjadin) {
+                $pelaksanaCount = $spd->pelaksanaPerjadin->count();
+            }
+        @endphp
+        <span class="info-badge info-badge-blue ml-3">Jumlah: {{ $pelaksanaCount }} orang</span>
     </div>
     <div class="p-6">
-        @if($spd->pelaksanaPerjadin->count() > 0)
+        @php
+            // Ambil data pelaksana dari snapshot atau relasi
+            $pelaksanaList = [];
+            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                $pelaksanaList = $spd->pelaksana_snapshot;
+            } elseif ($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0) {
+                foreach ($spd->pelaksanaPerjadin as $p) {
+                    $pelaksanaList[] = [
+                        'nama' => $p->nama,
+                        'nip' => $p->nip,
+                        'jabatan' => $p->jabatan,
+                    ];
+                }
+            }
+        @endphp
+        
+        @if(count($pelaksanaList) > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                @foreach($spd->pelaksanaPerjadin as $pelaksana)
+                @foreach($pelaksanaList as $pelaksana)
                     <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-150">
                         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center">
                             <i class="fas fa-user-check text-teal-600 text-sm"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ $pelaksana->nama }}</p>
-                            <p class="text-xs text-gray-500 truncate">NIP: {{ $pelaksana->nip ?? '-' }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ $pelaksana->jabatan ?? '-' }}</p>
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ $pelaksana['nama'] ?? '-' }}</p>
+                            <p class="text-xs text-gray-500 truncate">NIP: {{ $pelaksana['nip'] ?? '-' }}</p>
+                            <p class="text-xs text-gray-500 truncate">{{ $pelaksana['jabatan'] ?? '-' }}</p>
                         </div>
                     </div>
                 @endforeach
             </div>
         @else
             <p class="text-gray-500 text-center py-4">Tidak ada data pelaksana</p>
+        @endif
+        
+        @if($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0)
+            <div class="mt-3 text-xs text-gray-400 text-center">
+                <i class="fas fa-info-circle mr-1"></i> 
+                Data pelaksana diambil dari snapshot saat SPD dibuat
+            </div>
         @endif
     </div>
 </div>

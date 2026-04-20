@@ -503,21 +503,38 @@
                         @endif
                     </td>
 
-                    <!-- Kolom Pelaksana Perjalanan Dinas -->
+                    <!-- Kolom Pelaksana Perjalanan Dinas - MENGGUNAKAN SNAPSHOT -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-pelaksana">
-                        @if($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0)
+                        @php
+                            // Gunakan snapshot jika ada, fallback ke relasi
+                            $pelaksanaList = [];
+                            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                                $pelaksanaList = $spd->pelaksana_snapshot;
+                            } elseif ($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0) {
+                                // Fallback untuk data lama
+                                foreach ($spd->pelaksanaPerjadin as $p) {
+                                    $pelaksanaList[] = [
+                                        'nama' => $p->nama,
+                                        'nip' => $p->nip,
+                                        'jabatan' => $p->jabatan,
+                                    ];
+                                }
+                            }
+                        @endphp
+                        
+                        @if(count($pelaksanaList) > 0)
                             <div class="space-y-1">
-                                @foreach($spd->pelaksanaPerjadin->take(2) as $pelaksana)
+                                @foreach(array_slice($pelaksanaList, 0, 2) as $pelaksana)
                                     <div class="pelaksana-badge">
                                         <i class="fas fa-user-check mr-1 text-xs"></i>
-                                        {{ Str::limit($pelaksana->nama, 20) }}
+                                        {{ Str::limit($pelaksana['nama'] ?? '-', 20) }}
                                     </div>
                                 @endforeach
-                                @if($spd->pelaksanaPerjadin->count() > 2)
+                                @if(count($pelaksanaList) > 2)
                                     <div class="text-xs text-blue-600 mt-1 cursor-pointer hover:underline"
-                                         onclick="showPelaksanaDetail({{ json_encode($spd->pelaksanaPerjadin->map(function($p) { return ['nama' => $p->nama, 'nip' => $p->nip, 'jabatan' => $p->jabatan]; })) }})">
+                                         onclick="showPelaksanaDetail({{ json_encode($pelaksanaList) }})">
                                         <i class="fas fa-plus-circle mr-1"></i>
-                                        +{{ $spd->pelaksanaPerjadin->count() - 2 }} lainnya
+                                        +{{ count($pelaksanaList) - 2 }} lainnya
                                     </div>
                                 @endif
                             </div>
@@ -829,7 +846,7 @@ function showPelaksanaDetail(pelaksanaList) {
                     <i class="fas fa-user text-blue-600 text-sm"></i>
                 </div>
                 <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900">${escapeHtml(pelaksana.nama)}</p>
+                    <p class="text-sm font-medium text-gray-900">${escapeHtml(pelaksana.nama || '-')}</p>
                     <p class="text-xs text-gray-500">NIP: ${escapeHtml(pelaksana.nip || '-')}</p>
                     <p class="text-xs text-gray-500">Jabatan: ${escapeHtml(pelaksana.jabatan || '-')}</p>
                 </div>

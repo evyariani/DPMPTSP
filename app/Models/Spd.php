@@ -42,6 +42,7 @@ class SPD extends Model
         'tanggal_dikeluarkan',
         // Atribut baru
         'spt_id',
+        'pelaksana_snapshot', // TAMBAHKAN: Snapshot pelaksana
         'pejabat_teknis_id',
         'pejabat_teknis_pegawai_id',
         'pejabat_teknis_kode_rekening',
@@ -57,6 +58,7 @@ class SPD extends Model
 
     // Casting tipe data
     protected $casts = [
+        'pelaksana_snapshot' => 'array', // TAMBAHKAN
         'tanggal_berangkat' => 'date',
         'tanggal_kembali' => 'date',
         'tanggal_dikeluarkan' => 'date',
@@ -173,6 +175,37 @@ class SPD extends Model
         return !empty($this->penanda_tangan_nama);
     }
 
+    // ========== ACCESSORS PELAKSANA (MENGGUNAKAN SNAPSHOT) ==========
+    
+    /**
+     * Mendapatkan daftar pelaksana dari snapshot (data saat SPD dibuat)
+     * Gunakan: $spd->pelaksana_dari_snapshot
+     */
+    public function getPelaksanaDariSnapshotAttribute()
+    {
+        if (empty($this->pelaksana_snapshot)) {
+            return collect([]);
+        }
+        
+        return collect($this->pelaksana_snapshot)->map(function ($item) {
+            return (object) $item;
+        });
+    }
+    
+    /**
+     * Mendapatkan nama-nama pelaksana dari snapshot
+     * Gunakan: $spd->nama_pelaksana_dari_snapshot
+     */
+    public function getNamaPelaksanaDariSnapshotAttribute()
+    {
+        if (empty($this->pelaksana_snapshot)) {
+            return '-';
+        }
+        
+        $namaList = array_column($this->pelaksana_snapshot, 'nama');
+        return implode(', ', $namaList);
+    }
+
     // ========== ACCESSORS LAINNYA ==========
     
     /**
@@ -276,8 +309,8 @@ class SPD extends Model
     }
     
     /**
-     * Accessor untuk mendapatkan daftar pelaksana perjadin
-     * Gunakan: $spd->daftar_pelaksana
+     * Accessor untuk mendapatkan daftar pelaksana perjadin (dari relasi - HATI-HATI bisa berubah)
+     * @deprecated Gunakan pelaksana_dari_snapshot untuk tampilan
      */
     public function getDaftarPelaksanaAttribute()
     {
@@ -285,8 +318,8 @@ class SPD extends Model
     }
     
     /**
-     * Accessor untuk mendapatkan nama-nama pelaksana perjadin (string)
-     * Gunakan: $spd->nama_pelaksana_perjadin
+     * Accessor untuk mendapatkan nama-nama pelaksana perjadin (dari relasi - HATI-HATI bisa berubah)
+     * @deprecated Gunakan nama_pelaksana_dari_snapshot untuk tampilan
      */
     public function getNamaPelaksanaPerjadinAttribute()
     {
@@ -479,11 +512,42 @@ class SPD extends Model
     // ========== HELPER METHODS ==========
     
     /**
-     * Sync pelaksana perjalanan dinas
+     * Sync pelaksana perjalanan dinas dan update snapshot
      */
     public function syncPelaksana(array $pegawaiIds)
     {
-        return $this->pelaksanaPerjadin()->sync($pegawaiIds);
+        $result = $this->pelaksanaPerjadin()->sync($pegawaiIds);
+        
+        // Update snapshot setelah sync pelaksana
+        $this->createPelaksanaSnapshot();
+        $this->saveQuietly();
+        
+        return $result;
+    }
+    
+    /**
+     * Membuat snapshot pelaksana dari data pegawai yang terkait
+     * Simpan data lengkap pegawai saat SPD dibuat/diupdate
+     */
+    public function createPelaksanaSnapshot()
+    {
+        $pelaksana = $this->pelaksanaPerjadin()->get();
+        $snapshot = [];
+        
+        foreach ($pelaksana as $pegawai) {
+            $snapshot[] = [
+                'id_pegawai' => $pegawai->id_pegawai,
+                'nama' => $pegawai->nama,
+                'nip' => $pegawai->nip ?? '-',
+                'jabatan' => $pegawai->jabatan ?? '-',
+                'pangkat' => $pegawai->pangkat ?? '-',
+                'gol' => $pegawai->gol ?? '-',
+            ];
+        }
+        
+        $this->pelaksana_snapshot = $snapshot;
+        
+        return $this;
     }
     
     /**
@@ -555,38 +619,42 @@ class SPD extends Model
     }
     
     /**
-     * Override booted method untuk auto sync RincianBidang
+     * Override booted method untuk auto sync RincianBidang dan snapshot
      */
     protected static function booted()
     {
         // Event saat SPD dibuat
         static::created(function ($spd) {
+            // Buat snapshot pelaksana
+            $spd->createPelaksanaSnapshot();
+            $spd->saveQuietly();
+            
+            // Sync RincianBidang
             $spd->syncRincianBidang();
         });
         
-        // // Event saat SPD diupdate
-        // static::updated(function ($spd) {
-        //     // Cek apakah ada perubahan pada data yang mempengaruhi RincianBidang
-        //     $dirtyFields = ['nomor_surat', 'tempat_tujuan', 'tanggal_berangkat', 'tanggal_kembali', 'lama_perjadin'];
-        //     $isRelatedChanged = false;
+        // Event saat SPD diupdate
+        static::updated(function ($spd) {
+            // Cek apakah ada perubahan pada pelaksana
+            if ($spd->isDirty('pelaksana_perjadin')) {
+                $spd->createPelaksanaSnapshot();
+            }
             
-        //     foreach ($dirtyFields as $field) {
-        //         if ($spd->isDirty($field)) {
-        //             $isRelatedChanged = true;
-        //             break;
-        //         }
-        //     }
+            // Cek apakah ada perubahan pada data yang mempengaruhi RincianBidang
+            $dirtyFields = ['nomor_surat', 'tempat_tujuan', 'tanggal_berangkat', 'tanggal_kembali', 'lama_perjadin'];
+            $isRelatedChanged = false;
             
-        //     // Jika ada perubahan pada pelaksana
-        //     if ($spd->isDirty('pelaksana_perjadin') || $isRelatedChanged) {
-        //         $spd->syncRincianBidang();
-        //     }
-        // });
-        
-        // // Event setelah sync pelaksana
-        // static::saved(function ($spd) {
-        //     // Optional: sync ulang jika diperlukan
-        // });
+            foreach ($dirtyFields as $field) {
+                if ($spd->isDirty($field)) {
+                    $isRelatedChanged = true;
+                    break;
+                }
+            }
+            
+            if ($spd->isDirty('pelaksana_perjadin') || $isRelatedChanged) {
+                $spd->syncRincianBidang();
+            }
+        });
     }
     
     /**
@@ -621,9 +689,9 @@ class SPD extends Model
         // Ekstrak maksud perjadin dari tujuan SPT
         $maksudPerjadin = self::extractMaksudPerjadinFromSptTujuan($spt->tujuan);
         
-        // Ambil daftar pegawai dari SPT untuk dijadikan pelaksana
+        // Ambil daftar pegawai dari SPT untuk dijadikan pelaksana (gunakan snapshot SPT)
         $pelaksanaIds = [];
-        $pegawaiList = $spt->pegawai_list;
+        $pegawaiList = $spt->pegawai_list_from_snapshot;
         if ($pegawaiList && count($pegawaiList) > 0) {
             foreach ($pegawaiList as $pegawai) {
                 $pelaksanaIds[] = $pegawai->id_pegawai;
@@ -652,6 +720,7 @@ class SPD extends Model
             $spd->syncPelaksana($pelaksanaIds);
         }
         
+        // Snapshot pelaksana akan otomatis dibuat via booted created event
         // RincianBidang akan otomatis dibuat via booted created event
         return $spd;
     }

@@ -288,6 +288,16 @@
 .foto-item img:hover {
     transform: scale(1.05);
 }
+
+/* Snapshot badge */
+.snapshot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.65rem;
+    color: #3b82f6;
+    cursor: help;
+}
 </style>
 
 <div class="mb-6">
@@ -564,15 +574,24 @@
                     </td>
 
                     <!-- Kolom Daerah Tujuan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-daerah">
-                        @if($lhpd->daerahTujuan)
-                            <div class="text-sm text-gray-900">
-                                {{ $lhpd->daerahTujuan->nama }}
-                            </div>
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
-                    </td>
+<td class="px-6 py-4 text-wrap-cell fixed-col-daerah">
+    @php
+        $daerahTujuan = $lhpd->tempat_tujuan_snapshot ?? ($lhpd->daerahTujuan?->nama ?? null);
+    @endphp
+    @if($daerahTujuan)
+        <div class="text-sm text-gray-900">
+            {{ $daerahTujuan }}
+        </div>
+        @if($lhpd->tempat_tujuan_snapshot)
+            <span class="text-xs text-blue-500 tooltip">
+                <i class="fas fa-camera"></i> snapshot
+                <span class="tooltip-text">Data snapshot (tidak berubah)</span>
+            </span>
+        @endif
+    @else
+        <span class="text-gray-400 text-sm">-</span>
+    @endif
+</td>
 
                     <!-- Kolom Hasil LHPD -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-hasil">
@@ -586,15 +605,24 @@
                     </td>
 
                     <!-- Kolom Tempat Dikeluarkan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-tempat">
-                        @if($lhpd->tempatDikeluarkan)
-                            <div class="text-sm text-gray-900">
-                                {{ $lhpd->tempatDikeluarkan->nama }}
-                            </div>
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
-                    </td>
+<td class="px-6 py-4 text-wrap-cell fixed-col-tempat">
+    @php
+        $tempatDikeluarkan = $lhpd->tempat_dikeluarkan_snapshot ?? ($lhpd->tempatDikeluarkan?->nama ?? null);
+    @endphp
+    @if($tempatDikeluarkan)
+        <div class="text-sm text-gray-900">
+            {{ $tempatDikeluarkan }}
+        </div>
+        @if($lhpd->tempat_dikeluarkan_snapshot)
+            <span class="text-xs text-blue-500 tooltip">
+                <i class="fas fa-camera"></i> snapshot
+                <span class="tooltip-text">Data snapshot (tidak berubah)</span>
+            </span>
+        @endif
+    @else
+        <span class="text-gray-400 text-sm">-</span>
+    @endif
+</td>
 
                     <!-- Kolom Tanggal LHPD -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-tanggal">
@@ -648,12 +676,6 @@
                                title="Edit LHPD">
                                 <i class="fas fa-edit"></i>
                             </a>
-
-                            {{-- <a href="{{ route('lhpd.show', $lhpd->id_lhpd) }}"
-                               class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition duration-150 tooltip"
-                               title="Detail LHPD">
-                                <i class="fas fa-info-circle"></i>
-                            </a> --}}
 
                             <a href="{{ route('lhpd.print', $lhpd->id_lhpd) }}"
                                target="_blank"

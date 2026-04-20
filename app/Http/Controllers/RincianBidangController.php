@@ -54,13 +54,16 @@ class RincianBidangController extends Controller
         return redirect()->route('rincian.index')->with('success', 'Berhasil tambah rincian biaya dari SPD');
     }
 
-    public function show($id)
-    {
-        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'bendaharaPengeluaran', 'uangHarian')
-            ->findOrFail($id);
-        
-        return view('admin.rincian-detail', compact('rincian'));
-    }
+public function show($id)
+{
+    $rincian = RincianBidang::with('spd', 'tempatTujuan', 'uangHarian')
+        ->findOrFail($id);
+    
+    // Gunakan snapshot bendahara jika ada
+    $bendahara = $rincian->bendahara_snapshot;
+    
+    return view('admin.rincian-detail', compact('rincian', 'bendahara'));
+}
 
     public function edit($id)
     {
@@ -109,11 +112,13 @@ class RincianBidangController extends Controller
      */
     public function cetak($id)
     {
-        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'bendaharaPengeluaran', 'uangHarian')
+        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'uangHarian')
             ->findOrFail($id);
+
+            $bendahara = $rincian->bendahara_snapshot;
         
         // Load view khusus PDF
-        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian'));
+        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian','bendahara'));
         
         // Set kertas A4
         $pdf->setPaper('A4', 'portrait');
@@ -131,10 +136,12 @@ class RincianBidangController extends Controller
      */
     public function previewPdf($id)
     {
-        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'bendaharaPengeluaran', 'uangHarian')
+        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'uangHarian')
             ->findOrFail($id);
+
+        $bendahara = $rincian->bendahara_snapshot;
         
-        $pdf = Pdf::loadView('admin.rincian-cetak', compact('rincian'));
+        $pdf = Pdf::loadView('admin.rincian-cetak', compact('rincian','bendahara'));
         $pdf->setPaper('A4', 'portrait');
         
         $namaFile = 'Rincian_Biaya_' . ($rincian->nomor_sppd ?? $rincian->id) . '.pdf';
@@ -149,11 +156,14 @@ class RincianBidangController extends Controller
      */
     public function cetakBySpd($spdId)
     {
-        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'bendaharaPengeluaran', 'uangHarian')
+        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'uangHarian')
             ->where('spd_id', $spdId)
             ->firstOrFail();
+
+    // Gunakan snapshot bendahara
+    $bendahara = $rincian->bendahara_snapshot;
         
-        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian'));
+        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian','bendahara'));
         $pdf->setPaper('A4', 'portrait');
         
         $namaFile = 'Rincian_Biaya_SPD_' . ($rincian->nomor_sppd ?? $spdId) . '_' . date('Ymd') . '.pdf';
@@ -197,12 +207,12 @@ class RincianBidangController extends Controller
                 'total_keseluruhan' => $rincian->total_keseluruhan,
                 'total_keseluruhan_rupiah' => $rincian->total_keseluruhan_rupiah,
                 'terbilang' => $rincian->terbilang,
-                'bendahara' => $rincian->bendaharaPengeluaran ? [
-                    'id' => $rincian->bendaharaPengeluaran->id_pegawai,
-                    'nama' => $rincian->bendaharaPengeluaran->nama,
-                    'nip' => $rincian->bendaharaPengeluaran->nip,
-                    'jabatan' => $rincian->bendaharaPengeluaran->jabatan,
-                ] : null,
+'bendahara' => $rincian->bendahara_snapshot ? [
+    'id' => $rincian->bendahara_snapshot->id ?? null,
+    'nama' => $rincian->bendahara_snapshot->nama ?? $rincian->bendahara_nama,
+    'nip' => $rincian->bendahara_snapshot->nip ?? $rincian->bendahara_nip,
+    'jabatan' => $rincian->bendahara_snapshot->jabatan ?? $rincian->bendahara_jabatan,
+] : null,
             ]
         ]);
     }

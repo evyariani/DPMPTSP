@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Daftar Rincian Biaya Perjalanan Dinas'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -179,7 +177,6 @@
                     </td>
                     <td class="px-4 py-3 text-center">
                         <div class="flex items-center justify-center gap-1">
-                            
                             <a href="<?php echo e(route('rincian.cetak', $item->id)); ?>" 
                                class="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition" 
                                title="Cetak PDF"

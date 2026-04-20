@@ -502,22 +502,22 @@
                     <!-- Kolom Pegawai -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-pegawai table-cell-hover">
                         @if(!empty($spt->pegawai))
-                            @php $pegawaiList = $spt->pegawai_list; @endphp
+                            @php $pegawaiList = $spt->pegawai_list_from_snapshot; @endphp
                             <div class="space-y-2">
                                 @foreach($pegawaiList as $pegawai)
                                     <div class="flex items-center tooltip">
                                         <div class="flex-shrink-0 h-6 w-6 mr-2">
                                             <div class="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center">
                                                 <span class="text-indigo-600 font-semibold text-xs">
-                                                    {{ strtoupper(substr($pegawai->nama, 0, 1)) }}
+                                                    {{ strtoupper(substr($pegawai->nama??'-', 0, 1)) }}
                                                 </span>
                                             </div>
                                         </div>
                                         <div class="text-sm text-gray-900" title="{{ $pegawai->nama }}">
-                                            {{ Str::limit($pegawai->nama, 25) }}
+                                            {{ Str::limit($pegawai->nama??'-', 25) }}
                                         </div>
                                         <span class="tooltip-text">
-                                            {{ $pegawai->nama }}<br>
+                                            {{ $pegawai->nama??'-' }}<br>
                                             NIP: {{ $pegawai->nip ?? '-' }}<br>
                                             Jabatan: {{ $pegawai->jabatan ?? '-' }}
                                         </span>
@@ -569,25 +569,25 @@
                     
                     <!-- Kolom Penanda Tangan -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-penandatangan table-cell-hover">
-                        @if($spt->penandaTangan)
+                        @if($spt->penanda_tangan_nama)
                             <div class="flex items-center tooltip">
                                 <div class="flex-shrink-0 h-8 w-8 mr-3">
                                     <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
                                         <span class="text-green-600 font-semibold text-sm">
-                                            {{ strtoupper(substr($spt->penandaTangan->nama, 0, 1)) }}
+                                            {{ strtoupper(substr($spt->penanda_tangan_nama, 0, 1)) }}
                                         </span>
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900" title="{{ $spt->penandaTangan->nama }}">
-                                        {{ Str::limit($spt->penandaTangan->nama, 30) }}
+                                    <div class="text-sm font-medium text-gray-900" title="{{ $spt->penanda_tangan_nama }}">
+                                        {{ Str::limit($spt->penanda_tangan_nama, 30) }}
                                     </div>
-                                    <div class="text-xs text-gray-500">{{ $spt->penandaTangan->jabatan ?? '-' }}</div>
+                                    <div class="text-xs text-gray-500">{{ $spt->penanda_tangan_jabatan ?? '-' }}</div>
                                 </div>
                                 <span class="tooltip-text">
-                                    {{ $spt->penandaTangan->nama }}<br>
+                                    {{ $spt->penanda_tangan_nama }}<br>
                                     NIP: {{ $spt->penandaTangan->nip ?? '-' }}<br>
-                                    Jabatan: {{ $spt->penandaTangan->jabatan ?? '-' }}
+                                    Jabatan: {{ $spt->penanda_tangan_jabatan ?? '-' }}
                                 </span>
                             </div>
                         @else
@@ -608,13 +608,13 @@
                             </a>
                             
                             <!-- Tombol Buat SPD dari SPT -->
-                            <a href="{{ route('spd.create-from-spt', $spt->id_spt) }}" 
+                            {{-- <a href="{{ route('spd.create-from-spt', $spt->id_spt) }}" 
                                class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50 transition duration-150 tooltip"
                                title="Buat SPD dari SPT ini"
                                onclick="return confirmCreateSpd('{{ addslashes($spt->nomor_surat) }}')">
                                 <i class="fas fa-file-signature"></i>
                                 <span class="tooltip-text">Buat SPD dari SPT ini</span>
-                            </a>
+                            </a> --}}
                             
                             <!-- Tombol Print PDF -->
                             {{-- <a href="{{ route('spt.print', $spt->id_spt) }}" 

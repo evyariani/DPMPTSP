@@ -38,6 +38,10 @@ return new class extends Migration
             // Relasi ke SPT (source)
             $table->unsignedBigInteger('spt_id')->nullable()->comment('ID SPT asal pembuatan SPD');
             
+            // ========== SNAPSHOT PELAKSANA PERJALANAN DINAS ==========
+            // HAPUS ->after() karena tidak support di create table
+            $table->json('pelaksana_snapshot')->nullable()->comment('Snapshot data pelaksana perjalanan dinas');
+            
             // Pejabat pelaksana teknis kegiatan (referensi ke tb_program)
             $table->unsignedBigInteger('pejabat_teknis_id')->nullable()->comment('ID program yang berisi pejabat teknis dan rekening');
             $table->unsignedBigInteger('pejabat_teknis_pegawai_id')->nullable()->comment('ID pegawai pejabat teknis dari tb_program');
@@ -47,7 +51,6 @@ return new class extends Migration
             $table->string('pejabat_teknis_sub_kegiatan', 200)->nullable()->comment('Sub kegiatan dari tb_program');
             
             // ========== PENANDA TANGAN SPD (EKSTERNAL) ==========
-            // Data ini tidak terikat ke tabel manapun karena berasal dari instansi tujuan
             $table->string('penanda_tangan_nama', 150)->nullable()->comment('Nama pejabat penanda tangan di tempat tujuan');
             $table->string('penanda_tangan_nip', 50)->nullable()->comment('NIP pejabat penanda tangan');
             $table->string('penanda_tangan_jabatan', 150)->nullable()->comment('Jabatan pejabat penanda tangan');

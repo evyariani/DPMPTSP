@@ -31,10 +31,7 @@ class SPTController extends Controller
                     $q->where('nomor_surat', 'like', "%{$search}%")
                       ->orWhere('tujuan', 'like', "%{$search}%")
                       ->orWhere('lokasi', 'like', "%{$search}%")
-                      ->orWhereHas('penandaTangan', function ($pegawaiQuery) use ($search) {
-                          $pegawaiQuery->where('nama', 'like', "%{$search}%")
-                                       ->orWhere('nip', 'like', "%{$search}%");
-                      });
+                      ->orWhere('penanda_tangan_nama', 'like', "%{$search}%");
                 });
             }
             
@@ -75,7 +72,6 @@ class SPTController extends Controller
                 ->get();
             
         } catch (\Exception $e) {
-            // Jika ada error, berikan data kosong
             $spts = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
             $pegawais = collect([]);
         }
@@ -88,7 +84,6 @@ class SPTController extends Controller
      */
     public function create()
     {
-        // Daftar jabatan yang boleh menjadi penanda tangan
         $jabatanPenandaTangan = [
             'Kepala Dinas',
             'Sekretaris',
@@ -100,15 +95,12 @@ class SPTController extends Controller
             'Kasubbag Umum dan Kepegawaian'
         ];
         
-        // 1. Ambil pegawai untuk PENANDA TANGAN (hanya jabatan tertentu)
         $penandaTangans = Pegawai::whereIn('jabatan', $jabatanPenandaTangan)
             ->orderBy('nama')
             ->get();
         
-        // 2. Ambil SEMUA pegawai untuk dropdown PEGAWAI YANG DITUGASKAN
         $semuaPegawai = Pegawai::orderBy('nama')->get();
         
-        // Siapkan data pegawai untuk JavaScript (format array asosiatif)
         $pegawaiData = [];
         foreach ($semuaPegawai as $pegawai) {
             $initial = $pegawai->nama ? strtoupper(substr($pegawai->nama, 0, 1)) : '-';
@@ -122,61 +114,44 @@ class SPTController extends Controller
             ];
         }
         
-        // Template nomor surat untuk ditampilkan di view
         $nomorSuratTemplate = '800.1.11.1/           /DPMPTSP/' . date('Y');
         
         return view('admin.spt-create', compact('penandaTangans', 'semuaPegawai', 'pegawaiData', 'nomorSuratTemplate'));
     }
 
-    /**
-     * Generate nomor surat lengkap dari input user
-     * Format: 800.1.11.1/{nomor_urut}/DPMPTSP/{tahun}
-     */
     private function generateNomorSurat($nomorUrut, $tahun = null)
     {
         if (!$tahun) {
             $tahun = date('Y');
         }
         
-        // Format nomor surat dengan padding 3 digit (001, 002, dst)
         $nomorUrutFormatted = str_pad($nomorUrut, 3, '0', STR_PAD_LEFT);
         
         return "800.1.11.1/{$nomorUrutFormatted}/DPMPTSP/{$tahun}";
     }
     
-    /**
-     * Get next nomor urut untuk SPT
-     */
     public function getNextNomorUrut($tahun = null)
     {
         if (!$tahun) {
             $tahun = date('Y');
         }
         
-        // Cari nomor surat terakhir di tahun yang sama
         $lastSPT = SPT::whereYear('tanggal', $tahun)
             ->orderBy('id_spt', 'desc')
             ->first();
         
         if ($lastSPT && $lastSPT->nomor_surat) {
-            // Ekstrak nomor urut dari nomor surat
-            // Format: 800.1.11.1/XXX/DPMPTSP/YYYY
             preg_match('/800\.1\.11\.1\/(\d+)\/DPMPTSP\/\d{4}/', $lastSPT->nomor_surat, $matches);
             if (isset($matches[1])) {
                 return (int)$matches[1] + 1;
             }
         }
         
-        // Jika belum ada, mulai dari 1
         return 1;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        // Validasi data
         $validated = $request->validate([
             'nomor_urut' => 'required|integer|min:1|max:999',
             'dasar' => 'required|array',
@@ -187,50 +162,28 @@ class SPTController extends Controller
             'tanggal' => 'required|date',
             'lokasi' => 'required|string|max:255',
             'penanda_tangan' => 'required|exists:tb_pegawai,id_pegawai'
-        ], [
-            'nomor_urut.required' => 'Nomor urut surat harus diisi',
-            'nomor_urut.integer' => 'Nomor urut harus berupa angka',
-            'nomor_urut.min' => 'Nomor urut minimal 1',
-            'nomor_urut.max' => 'Nomor urut maksimal 999',
-            'dasar.required' => 'Dasar harus diisi minimal 1',
-            'dasar.array' => 'Format dasar tidak valid',
-            'dasar.*.required' => 'Setiap dasar harus diisi',
-            'pegawai.required' => 'Pegawai harus dipilih minimal 1',
-            'pegawai.array' => 'Format pegawai tidak valid',
-            'pegawai.*.exists' => 'Pegawai tidak valid',
-            'tujuan.required' => 'Tujuan harus diisi',
-            'tanggal.required' => 'Tanggal harus diisi',
-            'tanggal.date' => 'Format tanggal tidak valid',
-            'lokasi.required' => 'Lokasi harus diisi',
-            'lokasi.max' => 'Lokasi maksimal 255 karakter',
-            'penanda_tangan.required' => 'Penanda tangan harus dipilih',
-            'penanda_tangan.exists' => 'Penanda tangan tidak valid'
         ]);
         
-        // Generate nomor surat lengkap dari nomor urut dan tahun dari tanggal
         $tahun = date('Y', strtotime($request->tanggal));
         $nomorSurat = $this->generateNomorSurat($request->nomor_urut, $tahun);
         
-        // Cek apakah nomor surat sudah ada
         $exists = SPT::where('nomor_surat', $nomorSurat)->exists();
         if ($exists) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', "Nomor surat dengan urutan {$request->nomor_urut} untuk tahun {$tahun} sudah ada. Gunakan nomor urut lain.");
+                ->with('error', "Nomor surat dengan urutan {$request->nomor_urut} untuk tahun {$tahun} sudah ada.");
         }
         
-        // Simpan data
         try {
             DB::beginTransaction();
             
             $data = $validated;
             $data['nomor_surat'] = $nomorSurat;
-            unset($data['nomor_urut']); // Hapus nomor_urut karena tidak ada di tabel
+            unset($data['nomor_urut']);
             
             $spt = SPT::create($data);
             
             // ========== OTOMATIS BUAT SPD DARI SPT ==========
-            // Panggil SPDController untuk membuat SPD otomatis
             $spdController = new SPDController();
             $spd = $spdController->createSpdFromSpt($spt);
             
@@ -242,7 +195,7 @@ class SPTController extends Controller
             
             $message = "Data SPT berhasil ditambahkan. Nomor Surat: {$nomorSurat}";
             if ($spd) {
-                $message .= " SPD juga telah dibuat otomatis dengan nomor: {$spd->nomor_surat}";
+                $message .= " SPD juga telah dibuat otomatis.";
             }
             if ($lhpd) {
                 $message .= " LHPD juga telah dibuat otomatis.";
@@ -260,32 +213,26 @@ class SPTController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         try {
-            $spt = SPT::with('penandaTangan')->findOrFail($id);
-            $pegawaiList = $spt->pegawai_list;
+            $spt = SPT::findOrFail($id);
+            $pegawaiList = $spt->pegawai_list_from_snapshot;
             $dasarList = $spt->dasar_list;
+            $penandaTangan = $spt->penanda_tangan_snapshot;
             
-            return view('admin.spt-show', compact('spt', 'pegawaiList', 'dasarList'));
+            return view('admin.spt-show', compact('spt', 'pegawaiList', 'dasarList', 'penandaTangan'));
         } catch (\Exception $e) {
             return redirect()->route('spt.index')
                 ->with('error', 'Data SPT tidak ditemukan.');
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
         try {
             $spt = SPT::findOrFail($id);
             
-            // Ekstrak nomor urut dari nomor surat untuk ditampilkan di form edit
             $nomorUrut = null;
             if ($spt->nomor_surat) {
                 preg_match('/800\.1\.11\.1\/(\d+)\/DPMPTSP\/\d{4}/', $spt->nomor_surat, $matches);
@@ -294,7 +241,6 @@ class SPTController extends Controller
                 }
             }
             
-            // Daftar jabatan yang boleh menjadi penanda tangan
             $jabatanPenandaTangan = [
                 'Kepala Dinas',
                 'Sekretaris',
@@ -306,15 +252,12 @@ class SPTController extends Controller
                 'Kasubbag Umum dan Kepegawaian'
             ];
             
-            // 1. Ambil pegawai untuk PENANDA TANGAN (hanya jabatan tertentu)
             $penandaTangans = Pegawai::whereIn('jabatan', $jabatanPenandaTangan)
                 ->orderBy('nama')
                 ->get();
             
-            // 2. Ambil SEMUA pegawai untuk dropdown PEGAWAI YANG DITUGASKAN
             $semuaPegawai = Pegawai::orderBy('nama')->get();
             
-            // Siapkan data untuk JavaScript
             $pegawaiData = [];
             foreach ($semuaPegawai as $pegawai) {
                 $initial = $pegawai->nama ? strtoupper(substr($pegawai->nama, 0, 1)) : '-';
@@ -337,9 +280,6 @@ class SPTController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         try {
@@ -355,31 +295,11 @@ class SPTController extends Controller
                 'tanggal' => 'required|date',
                 'lokasi' => 'required|string|max:255',
                 'penanda_tangan' => 'required|exists:tb_pegawai,id_pegawai'
-            ], [
-                'nomor_urut.required' => 'Nomor urut surat harus diisi',
-                'nomor_urut.integer' => 'Nomor urut harus berupa angka',
-                'nomor_urut.min' => 'Nomor urut minimal 1',
-                'nomor_urut.max' => 'Nomor urut maksimal 999',
-                'dasar.required' => 'Dasar harus diisi minimal 1',
-                'dasar.array' => 'Format dasar tidak valid',
-                'dasar.*.required' => 'Setiap dasar harus diisi',
-                'pegawai.required' => 'Pegawai harus dipilih minimal 1',
-                'pegawai.array' => 'Format pegawai tidak valid',
-                'pegawai.*.exists' => 'Pegawai tidak valid',
-                'tujuan.required' => 'Tujuan harus diisi',
-                'tanggal.required' => 'Tanggal harus diisi',
-                'tanggal.date' => 'Format tanggal tidak valid',
-                'lokasi.required' => 'Lokasi harus diisi',
-                'lokasi.max' => 'Lokasi maksimal 255 karakter',
-                'penanda_tangan.required' => 'Penanda tangan harus dipilih',
-                'penanda_tangan.exists' => 'Penanda tangan tidak valid'
             ]);
             
-            // Generate nomor surat baru dari nomor urut dan tahun dari tanggal
             $tahun = date('Y', strtotime($request->tanggal));
             $nomorSuratBaru = $this->generateNomorSurat($request->nomor_urut, $tahun);
             
-            // Cek apakah nomor surat sudah ada (kecuali untuk data ini sendiri)
             $exists = SPT::where('nomor_surat', $nomorSuratBaru)
                 ->where('id_spt', '!=', $id)
                 ->exists();
@@ -387,25 +307,21 @@ class SPTController extends Controller
             if ($exists) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', "Nomor surat dengan urutan {$request->nomor_urut} untuk tahun {$tahun} sudah ada. Gunakan nomor urut lain.");
+                    ->with('error', "Nomor surat dengan urutan {$request->nomor_urut} untuk tahun {$tahun} sudah ada.");
             }
             
             DB::beginTransaction();
             
-            // Update data
             $data = $validated;
             $data['nomor_surat'] = $nomorSuratBaru;
             unset($data['nomor_urut']);
             
             $spt->update($data);
             
-            // ========== UPDATE SPD YANG SUDAH ADA (jika perlu) ==========
-            // Cek apakah sudah ada SPD dari SPT ini
             $spdController = new SPDController();
             $existingSpd = \App\Models\SPD::where('spt_id', $spt->id_spt)->first();
             
             if ($existingSpd) {
-                // Update SPD yang sudah ada dengan data terbaru dari SPT
                 $existingSpd->update([
                     'maksud_perjadin' => $spt->tujuan,
                     'tanggal_berangkat' => $spt->tanggal,
@@ -413,29 +329,18 @@ class SPTController extends Controller
                     'keterangan' => "Diperbarui dari SPT Nomor: {$spt->nomor_surat}"
                 ]);
                 
-                // Update pelaksana perjalanan dinas
-                $pegawaiList = $spt->pegawai_list;
-                $pelaksanaIds = [];
-                if ($pegawaiList && count($pegawaiList) > 0) {
-                    foreach ($pegawaiList as $pegawai) {
-                        $pelaksanaIds[] = $pegawai->id_pegawai;
-                    }
-                }
+                $pelaksanaIds = $request->pegawai;
                 if (!empty($pelaksanaIds)) {
                     $existingSpd->syncPelaksana($pelaksanaIds);
                 }
             } else {
-                // Buat SPD baru jika belum ada
                 $spdController->createSpdFromSpt($spt);
             }
             
-            // ========== UPDATE LHPD OTOMATIS ==========
             $lhpdController = new LhpdController();
             if ($existingSpd) {
-                // Update LHPD berdasarkan SPD yang sudah ada
                 $lhpdController->updateLhpdFromSpd($existingSpd);
             } else {
-                // Buat LHPD baru dari SPT
                 $lhpdController->createLhpdFromSpt($spt);
             }
             
@@ -459,9 +364,6 @@ class SPTController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         try {
@@ -470,18 +372,14 @@ class SPTController extends Controller
             
             DB::beginTransaction();
             
-            // Hapus juga SPD yang terkait jika ada
             $spd = \App\Models\SPD::where('spt_id', $id)->first();
             if ($spd) {
                 $spd->pelaksanaPerjadin()->detach();
                 $spd->delete();
             }
             
-            // Hapus juga LHPD yang terkait
             $lhpdController = new LhpdController();
-            $lhpd = \App\Models\Lhpd::where('tujuan', $spt->tujuan)
-                ->where('tanggal_berangkat', $spt->tanggal)
-                ->first();
+           $lhpd = \App\Models\Lhpd::where('spt_id', $spt->id_spt)->first();
             if ($lhpd) {
                 $lhpd->delete();
             }
@@ -490,7 +388,6 @@ class SPTController extends Controller
             
             DB::commit();
             
-            // Jika request AJAX
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -505,7 +402,6 @@ class SPTController extends Controller
             DB::rollBack();
             Log::error('Gagal menghapus SPT: ' . $e->getMessage());
             
-            // Jika request AJAX
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -518,9 +414,6 @@ class SPTController extends Controller
         }
     }
 
-    /**
-     * API: Get next nomor urut untuk SPT via API
-     */
     public function apiGetNextNomorUrut(Request $request)
     {
         $tahun = $request->input('tahun', date('Y'));
@@ -533,15 +426,11 @@ class SPTController extends Controller
         ]);
     }
 
-    /**
-     * Export data SPT ke Excel (SATU METHOD UNTUK SEMUA FILTER)
-     */
     public function export(Request $request)
     {
         try {
             $query = SPT::with('penandaTangan');
             
-            // Filter berdasarkan search
             if ($request->has('search') && $request->search != '') {
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
@@ -555,17 +444,14 @@ class SPTController extends Controller
                 });
             }
             
-            // Filter berdasarkan bulan
             if ($request->has('bulan') && $request->bulan != '') {
                 $query->whereMonth('tanggal', $request->bulan);
             }
             
-            // Filter berdasarkan tahun
             if ($request->has('tahun') && $request->tahun != '') {
                 $query->whereYear('tanggal', $request->tahun);
             }
             
-            // Filter berdasarkan penanda tangan
             if ($request->has('penanda_tangan') && $request->penanda_tangan != '') {
                 $query->where('penanda_tangan', $request->penanda_tangan);
             }
@@ -576,14 +462,10 @@ class SPTController extends Controller
                 return redirect()->back()->with('error', 'Tidak ada data SPT untuk diexport.');
             }
             
-            // Buat spreadsheet baru
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
-            
-            // Set judul sheet
             $sheet->setTitle('Data SPT');
             
-            // Header kolom
             $headers = [
                 'A1' => 'NO',
                 'B1' => 'NOMOR SURAT',
@@ -597,7 +479,6 @@ class SPTController extends Controller
                 'J1' => 'JABATAN PENANDA TANGAN'
             ];
             
-            // Apply header style
             foreach ($headers as $cell => $value) {
                 $sheet->setCellValue($cell, $value);
                 $sheet->getStyle($cell)->applyFromArray([
@@ -608,21 +489,18 @@ class SPTController extends Controller
                 ]);
             }
             
-            // Isi data
             $row = 2;
             $no = 1;
             foreach ($spts as $spt) {
-                // Format dasar menjadi string
                 $dasarList = $spt->dasar_list;
                 $dasarString = is_array($dasarList) ? implode("\n", $dasarList) : (string)$dasarList;
                 
-                // Format pegawai menjadi string
-                $pegawaiList = $spt->pegawai_list;
+                $pegawaiSnapshot = $spt->pegawai_snapshot ?? [];
                 $pegawaiString = '';
-                if ($pegawaiList && count($pegawaiList) > 0) {
+                if (!empty($pegawaiSnapshot)) {
                     $pegawaiNames = [];
-                    foreach ($pegawaiList as $pegawai) {
-                        $pegawaiNames[] = trim($pegawai->nama) . ($pegawai->nip ? ' (' . $pegawai->nip . ')' : '');
+                    foreach ($pegawaiSnapshot as $pegawai) {
+                        $pegawaiNames[] = trim($pegawai['nama'] ?? '-') . (isset($pegawai['nip']) && $pegawai['nip'] ? ' (' . $pegawai['nip'] . ')' : '');
                     }
                     $pegawaiString = implode("\n", $pegawaiNames);
                 }
@@ -634,34 +512,29 @@ class SPTController extends Controller
                 $sheet->setCellValue('E' . $row, $spt->tujuan);
                 $sheet->setCellValue('F' . $row, date('d-m-Y', strtotime($spt->tanggal)));
                 $sheet->setCellValue('G' . $row, $spt->lokasi);
-                $sheet->setCellValue('H' . $row, $spt->penandaTangan ? $spt->penandaTangan->nama : '-');
-                $sheet->setCellValue('I' . $row, $spt->penandaTangan ? $spt->penandaTangan->nip : '-');
-                $sheet->setCellValue('J' . $row, $spt->penandaTangan ? $spt->penandaTangan->jabatan : '-');
+                $sheet->setCellValue('H' . $row, $spt->penanda_tangan_nama ?? '-');
+                $sheet->setCellValue('I' . $row, $spt->penanda_tangan_nip ?? '-');
+                $sheet->setCellValue('J' . $row, $spt->penanda_tangan_jabatan ?? '-');
                 
-                // Apply style untuk data
                 $sheet->getStyle('A' . $row . ':J' . $row)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['vertical' => Alignment::VERTICAL_TOP, 'wrapText' => true]
                 ]);
                 
-                // Set tinggi baris otomatis
                 $sheet->getRowDimension($row)->setRowHeight(-1);
                 
                 $row++;
                 $no++;
             }
             
-            // Auto size untuk kolom
             foreach (range('A', 'J') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
             
-            // Set lebar khusus untuk kolom yang panjang
             $sheet->getColumnDimension('C')->setWidth(40);
             $sheet->getColumnDimension('D')->setWidth(45);
             $sheet->getColumnDimension('E')->setWidth(50);
             
-            // Buat nama file berdasarkan filter yang dipilih
             $filterInfo = '';
             if ($request->has('bulan') && $request->bulan != '') {
                 $namaBulan = $this->getNamaBulan($request->bulan);
@@ -683,19 +556,16 @@ class SPTController extends Controller
             $filename = 'Data_SPT' . $filterInfo . '_' . date('Y-m-d_His') . '.xlsx';
             $filename = $this->sanitizeFilename($filename);
             
-            // Hapus buffer output yang mungkin ada
             if (ob_get_length()) {
                 ob_end_clean();
             }
             
-            // Set header untuk download
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
             header('Cache-Control: max-age=0');
             header('Expires: 0');
             header('Pragma: public');
             
-            // Tulis file ke output
             $writer = new Xlsx($spreadsheet);
             $writer->save('php://output');
             exit;
@@ -707,90 +577,48 @@ class SPTController extends Controller
         }
     }
 
-    /**
-     * Helper untuk mendapatkan nama bulan
-     */
     private function getNamaBulan($bulan)
     {
         $namaBulan = [
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember'
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
-        
         return $namaBulan[(int)$bulan] ?? 'Bulan_' . $bulan;
     }
 
-    /**
-     * Helper untuk membersihkan nama file dari karakter ilegal
-     */
     private function sanitizeFilename($filename)
     {
-        // Daftar karakter yang tidak diperbolehkan dalam nama file
         $filename = str_replace(
             ['/', '\\', ':', '*', '?', '"', '<', '>', '|', ' ', '(', ')', '[', ']', '{', '}', '!', '@', '#', '$', '%', '^', '&', '=', '+', ',', ';', "'"], 
             '-', 
             $filename
         );
-        
-        // Hapus karakter selain huruf, angka, titik, dan dash
         $filename = preg_replace('/[^a-zA-Z0-9.-]/', '', $filename);
-        
-        // Hapus dash berulang (ganti dengan single dash)
         $filename = preg_replace('/-+/', '-', $filename);
-        
-        // Hapus dash di awal dan akhir
         $filename = trim($filename, '-');
-        
-        // Jika hasil kosong, beri nama default
-        if (empty($filename)) {
-            $filename = 'spt';
-        }
-        
+        if (empty($filename)) $filename = 'spt';
         return $filename;
     }
 
-    /**
-     * Helper untuk menghasilkan nama file PDF yang aman
-     */
     private function generatePdfFilename($spt, $prefix = 'SPT-', $suffix = '.pdf')
     {
-        // Ambil nomor surat dan bersihkan
         $nomorBersih = $this->sanitizeFilename($spt->nomor_surat);
-        
-        // Gabungkan dengan ID untuk memastikan unique
         return $prefix . $nomorBersih . '-' . $spt->id_spt . $suffix;
     }
 
-    /**
-     * Print SPT (cetak PDF)
-     */
     public function print($id)
     {
         try {
-            $spt = SPT::with('penandaTangan')->findOrFail($id);
-            $pegawaiList = $spt->pegawai_list;
+            $spt = SPT::findOrFail($id);
+            $pegawaiList = $spt->pegawai_list_from_snapshot;
             $dasarList = $spt->dasar_list;
+            $penandaTangan = $spt->penanda_tangan_snapshot;
             
-            // Generate PDF
-            $pdf = Pdf::loadView('admin.spt-pdf', compact('spt', 'pegawaiList', 'dasarList'));
-            
-            // Set ukuran kertas (opsional)
+            $pdf = Pdf::loadView('admin.spt-pdf', compact('spt', 'pegawaiList', 'dasarList', 'penandaTangan'));
             $pdf->setPaper('A4', 'portrait');
-            
-            // Generate nama file yang aman
             $namaFile = $this->generatePdfFilename($spt, 'SPT-', '.pdf');
             
-            // Download PDF
             return $pdf->download($namaFile);
             
         } catch (\Exception $e) {
@@ -799,23 +627,19 @@ class SPTController extends Controller
         }
     }
 
-    /**
-     * Preview SPT PDF di browser
-     */
     public function previewPdf($id)
     {
         try {
-            $spt = SPT::with('penandaTangan')->findOrFail($id);
-            $pegawaiList = $spt->pegawai_list;
+            $spt = SPT::findOrFail($id);
+            // PERBAIKAN: Gunakan snapshot untuk preview
+            $pegawaiList = $spt->pegawai_list_from_snapshot;
             $dasarList = $spt->dasar_list;
+            $penandaTangan = $spt->penanda_tangan_snapshot;
             
-            $pdf = Pdf::loadView('admin.spt-pdf', compact('spt', 'pegawaiList', 'dasarList'));
+            $pdf = Pdf::loadView('admin.spt-pdf', compact('spt', 'pegawaiList', 'dasarList', 'penandaTangan'));
             $pdf->setPaper('A4', 'portrait');
-            
-            // Generate nama file yang aman
             $namaFile = $this->generatePdfFilename($spt, 'SPT-', '.pdf');
             
-            // Tampilkan di browser
             return $pdf->stream($namaFile);
             
         } catch (\Exception $e) {
@@ -824,9 +648,6 @@ class SPTController extends Controller
         }
     }
 
-    /**
-     * Get data pegawai untuk API (contoh fitur tambahan)
-     */
     public function getPegawaiData($id)
     {
         try {

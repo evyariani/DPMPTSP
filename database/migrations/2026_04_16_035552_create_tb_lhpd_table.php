@@ -11,36 +11,57 @@ return new class extends Migration
         Schema::create('tb_lhpd', function (Blueprint $table) {
             $table->id('id_lhpd');
             
+            // ========== RELASI KE SPT ==========
+            $table->unsignedBigInteger('spt_id')->nullable()->comment('ID SPT asal pembuatan LHPD');
+            
+            // ========== DATA DARI SPT (SNAPSHOT) ==========
             // Dasar (dari tb_spt - column dasar)
             $table->json('dasar')->nullable()->comment('Dasar perjalanan dari SPT');
             
             // Tujuan (dari tb_spt - column tujuan)
             $table->text('tujuan')->nullable()->comment('Tujuan perjalanan dari SPT');
             
-            // ID Pegawai (dari tb_spt - column pegawai yang berisi JSON)
-            // Karena pegawai di spt berupa JSON, kita simpan sebagai JSON juga
-            $table->json('id_pegawai')->nullable()->comment('ID pegawai yang melakukan perjalanan dari SPT');
+            // Snapshot data pegawai (data lengkap saat SPT dibuat)
+            $table->json('pegawai_snapshot')->nullable()->comment('Snapshot data pegawai yang melakukan perjalanan');
             
+            // ========== DATA DARI SPD (SNAPSHOT) ==========
             // Tanggal berangkat (dari tb_spd - column tanggal_berangkat)
             $table->date('tanggal_berangkat')->nullable()->comment('Tanggal berangkat dari SPD');
             
-            // ID Daerah (dari tb_spd - column tempat_tujuan)
-            $table->unsignedBigInteger('id_daerah')->nullable()->comment('ID daerah tujuan dari SPD');
+            // Tempat tujuan (snapshot)
+            $table->string('tempat_tujuan_snapshot', 255)->nullable()->comment('Snapshot nama tempat tujuan');
             
-            // Hasil LHPD
+            // ID Daerah (referensi ke tb_daerah - untuk relasi, bukan untuk tampilan)
+            $table->unsignedBigInteger('id_daerah')->nullable()->comment('ID daerah tujuan dari SPD (referensi)');
+            
+            // ========== DATA UANG HARIAN (SNAPSHOT) ==========
+            $table->decimal('uang_harian_snapshot', 15, 0)->default(0)->comment('Snapshot uang harian per hari');
+            $table->decimal('uang_transport_snapshot', 15, 0)->default(0)->comment('Snapshot uang transport per hari');
+            $table->decimal('total_biaya_snapshot', 15, 0)->default(0)->comment('Snapshot total biaya perjalanan');
+            
+            // ========== DATA LHPD ==========
             $table->text('hasil')->nullable()->comment('Hasil Laporan Hasil Perjalanan Dinas');
             
-            // Tempat LHPD dikeluarkan (references ke id_daerah di tb_daerah)
+            // Tempat LHPD dikeluarkan (referensi ke tb_daerah)
             $table->unsignedBigInteger('tempat_dikeluarkan')->nullable()->comment('Tempat LHPD dikeluarkan (referensi ke tb_daerah)');
+            
+            // Snapshot tempat dikeluarkan (agar tidak berubah)
+            $table->string('tempat_dikeluarkan_snapshot', 255)->nullable()->comment('Snapshot nama tempat LHPD dikeluarkan');
             
             // Tanggal LHPD dibuat
             $table->date('tanggal_lhpd')->nullable()->comment('Tanggal LHPD dibuat');
             
             // Foto
-            // Di file migration tb_lhpd, ubah kolom foto menjadi:
-            $table->json('foto')->nullable()->comment('Foto dokumentasi LHPD (multiple)');  
+            $table->json('foto')->nullable()->comment('Foto dokumentasi LHPD (multiple)');
             
             $table->timestamps();
+            
+            // ========== FOREIGN KEYS ==========
+            // Foreign key ke tabel spt
+            $table->foreign('spt_id')
+                  ->references('id_spt')
+                  ->on('spt')
+                  ->onDelete('set null');
             
             // Foreign key ke tabel tb_daerah (untuk id_daerah dari SPD)
             $table->foreign('id_daerah')
@@ -54,7 +75,8 @@ return new class extends Migration
                   ->on('tb_daerah')
                   ->onDelete('set null');
             
-            // Indexes untuk performance
+            // ========== INDEXES ==========
+            $table->index('spt_id');
             $table->index('tanggal_berangkat');
             $table->index('id_daerah');
             $table->index('tempat_dikeluarkan');

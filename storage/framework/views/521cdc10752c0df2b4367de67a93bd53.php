@@ -193,7 +193,7 @@
         <h1>LAPORAN HASIL PERJALANAN DINAS (LHPD)</h1>
     </div>
 
-    @php
+    <?php
         // =====================================================
         // AMBIL DATA DARI DATABASE
         // =====================================================
@@ -292,35 +292,35 @@
         if ($pegawaiList->isEmpty() && isset($lhpd->pegawai_list)) {
             $pegawaiList = $lhpd->pegawai_list;
         }
-    @endphp
+    ?>
 
-    {{-- I. DASAR --}}
+    
     <table class="content-table">
-        @if(count($dasarList) > 0)
-            @foreach($dasarList as $index => $dasar)
+        <?php if(count($dasarList) > 0): ?>
+            <?php $__currentLoopData = $dasarList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $dasar): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    @if($index == 0)
-                        <td class="label-col" rowspan="{{ count($dasarList) }}">I.</td>
-                        <td class="ket-col" rowspan="{{ count($dasarList) }}">Dasar</td>
-                        <td class="titikdua-col" rowspan="{{ count($dasarList) }}">:</td>
-                    @endif
-                    <td class="nomor-col">{{ $index + 1 }}.</td>
-                    <td class="content-col" colspan="2">{{ $dasar }}</td>
+                    <?php if($index == 0): ?>
+                        <td class="label-col" rowspan="<?php echo e(count($dasarList)); ?>">I.</td>
+                        <td class="ket-col" rowspan="<?php echo e(count($dasarList)); ?>">Dasar</td>
+                        <td class="titikdua-col" rowspan="<?php echo e(count($dasarList)); ?>">:</td>
+                    <?php endif; ?>
+                    <td class="nomor-col"><?php echo e($index + 1); ?>.</td>
+                    <td class="content-col" colspan="2"><?php echo e($dasar); ?></td>
                 </tr>
-            @endforeach
-        @else
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php else: ?>
             <tr>
                 <td class="label-col">I.</td>
                 <td class="ket-col">Dasar</td>
                 <td class="titikdua-col">:</td>
                 <td class="content-col" colspan="3">-</td>
             </tr>
-        @endif
+        <?php endif; ?>
     </table>
 
     <div class="section-spacer"></div>
 
-    {{-- II. TANGGAL/TUJUAN --}}
+    
     <table class="content-table">
         <tr>
             <td class="label-col">II.</td>
@@ -328,42 +328,42 @@
             <td class="titikdua-col">:</td>
             <td class="content-col" colspan="3">
                 Perjalanan Dinas dilaksanakan pada tanggal 
-                <strong>{{ $tanggalBerangkatStr }}</strong> 
+                <strong><?php echo e($tanggalBerangkatStr); ?></strong> 
                 dengan tujuan 
-                <strong>{{ $tujuanDaerah }}</strong>
+                <strong><?php echo e($tujuanDaerah); ?></strong>
             </td>
         </tr>
     </table>
 
     <div class="section-spacer"></div>
 
-    {{-- III. KEPERLUAN --}}
+    
     <table class="content-table">
         <tr>
             <td class="label-col">III.</td>
             <td class="ket-col">Keperluan</td>
             <td class="titikdua-col">:</td>
-            <td class="content-col" colspan="3">{{ $keperluan }}</td>
+            <td class="content-col" colspan="3"><?php echo e($keperluan); ?></td>
         </tr>
     </table>
 
     <div class="section-spacer"></div>
 
-    {{-- IV. HASIL --}}
+    
     <table class="content-table">
         <tr>
             <td class="label-col">IV.</td>
             <td class="ket-col">Hasil</td>
             <td class="titikdua-col">:</td>
             <td class="content-col" colspan="3">
-                <div class="hasil-text">{!! nl2br(e($hasilTeks)) !!}</div>
+                <div class="hasil-text"><?php echo nl2br(e($hasilTeks)); ?></div>
             </td>
         </tr>
     </table>
 
     <div class="section-spacer"></div>
 
-    {{-- PENUTUP --}}
+    
     <table class="content-table">
         <tr>
             <td class="label-col"></td>
@@ -375,64 +375,65 @@
         </tr>
     </table>
 
-    {{-- FOTO --}}
-    @if(count($fotoGrid) > 0)
+    
+    <?php if(count($fotoGrid) > 0): ?>
     <table class="foto-table">
-        @foreach($fotoGrid as $rowIdx => $rowFoto)
+        <?php $__currentLoopData = $fotoGrid; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rowIdx => $rowFoto): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <tr>
-            @for($col = 0; $col < 3; $col++)
-                @php
+            <?php for($col = 0; $col < 3; $col++): ?>
+                <?php
                     $fotoData = isset($rowFoto[$col]) ? $rowFoto[$col] : null;
                     $fotoIndex = ($rowIdx * 3) + $col + 1;
-                @endphp
+                ?>
                 <td>
                     <div class="foto-item">
-                        @if($fotoData)
-                            <img src="{{ $fotoData }}" alt="Dokumentasi {{ $fotoIndex }}">
-                        @else
+                        <?php if($fotoData): ?>
+                            <img src="<?php echo e($fotoData); ?>" alt="Dokumentasi <?php echo e($fotoIndex); ?>">
+                        <?php else: ?>
                             <div class="foto-placeholder">
-                                📷 Foto {{ $fotoIndex }}<br>
+                                📷 Foto <?php echo e($fotoIndex); ?><br>
                                 <span style="font-size:8px;">(belum tersedia)</span>
                             </div>
-                        @endif
-                        <div class="foto-caption">Foto {{ $fotoIndex }}</div>
+                        <?php endif; ?>
+                        <div class="foto-caption">Foto <?php echo e($fotoIndex); ?></div>
                     </div>
                 </td>
-            @endfor
+            <?php endfor; ?>
         </tr>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </table>
-    @endif
+    <?php endif; ?>
 
-    {{-- TANDA TANGAN --}}
+    
     <div class="tanda-tangan">
         <div class="tempat-tanggal">
-            {{ $tempat }}, {{ $tanggalLaporanStr }}
+            <?php echo e($tempat); ?>, <?php echo e($tanggalLaporanStr); ?>
+
         </div>
         <div>Yang Membuat Laporan,</div>
         
         <div class="ttd-space"></div>
         
-        @if($pegawaiList && $pegawaiList->count() > 0)
-            @foreach($pegawaiList as $index => $pegawai)
-                @if($index > 0)
+        <?php if($pegawaiList && $pegawaiList->count() > 0): ?>
+            <?php $__currentLoopData = $pegawaiList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php if($index > 0): ?>
                     <div style="margin-top: 20px;"></div>
-                @endif
-                @php
+                <?php endif; ?>
+                <?php
                     $nama = is_object($pegawai) ? ($pegawai->nama ?? '') : ($pegawai['nama'] ?? '');
                     $nip = is_object($pegawai) ? ($pegawai->nip ?? '') : ($pegawai['nip'] ?? '');
-                @endphp
-                <div class="nama-ttd">{{ $nama }}</div>
-                @if($nip)
-                    <div class="nip-ttd">NIP. {{ $nip }}</div>
-                @endif
-            @endforeach
-        @else
+                ?>
+                <div class="nama-ttd"><?php echo e($nama); ?></div>
+                <?php if($nip): ?>
+                    <div class="nip-ttd">NIP. <?php echo e($nip); ?></div>
+                <?php endif; ?>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        <?php else: ?>
             <div class="nama-ttd">_________________________</div>
             <div class="nip-ttd">NIP. _________________</div>
-        @endif
+        <?php endif; ?>
     </div>
     <div class="clearfix"></div>
 
 </body>
-</html>
+</html><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/lhpd-pdf.blade.php ENDPATH**/ ?>

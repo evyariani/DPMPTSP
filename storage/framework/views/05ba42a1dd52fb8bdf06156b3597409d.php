@@ -1,35 +1,33 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Edit Surat Perintah Tugas (SPT)'); ?>
 
-@section('title', 'Edit Surat Perintah Tugas (SPT)')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="mb-6">
     <div class="flex justify-between items-center">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Edit Surat Perintah Tugas</h2>
             <p class="text-gray-500">Ubah data Surat Perintah Tugas</p>
         </div>
-        <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
+        <a href="<?php echo e(route('spt.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
             <i class="fas fa-arrow-left mr-2"></i> Kembali
         </a>
     </div>
 </div>
 
 <!-- Notifikasi -->
-@if(session('error'))
+<?php if(session('error')): ?>
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
         <div class="flex">
             <div class="flex-shrink-0">
                 <i class="fas fa-exclamation-circle text-red-500"></i>
             </div>
             <div class="ml-3">
-                <p class="text-sm">{{ session('error') }}</p>
+                <p class="text-sm"><?php echo e(session('error')); ?></p>
             </div>
         </div>
     </div>
-@endif
+<?php endif; ?>
 
-@if ($errors->any())
+<?php if($errors->any()): ?>
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
         <div class="flex">
             <div class="flex-shrink-0">
@@ -38,21 +36,21 @@
             <div class="ml-3">
                 <p class="font-medium">Terjadi kesalahan:</p>
                 <ul class="mt-2 list-disc list-inside text-sm">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </ul>
             </div>
         </div>
     </div>
-@endif
+<?php endif; ?>
 
 <!-- Form Edit SPT -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="p-6">
-        <form action="{{ route('spt.update', $spt->id_spt) }}" method="POST" id="formSPT">
-            @csrf
-            @method('PUT')
+        <form action="<?php echo e(route('spt.update', $spt->id_spt)); ?>" method="POST" id="formSPT">
+            <?php echo csrf_field(); ?>
+            <?php echo method_field('PUT'); ?>
             
             <!-- Grid 2 kolom untuk informasi dasar -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -69,7 +67,7 @@
                                     <input type="number" 
                                            name="nomor_urut" 
                                            id="nomor_urut"
-                                           value="{{ old('nomor_urut', $nomorUrut ?? '') }}"
+                                           value="<?php echo e(old('nomor_urut', $nomorUrut ?? '')); ?>"
                                            min="1" 
                                            max="999"
                                            required
@@ -91,7 +89,7 @@
                                     <div class="flex-1">
                                         <p class="text-sm text-gray-600 mb-1">Preview format lengkap:</p>
                                         <p class="font-mono text-md font-semibold text-blue-700 break-all" id="preview-nomor-surat">
-                                            800.1.11.1/<span id="preview-nomor-urut" class="text-gray-400">___</span>/DPMPTSP/<span id="preview-tahun">{{ date('Y', strtotime($spt->tanggal)) }}</span>
+                                            800.1.11.1/<span id="preview-nomor-urut" class="text-gray-400">___</span>/DPMPTSP/<span id="preview-tahun"><?php echo e(date('Y', strtotime($spt->tanggal))); ?></span>
                                         </p>
                                     </div>
                                 </div>
@@ -107,7 +105,7 @@
                         <input type="date" 
                                id="tanggal" 
                                name="tanggal" 
-                               value="{{ old('tanggal', $spt->tanggal->format('Y-m-d')) }}"
+                               value="<?php echo e(old('tanggal', $spt->tanggal->format('Y-m-d'))); ?>"
                                required
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                         <p class="mt-1 text-sm text-gray-500">Tanggal pembuatan surat (tahun akan digunakan untuk format nomor surat)</p>
@@ -143,12 +141,13 @@
                                 required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
                             <option value="">Pilih Penanda Tangan</option>
-                            @foreach($penandaTangans as $pegawai)
-                                <option value="{{ $pegawai->id_pegawai }}" 
-                                    {{ old('penanda_tangan', $spt->penanda_tangan) == $pegawai->id_pegawai ? 'selected' : '' }}>
-                                    {{ $pegawai->nama }} - {{ $pegawai->jabatan }}
+                            <?php $__currentLoopData = $penandaTangans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($pegawai->id_pegawai); ?>" 
+                                    <?php echo e(old('penanda_tangan', $spt->penanda_tangan) == $pegawai->id_pegawai ? 'selected' : ''); ?>>
+                                    <?php echo e($pegawai->nama); ?> - <?php echo e($pegawai->jabatan); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                         <p class="mt-1 text-sm text-gray-500">Pilih pejabat yang menandatangani surat</p>
                     </div>
@@ -161,18 +160,18 @@
                     Dasar <span class="text-red-500">*</span>
                 </label>
                 <div id="dasar-container" class="space-y-3">
-                    @php
+                    <?php
                         $dasarList = old('dasar', is_array($spt->dasar) ? $spt->dasar : (json_decode($spt->dasar ?? '[]', true) ?: ['']));
                         if (!is_array($dasarList)) {
                             $dasarList = ['']; // Fallback jika bukan array
                         }
-                    @endphp
-                    @foreach($dasarList as $index => $value)
+                    ?>
+                    <?php $__currentLoopData = $dasarList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="flex items-start space-x-2 dasar-item">
                         <div class="flex-grow">
                             <input type="text" 
                                    name="dasar[]" 
-                                   value="{{ $value }}"
+                                   value="<?php echo e($value); ?>"
                                    required
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                    placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
@@ -183,7 +182,7 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
                 <button type="button" id="tambah-dasar" class="mt-2 text-blue-600 hover:text-blue-800 text-sm flex items-center">
                     <i class="fas fa-plus-circle mr-1"></i> Tambah Dasar Lainnya
@@ -196,7 +195,7 @@
                     Pegawai yang Ditugaskan <span class="text-red-500">*</span>
                 </label>
                 <div id="pegawai-container" class="space-y-3">
-                    @php
+                    <?php
     // Ambil ID pegawai dari snapshot (karena snapshot selalu ada untuk data lama)
     $pegawaiIds = [];
     if ($spt->pegawai_snapshot && count($spt->pegawai_snapshot) > 0) {
@@ -210,23 +209,23 @@
     }
     
     $pegawaiList = old('pegawai', $pegawaiIds);
-@endphp
-                    @foreach($pegawaiList as $index => $value)
+?>
+                    <?php $__currentLoopData = $pegawaiList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="flex items-start space-x-2 pegawai-item">
                         <div class="flex-grow">
                             <select name="pegawai[]" 
                                     required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 pegawai-select">
                                 <option value="">Pilih Pegawai</option>
-                                @foreach($semuaPegawai as $pegawai)
-                                    <option value="{{ $pegawai->id_pegawai }}" 
-                                        data-nama="{{ $pegawai->nama }}"
-                                        data-nip="{{ $pegawai->nip }}"
-                                        data-jabatan="{{ $pegawai->jabatan }}"
-                                        {{ $value == $pegawai->id_pegawai ? 'selected' : '' }}>
-                                        {{ $pegawai->nama }} - {{ $pegawai->nip }} ({{ $pegawai->jabatan }})
+                                <?php $__currentLoopData = $semuaPegawai; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($pegawai->id_pegawai); ?>" 
+                                        data-nama="<?php echo e($pegawai->nama); ?>"
+                                        data-nip="<?php echo e($pegawai->nip); ?>"
+                                        data-jabatan="<?php echo e($pegawai->jabatan); ?>"
+                                        <?php echo e($value == $pegawai->id_pegawai ? 'selected' : ''); ?>>
+                                        <?php echo e($pegawai->nama); ?> - <?php echo e($pegawai->nip); ?> (<?php echo e($pegawai->jabatan); ?>)
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <button type="button" 
@@ -235,7 +234,7 @@
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
                 <button type="button" id="tambah-pegawai" class="mt-2 text-blue-600 hover:text-blue-800 text-sm flex items-center">
                     <i class="fas fa-plus-circle mr-1"></i> Tambah Pegawai Lainnya
@@ -255,13 +254,13 @@
                           rows="4"
                           required
                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                          placeholder="Jelaskan tujuan penugasan...">{{ old('tujuan', $spt->tujuan) }}</textarea>
+                          placeholder="Jelaskan tujuan penugasan..."><?php echo e(old('tujuan', $spt->tujuan)); ?></textarea>
                 <p class="mt-1 text-sm text-gray-500">Uraikan maksud dan tujuan pelaksanaan tugas</p>
             </div>
 
             <!-- Tombol Aksi -->
             <div class="pt-6 border-t border-gray-200 flex justify-end space-x-3">
-                <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg flex items-center transition duration-200">
+                <a href="<?php echo e(route('spt.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg flex items-center transition duration-200">
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
@@ -271,9 +270,9 @@
         </form>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 <script>
 // ========== FUNGSI PREVIEW NOMOR SURAT ==========
 function updatePreviewNomorSurat() {
@@ -314,7 +313,7 @@ function getNextNomorUrut() {
         tahun = new Date(tanggalInput.value).getFullYear();
     }
     
-    fetch(`{{ route('spt.api-get-next-nomor-urut') }}?tahun=${tahun}`)
+    fetch(`<?php echo e(route('spt.api-get-next-nomor-urut')); ?>?tahun=${tahun}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -451,14 +450,14 @@ function setupPegawaiFields() {
             } else {
                 // Generate options dari data semuaPegawai
                 options = `<option value="">Pilih Pegawai</option>`;
-                @foreach($semuaPegawai as $pegawai)
-                    options += `<option value="{{ $pegawai->id_pegawai }}" 
-                        data-nama="{{ $pegawai->nama }}"
-                        data-nip="{{ $pegawai->nip }}"
-                        data-jabatan="{{ $pegawai->jabatan }}">
-                        {{ $pegawai->nama }} - {{ $pegawai->nip }} ({{ $pegawai->jabatan }})
+                <?php $__currentLoopData = $semuaPegawai; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    options += `<option value="<?php echo e($pegawai->id_pegawai); ?>" 
+                        data-nama="<?php echo e($pegawai->nama); ?>"
+                        data-nip="<?php echo e($pegawai->nip); ?>"
+                        data-jabatan="<?php echo e($pegawai->jabatan); ?>">
+                        <?php echo e($pegawai->nama); ?> - <?php echo e($pegawai->nip); ?> (<?php echo e($pegawai->jabatan); ?>)
                     </option>`;
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             }
             
             newItem.innerHTML = `
@@ -680,4 +679,5 @@ if (form) {
     });
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/spt-edit.blade.php ENDPATH**/ ?>
