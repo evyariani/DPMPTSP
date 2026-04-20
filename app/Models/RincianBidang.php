@@ -4,11 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-<<<<<<< HEAD
-=======
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\UangHarian;
->>>>>>> db0c50f6a0cf3864408bbf4a141a91bc52fa8d2b
 
 class RincianBidang extends Model
 {
@@ -22,41 +19,6 @@ class RincianBidang extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-<<<<<<< HEAD
-        'nomor',
-        'tanggal',
-        'tujuan',
-        'pegawai',
-        'transport',
-        'total',
-        'terbilang'
-    ];
-
-    protected $casts = [
-        'pegawai' => 'array',  // JSON otomatis jadi array
-        'tanggal' => 'date'     // otomatis jadi Carbon object
-    ];
-
-    // Accessor: Total Uang Harian
-    public function getTotalUangHarianAttribute()
-    {
-        $total = 0;
-        if ($this->pegawai) {
-            foreach ($this->pegawai as $p) {
-                $total += ($p['nominal'] ?? 0) * ($p['hari'] ?? 0);
-            }
-        }
-        return $total;
-    }
-
-    // Accessor: Total Keseluruhan (Uang Harian + Transport)
-    public function getTotalKeseluruhanAttribute()
-    {
-        return $this->total_uang_harian + ($this->transport ?? 0);
-    }
-
-    // ✅ Tambahan opsional: Mendapatkan daftar nama pegawai
-=======
         'spd_id',
         'nomor_sppd',
         'tanggal_berangkat',
@@ -125,43 +87,11 @@ class RincianBidang extends Model
                ($this->transport ?? 0);
     }
 
->>>>>>> db0c50f6a0cf3864408bbf4a141a91bc52fa8d2b
     public function getDaftarNamaPegawaiAttribute()
     {
         if (!$this->pegawai) return [];
         return array_column($this->pegawai, 'nama');
     }
-<<<<<<< HEAD
-
-    // ✅ Tambahan opsional: Mendapatkan pegawai pertama (bendahara)
-    public function getBendaharaAttribute()
-    {
-        return $this->pegawai[0] ?? null;
-    }
-
-    // ✅ Tambahan opsional: Mendapatkan pegawai selain pertama (yang menerima)
-    public function getPenerimaAttribute()
-    {
-        return array_slice($this->pegawai, 1);
-    }
-
-    // ✅ Tambahan opsional: Format tanggal Indonesia
-    public function getTanggalIndonesiaAttribute()
-    {
-        if (!$this->tanggal) return '-';
-        
-        $bulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-        ];
-        
-        $tgl = $this->tanggal->day;
-        $bln = $bulan[(int)$this->tanggal->month];
-        $thn = $this->tanggal->year;
-        
-        return "{$tgl} {$bln} {$thn}";
-=======
     
     public function getDaftarPegawaiLengkapAttribute()
     {
@@ -489,6 +419,5 @@ class RincianBidang extends Model
         ]);
         
         return $rincianBidang;
->>>>>>> db0c50f6a0cf3864408bbf4a141a91bc52fa8d2b
     }
 }
