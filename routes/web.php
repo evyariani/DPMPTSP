@@ -9,6 +9,8 @@ use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\UangHarianController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SPTController;
+use App\Http\Controllers\RincianBidangController;
+use App\Http\Controllers\KwitansiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -110,6 +112,33 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
         Route::delete('/{id}', [SPTController::class, 'destroy'])->name('spt.destroy');
         Route::post('/', [SPTController::class, 'store'])->name('spt.store');
     });
+
+    // RINCIAN BIDANG - SEMUA USER BISA AKSES
+    Route::prefix('rincian')->group(function () {
+        Route::get('/', [RincianBidangController::class, 'index'])->name('rincian.index');
+        Route::get('/create', [RincianBidangController::class, 'create'])->name('rincian.create');
+        Route::post('/', [RincianBidangController::class, 'store'])->name('rincian.store');
+        Route::get('/{id}', [RincianBidangController::class, 'show'])->name('rincian.show');
+        Route::get('/{id}/edit', [RincianBidangController::class, 'edit'])->name('rincian.edit');
+        Route::put('/{id}', [RincianBidangController::class, 'update'])->name('rincian.update');
+        Route::delete('/{id}', [RincianBidangController::class, 'destroy'])->name('rincian.destroy');
+        Route::get('/rincian/cetak/{id}', [RincianBidangController::class, 'cetak'])->name('rincian.cetak');
+        Route::get('/rincian/preview/{id}', [RincianBidangController::class, 'previewPdf'])->name('rincian.preview');
+    });
+
+    // KWITANSI - SEMUA USER BISA AKSES
+    Route::prefix('kwitansi')->group(function () {
+        Route::get('/', [KwitansiController::class, 'index'])->name('kwitansi.index');
+        Route::get('/create', [KwitansiController::class, 'create'])->name('kwitansi.create');
+        Route::post('/', [KwitansiController::class, 'store'])->name('kwitansi.store');
+        Route::get('/{id}', [KwitansiController::class, 'show'])->name('kwitansi.show');
+        Route::get('/{id}/edit', [KwitansiController::class, 'edit'])->name('kwitansi.edit');
+        Route::put('/{id}', [KwitansiController::class, 'update'])->name('kwitansi.update');
+        Route::delete('/{id}', [KwitansiController::class, 'destroy'])->name('kwitansi.destroy');
+        Route::get('/cetak/{id}', [KwitansiController::class, 'cetak'])->name('kwitansi.cetak');
+        Route::get('/print/{id}', [KwitansiController::class, 'print'])->name('kwitansi.print');
+        Route::get('/preview/{id}', [KwitansiController::class, 'previewPdf'])->name('kwitansi.preview');
+});
     
     // TRANSPORTASI MANAGEMENT
     Route::prefix('transportasi')->middleware(['role:admin|kadis'])->group(function () {
