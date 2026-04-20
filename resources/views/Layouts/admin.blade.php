@@ -170,7 +170,7 @@
                             </a>
                         </li>
                         
-                    <!-- MENU UNTUK PEGAWAI (HANYA SPT, SPD, DLL) -->
+                    <!-- MENU UNTUK PEGAWAI (SPT, SPD, RINCIAN BIDANG, KWITANSI BIDANG, LHPD) -->
                     @elseif($userLevel == 'pegawai')
                         <!-- SPT -->
                         <li>
@@ -186,23 +186,12 @@
 
                         <!-- SPD DEPAN -->
                         <li>
-                            <a href="/transaksi" 
+                            <a href="/spd" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('transaksi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      {{ request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-exchange-alt text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">SPD Depan</span>
-                            </a>
-                        </li>
-
-                        <!-- SPD BELAKANG -->
-                        <li>
-                            <a href="/laporan" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('laporan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-chart-bar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">SPD Belakang</span>
+                                <span x-show="sidebarOpen" class="text-sm font-medium">SPD</span>
                             </a>
                         </li>
 
@@ -227,8 +216,20 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Kwitansi Bidang</span>
                             </a>
                         </li>
+
+                        <!-- LHPD (Laporan Hasil Perjalanan Dinas) - MENU TERAKHIR UNTUK PEGAWAI -->
+                        <li>
+                            <a href="/lhpd" 
+                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
+                                      {{ request()->is('lhpd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                               :class="{'justify-center': !sidebarOpen}">
+                                <i class="fas fa-clipboard-list text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
+                                <span x-show="sidebarOpen" class="text-sm font-medium">LHPD</span>
+                                <span x-show="sidebarOpen" class="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">Laporan</span>
+                            </a>
+                        </li>
                         
-                    <!-- MENU UNTUK KADIS (SEMUA MENU) -->
+                    <!-- MENU UNTUK KADIS (SEMUA MENU) - TANPA LHPD -->
                     @elseif($userLevel == 'kadis')
                         <!-- Data Master Section -->
                         <li class="mb-2">
@@ -288,7 +289,7 @@
                         
                         <li class="mb-2">
                             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2" x-show="sidebarOpen">
-                                <i class="fas fa-file-alt mr-2"></i> Transaksi
+                                <i class="fas fa-file-alt mr-2"></i> Perjalanan Dinas
                             </div>
                         </li>
                         
@@ -306,23 +307,12 @@
 
                         <!-- SPD DEPAN -->
                         <li>
-                            <a href="/transaksi" 
+                            <a href="/spd" 
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('transaksi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
+                                      {{ request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-exchange-alt text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">SPD Depan</span>
-                            </a>
-                        </li>
-
-                        <!-- SPD BELAKANG -->
-                        <li>
-                            <a href="/laporan" 
-                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      {{ request()->is('laporan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm' }}"
-                               :class="{'justify-center': !sidebarOpen}">
-                                <i class="fas fa-chart-bar text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
-                                <span x-show="sidebarOpen" class="text-sm font-medium">SPD Belakang</span>
                             </a>
                         </li>
 

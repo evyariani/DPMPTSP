@@ -9,6 +9,24 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PegawaiController extends Controller
 {
+    /**
+     * Daftar jabatan yang tersedia untuk dropdown
+     */
+    private function getJabatanList()
+    {
+        return [
+            'Kepala Dinas',
+            'Sekretaris',
+            'Kabid Data, Informasi dan Pengaduan',
+            'Kabid Perizinan dan Non Perizinan Tertentu',
+            'Kabid Perizinan dan Non Perizinan Jasa Usaha',
+            'Kabid Penanaman Modal',
+            'Kasubbag Perencanaan dan Pelaporan',
+            'Kasubbag Umum dan Kepegawaian',
+            'Lainnya' // Opsi untuk input manual
+        ];
+    }
+
     public function index(Request $request)
     {
         try {
@@ -67,37 +85,70 @@ class PegawaiController extends Controller
     
     public function create()
     {
-        return view('admin.create-pegawai');
+        $jabatanList = $this->getJabatanList();
+        return view('admin.create-pegawai', compact('jabatanList'));
     }
     
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'nama' => 'required|string|max:100',
             'nip' => 'nullable|string|max:25|unique:tb_pegawai,nip',
             'pangkat' => 'nullable|string|max:50',
             'gol' => 'nullable|string|max:10',
-            'jabatan' => 'nullable|string|max:100',
             'tk_jalan' => 'nullable|string|max:50'
-        ], [
-            'nama.required' => 'Nama pegawai harus diisi',
-            'nip.unique' => 'NIP sudah terdaftar'
-        ]);
+        ];
+        
+        // Validasi jabatan berdasarkan pilihan
+        if ($request->jabatan == 'Lainnya') {
+            $rules['jabatan_lainnya'] = 'required|string|max:100';
+            $messages = [
+                'jabatan_lainnya.required' => 'Jabatan harus diisi',
+                'jabatan_lainnya.max' => 'Jabatan maksimal 100 karakter'
+            ];
+        } else {
+            $rules['jabatan'] = 'required|string|max:100';
+            $messages = [
+                'jabatan.required' => 'Jabatan harus dipilih'
+            ];
+        }
+        
+        $messages['nama.required'] = 'Nama pegawai harus diisi';
+        $messages['nip.unique'] = 'NIP sudah terdaftar';
+        
+        $validated = $request->validate($rules, $messages);
+        
+        // Set jabatan berdasarkan pilihan
+        if ($request->jabatan == 'Lainnya') {
+            $validated['jabatan'] = $request->jabatan_lainnya;
+            unset($validated['jabatan_lainnya']);
+        }
+        unset($validated['jabatan']); // Hapus sementara, akan diisi ulang
+        
+        // Rebuild array dengan jabatan yang benar
+        $data = [
+            'nama' => $validated['nama'],
+            'nip' => $validated['nip'] ?? null,
+            'pangkat' => $validated['pangkat'] ?? null,
+            'gol' => $validated['gol'] ?? null,
+            'jabatan' => ($request->jabatan == 'Lainnya') ? $request->jabatan_lainnya : $request->jabatan,
+            'tk_jalan' => $validated['tk_jalan'] ?? null
+        ];
         
         // Format NIP hapus spasi
-        if ($request->nip) {
-            $validated['nip'] = str_replace(' ', '', $request->nip);
+        if ($data['nip']) {
+            $data['nip'] = str_replace(' ', '', $data['nip']);
         }
         
         // Format tk_jalan (uppercase jika huruf)
-        if ($request->tk_jalan) {
-            $validated['tk_jalan'] = trim($request->tk_jalan);
-            if (!is_numeric($validated['tk_jalan'])) {
-                $validated['tk_jalan'] = strtoupper($validated['tk_jalan']);
+        if ($data['tk_jalan']) {
+            $data['tk_jalan'] = trim($data['tk_jalan']);
+            if (!is_numeric($data['tk_jalan'])) {
+                $data['tk_jalan'] = strtoupper($data['tk_jalan']);
             }
         }
         
-        Pegawai::create($validated);
+        Pegawai::create($data);
         
         if (request()->ajax()) {
             return response()->json([
@@ -113,6 +164,12 @@ class PegawaiController extends Controller
     {
         try {
             $pegawai = Pegawai::findOrFail($id);
+            $jabatanList = $this->getJabatanList();
+            
+            // Cek apakah jabatan termasuk dalam list atau custom
+            $isJabatanInList = in_array($pegawai->jabatan, $jabatanList);
+            $jabatanLainnya = $isJabatanInList ? '' : $pegawai->jabatan;
+            
         } catch (ModelNotFoundException $e) {
             if (request()->ajax()) {
                 return response()->json([
@@ -123,7 +180,7 @@ class PegawaiController extends Controller
             return redirect('/pegawai')->with('error', 'Data pegawai tidak ditemukan');
         }
         
-        return view('admin.edit-pegawai', compact('pegawai'));
+        return view('admin.edit-pegawai', compact('pegawai', 'jabatanList', 'isJabatanInList', 'jabatanLainnya'));
     }
     
     public function update(Request $request, $id)
@@ -140,32 +197,64 @@ class PegawaiController extends Controller
             return redirect('/pegawai')->with('error', 'Data pegawai tidak ditemukan');
         }
         
-        $validated = $request->validate([
+        $rules = [
             'nama' => 'required|string|max:100',
             'nip' => 'nullable|string|max:25|unique:tb_pegawai,nip,' . $id . ',id_pegawai',
             'pangkat' => 'nullable|string|max:50',
             'gol' => 'nullable|string|max:10',
-            'jabatan' => 'nullable|string|max:100',
             'tk_jalan' => 'nullable|string|max:50'
-        ], [
-            'nama.required' => 'Nama pegawai harus diisi',
-            'nip.unique' => 'NIP sudah terdaftar'
-        ]);
+        ];
         
-        // Format NIP hapus spasi
+        // Validasi jabatan berdasarkan pilihan
+        if ($request->jabatan == 'Lainnya') {
+            $rules['jabatan_lainnya'] = 'required|string|max:100';
+            $messages = [
+                'jabatan_lainnya.required' => 'Jabatan harus diisi',
+                'jabatan_lainnya.max' => 'Jabatan maksimal 100 karakter'
+            ];
+        } else {
+            $rules['jabatan'] = 'required|string|max:100';
+            $messages = [
+                'jabatan.required' => 'Jabatan harus dipilih'
+            ];
+        }
+        
+        $messages['nama.required'] = 'Nama pegawai harus diisi';
+        $messages['nip.unique'] = 'NIP sudah terdaftar';
+        
+        $validated = $request->validate($rules, $messages);
+        
+        // Siapkan data untuk update
+        $data = [
+            'nama' => $validated['nama'],
+            'pangkat' => $validated['pangkat'] ?? null,
+            'gol' => $validated['gol'] ?? null,
+            'tk_jalan' => $validated['tk_jalan'] ?? null
+        ];
+        
+        // Set NIP jika ada
         if ($request->nip) {
-            $validated['nip'] = str_replace(' ', '', $request->nip);
+            $data['nip'] = str_replace(' ', '', $request->nip);
+        } else {
+            $data['nip'] = null;
+        }
+        
+        // Set jabatan berdasarkan pilihan
+        if ($request->jabatan == 'Lainnya') {
+            $data['jabatan'] = $request->jabatan_lainnya;
+        } else {
+            $data['jabatan'] = $request->jabatan;
         }
         
         // Format tk_jalan (uppercase jika huruf)
-        if ($request->tk_jalan) {
-            $validated['tk_jalan'] = trim($request->tk_jalan);
-            if (!is_numeric($validated['tk_jalan'])) {
-                $validated['tk_jalan'] = strtoupper($validated['tk_jalan']);
+        if ($data['tk_jalan']) {
+            $data['tk_jalan'] = trim($data['tk_jalan']);
+            if (!is_numeric($data['tk_jalan'])) {
+                $data['tk_jalan'] = strtoupper($data['tk_jalan']);
             }
         }
         
-        $pegawai->update($validated);
+        $pegawai->update($data);
         
         if (request()->ajax()) {
             return response()->json([
