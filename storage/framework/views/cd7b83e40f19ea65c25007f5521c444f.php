@@ -1,8 +1,6 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Surat Perintah Dinas (SPD) - Halaman Belakang'); ?>
 
-@section('title', 'Surat Perintah Dinas (SPD) - Halaman Belakang')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <style>
 /* Animasi untuk notifikasi */
 @keyframes slideInFromBottom {
@@ -154,10 +152,10 @@
             <p class="text-gray-500">Detail Program, Kode Rekening, dan Penanda Tangan</p>
         </div>
         <div class="flex space-x-3">
-            <a href="{{ route('spd.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
+            <a href="<?php echo e(route('spd.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-arrow-left mr-2"></i> Kembali ke Halaman Depan
             </a>
-            <a href="{{ route('spd.edit', $spd->id_spd) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+            <a href="<?php echo e(route('spd.edit', $spd->id_spd)); ?>" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-edit mr-2"></i> Edit Halaman Depan
             </a>
         </div>
@@ -165,7 +163,7 @@
 </div>
 
 <!-- Notifikasi Toast -->
-@if(session('success'))
+<?php if(session('success')): ?>
 <div id="success-notification" class="notification">
     <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -174,7 +172,7 @@
             </div>
             <div class="ml-3 flex-1">
                 <p class="font-medium">Berhasil!</p>
-                <p class="text-sm mt-1">{{ session('success') }}</p>
+                <p class="text-sm mt-1"><?php echo e(session('success')); ?></p>
             </div>
             <button type="button" onclick="hideNotification('success')" class="ml-4 text-green-600 hover:text-green-800">
                 <i class="fas fa-times"></i>
@@ -185,9 +183,9 @@
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
-@if(session('error'))
+<?php if(session('error')): ?>
 <div id="error-notification" class="notification">
     <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -196,7 +194,7 @@
             </div>
             <div class="ml-3 flex-1">
                 <p class="font-medium">Terjadi Kesalahan!</p>
-                <p class="text-sm mt-1">{{ session('error') }}</p>
+                <p class="text-sm mt-1"><?php echo e(session('error')); ?></p>
             </div>
             <button type="button" onclick="hideNotification('error')" class="ml-4 text-red-600 hover:text-red-800">
                 <i class="fas fa-times"></i>
@@ -207,9 +205,9 @@
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
-@if(session('warning'))
+<?php if(session('warning')): ?>
 <div id="warning-notification" class="notification">
     <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -218,7 +216,7 @@
             </div>
             <div class="ml-3 flex-1">
                 <p class="font-medium">Peringatan!</p>
-                <p class="text-sm mt-1">{{ session('warning') }}</p>
+                <p class="text-sm mt-1"><?php echo e(session('warning')); ?></p>
             </div>
             <button type="button" onclick="hideNotification('warning')" class="ml-4 text-yellow-600 hover:text-yellow-800">
                 <i class="fas fa-times"></i>
@@ -229,7 +227,7 @@
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
 <!-- CARD 1: INFORMASI SPD -->
 <div class="info-card">
@@ -243,28 +241,28 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
                 <span class="text-gray-500 text-xs">Nomor Surat</span>
-                <p class="font-semibold text-gray-800 text-sm">{{ $spd->nomor_surat }}</p>
+                <p class="font-semibold text-gray-800 text-sm"><?php echo e($spd->nomor_surat); ?></p>
             </div>
             <div>
                 <span class="text-gray-500 text-xs">Maksud Perjalanan</span>
-                <p class="text-gray-800 text-sm">{{ Str::limit($spd->maksud_perjadin, 80) }}</p>
+                <p class="text-gray-800 text-sm"><?php echo e(Str::limit($spd->maksud_perjadin, 80)); ?></p>
             </div>
             <div>
                 <span class="text-gray-500 text-xs">Tanggal Perjalanan</span>
-                <p class="text-gray-800 text-sm">{{ $spd->tanggal_berangkat ? $spd->tanggal_berangkat->format('d/m/Y') : '-' }} s/d {{ $spd->tanggal_kembali ? $spd->tanggal_kembali->format('d/m/Y') : '-' }}</p>
-                <p class="text-xs text-gray-500">{{ $spd->lama_perjadin }} Hari</p>
+                <p class="text-gray-800 text-sm"><?php echo e($spd->tanggal_berangkat ? $spd->tanggal_berangkat->format('d/m/Y') : '-'); ?> s/d <?php echo e($spd->tanggal_kembali ? $spd->tanggal_kembali->format('d/m/Y') : '-'); ?></p>
+                <p class="text-xs text-gray-500"><?php echo e($spd->lama_perjadin); ?> Hari</p>
             </div>
             <div>
                 <span class="text-gray-500 text-xs">Tempat Tujuan</span>
-                <p class="text-gray-800 text-sm">{{ $spd->tempatTujuan?->nama ?? '-' }}</p>
+                <p class="text-gray-800 text-sm"><?php echo e($spd->tempatTujuan?->nama ?? '-'); ?></p>
             </div>
             <div>
                 <span class="text-gray-500 text-xs">Alat Transportasi</span>
-                <p class="text-gray-800 text-sm">{{ $spd->label_alat_transportasi ?? '-' }}</p>
+                <p class="text-gray-800 text-sm"><?php echo e($spd->label_alat_transportasi ?? '-'); ?></p>
             </div>
             <div>
                 <span class="text-gray-500 text-xs">SKPD</span>
-                <p class="text-gray-800 text-sm">{{ $spd->skpd ?? '-' }}</p>
+                <p class="text-gray-800 text-sm"><?php echo e($spd->skpd ?? '-'); ?></p>
             </div>
         </div>
     </div>
@@ -283,25 +281,25 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-purple-50 rounded-lg p-3">
                 <span class="text-gray-600 text-xs">Program</span>
-                <p class="font-medium text-gray-800 text-sm">{{ $spd->pejabat_teknis_program ?? '-' }}</p>
+                <p class="font-medium text-gray-800 text-sm"><?php echo e($spd->pejabat_teknis_program ?? '-'); ?></p>
             </div>
             <div class="bg-purple-50 rounded-lg p-3">
                 <span class="text-gray-600 text-xs">Kegiatan</span>
-                <p class="font-medium text-gray-800 text-sm">{{ $spd->pejabat_teknis_kegiatan ?? '-' }}</p>
+                <p class="font-medium text-gray-800 text-sm"><?php echo e($spd->pejabat_teknis_kegiatan ?? '-'); ?></p>
             </div>
             <div class="bg-purple-50 rounded-lg p-3">
                 <span class="text-gray-600 text-xs">Sub Kegiatan</span>
-                <p class="font-medium text-gray-800 text-sm">{{ $spd->pejabat_teknis_sub_kegiatan ?? '-' }}</p>
+                <p class="font-medium text-gray-800 text-sm"><?php echo e($spd->pejabat_teknis_sub_kegiatan ?? '-'); ?></p>
             </div>
             <div class="bg-purple-50 rounded-lg p-3">
                 <span class="text-gray-600 text-xs">Kode Rekening</span>
-                <p class="font-mono font-medium text-gray-800 text-sm">{{ $spd->pejabat_teknis_kode_rekening ?? '-' }}</p>
+                <p class="font-mono font-medium text-gray-800 text-sm"><?php echo e($spd->pejabat_teknis_kode_rekening ?? '-'); ?></p>
             </div>
             <div class="bg-purple-50 rounded-lg p-3 md:col-span-2">
                 <span class="text-gray-600 text-xs">Pejabat Teknis</span>
-                <p class="font-medium text-gray-800 text-sm">{{ $spd->pejabatTeknisPegawai?->nama ?? '-' }}</p>
-                <p class="text-xs text-gray-500">NIP: {{ $spd->pejabatTeknisPegawai?->nip ?? '-' }}</p>
-                <p class="text-xs text-gray-500">Jabatan: {{ $spd->pejabatTeknisPegawai?->jabatan ?? '-' }}</p>
+                <p class="font-medium text-gray-800 text-sm"><?php echo e($spd->pejabatTeknisPegawai?->nama ?? '-'); ?></p>
+                <p class="text-xs text-gray-500">NIP: <?php echo e($spd->pejabatTeknisPegawai?->nip ?? '-'); ?></p>
+                <p class="text-xs text-gray-500">Jabatan: <?php echo e($spd->pejabatTeknisPegawai?->jabatan ?? '-'); ?></p>
             </div>
         </div>
     </div>
@@ -314,59 +312,27 @@
             <i class="fas fa-users text-teal-500 mr-2"></i>
             Pelaksana Perjalanan Dinas
         </h3>
-        @php
-            // Gunakan snapshot jika ada, fallback ke relasi
-            $pelaksanaCount = 0;
-            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
-                $pelaksanaCount = count($spd->pelaksana_snapshot);
-            } elseif ($spd->pelaksanaPerjadin) {
-                $pelaksanaCount = $spd->pelaksanaPerjadin->count();
-            }
-        @endphp
-        <span class="info-badge info-badge-blue ml-3">Jumlah: {{ $pelaksanaCount }} orang</span>
+        <span class="info-badge info-badge-blue ml-3">Jumlah: <?php echo e($spd->pelaksanaPerjadin->count()); ?> orang</span>
     </div>
     <div class="p-6">
-        @php
-            // Ambil data pelaksana dari snapshot atau relasi
-            $pelaksanaList = [];
-            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
-                $pelaksanaList = $spd->pelaksana_snapshot;
-            } elseif ($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0) {
-                foreach ($spd->pelaksanaPerjadin as $p) {
-                    $pelaksanaList[] = [
-                        'nama' => $p->nama,
-                        'nip' => $p->nip,
-                        'jabatan' => $p->jabatan,
-                    ];
-                }
-            }
-        @endphp
-        
-        @if(count($pelaksanaList) > 0)
+        <?php if($spd->pelaksanaPerjadin->count() > 0): ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                @foreach($pelaksanaList as $pelaksana)
+                <?php $__currentLoopData = $spd->pelaksanaPerjadin; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelaksana): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-150">
                         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center">
                             <i class="fas fa-user-check text-teal-600 text-sm"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ $pelaksana['nama'] ?? '-' }}</p>
-                            <p class="text-xs text-gray-500 truncate">NIP: {{ $pelaksana['nip'] ?? '-' }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ $pelaksana['jabatan'] ?? '-' }}</p>
+                            <p class="text-sm font-medium text-gray-900 truncate"><?php echo e($pelaksana->nama); ?></p>
+                            <p class="text-xs text-gray-500 truncate">NIP: <?php echo e($pelaksana->nip ?? '-'); ?></p>
+                            <p class="text-xs text-gray-500 truncate"><?php echo e($pelaksana->jabatan ?? '-'); ?></p>
                         </div>
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
-        @else
+        <?php else: ?>
             <p class="text-gray-500 text-center py-4">Tidak ada data pelaksana</p>
-        @endif
-        
-        @if($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0)
-            <div class="mt-3 text-xs text-gray-400 text-center">
-                <i class="fas fa-info-circle mr-1"></i> 
-                Data pelaksana diambil dari snapshot saat SPD dibuat
-            </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
@@ -380,8 +346,8 @@
         <span class="info-badge info-badge-blue ml-3">Isi jika diperlukan</span>
     </div>
     <div class="p-6">
-        <form action="{{ route('spd.update-belakang', $spd->id_spd) }}" method="POST" id="formPenandaTangan">
-            @csrf
+        <form action="<?php echo e(route('spd.update-belakang', $spd->id_spd)); ?>" method="POST" id="formPenandaTangan">
+            <?php echo csrf_field(); ?>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                     <label for="penanda_tangan_nama" class="block text-sm font-medium text-gray-700 mb-2">
@@ -390,7 +356,7 @@
                     <input type="text"
                            id="penanda_tangan_nama"
                            name="penanda_tangan_nama"
-                           value="{{ old('penanda_tangan_nama', $spd->penanda_tangan_nama) }}"
+                           value="<?php echo e(old('penanda_tangan_nama', $spd->penanda_tangan_nama)); ?>"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: Dr. H. Ahmad, M.Si">
                     <p class="mt-1 text-xs text-gray-500">Nama pejabat yang menandatangani SPD di tempat tujuan</p>
@@ -403,7 +369,7 @@
                     <input type="text"
                            id="penanda_tangan_nip"
                            name="penanda_tangan_nip"
-                           value="{{ old('penanda_tangan_nip', $spd->penanda_tangan_nip) }}"
+                           value="<?php echo e(old('penanda_tangan_nip', $spd->penanda_tangan_nip)); ?>"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: 197501011998031001">
                 </div>
@@ -415,7 +381,7 @@
                     <input type="text"
                            id="penanda_tangan_jabatan"
                            name="penanda_tangan_jabatan"
-                           value="{{ old('penanda_tangan_jabatan', $spd->penanda_tangan_jabatan) }}"
+                           value="<?php echo e(old('penanda_tangan_jabatan', $spd->penanda_tangan_jabatan)); ?>"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: Kepala Dinas">
                 </div>
@@ -427,7 +393,7 @@
                     <input type="text"
                            id="penanda_tangan_instansi"
                            name="penanda_tangan_instansi"
-                           value="{{ old('penanda_tangan_instansi', $spd->penanda_tangan_instansi) }}"
+                           value="<?php echo e(old('penanda_tangan_instansi', $spd->penanda_tangan_instansi)); ?>"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: Dinas Pendidikan Kab. Bandung">
                     <p class="mt-1 text-xs text-gray-500">Instansi/lembaga tempat penanda tangan bertugas</p>
@@ -447,12 +413,12 @@
 <div class="info-card">
     <div class="p-6">
         <div class="flex justify-end space-x-3">
-            <a href="{{ route('spd.print-belakang', $spd->id_spd) }}"
+            <a href="<?php echo e(route('spd.print-belakang', $spd->id_spd)); ?>"
                target="_blank"
                class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-print mr-2"></i> Cetak Halaman Belakang
             </a>
-            <a href="{{ route('spd.preview-belakang', $spd->id_spd) }}"
+            <a href="<?php echo e(route('spd.preview-belakang', $spd->id_spd)); ?>"
                target="_blank"
                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-eye mr-2"></i> Preview PDF
@@ -460,9 +426,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 <script>
 function hideNotification(type) {
     const notification = document.getElementById(`${type}-notification`);
@@ -503,4 +469,6 @@ document.getElementById('formPenandaTangan')?.addEventListener('submit', functio
     }, 5000);
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PKL POLITALA\dpmptsp\resources\views/admin/spd-belakang.blade.php ENDPATH**/ ?>

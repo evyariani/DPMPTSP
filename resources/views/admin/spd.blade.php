@@ -1,3 +1,40 @@
+<h2>Data SPD</h2>
+
+<a href="{{ route('spd-create') }}">+ Tambah SPD</a>
+
+@if(session('success'))
+    <p>{{ session('success') }}</p>
+@endif
+
+<table border="1">
+    <tr>
+        <th>No</th>
+        <th>Nama Pegawai</th>
+        <th>Program</th>
+        <th>Tanggal</th>
+        <th>Aksi</th>
+    </tr>
+
+    @foreach($spds as $key => $spd)
+    <tr>
+        <td>{{ $key+1 }}</td>
+        <td>{{ $spd->pegawai->nama }}</td>
+        <td>{{ $spd->program->nama_program }}</td>
+        <td>{{ $spd->tanggal_berangkat }}</td>
+        <td>
+            <a href="{{ route('spd.show', $spd->id) }}">Detail</a>
+            <a href="{{ route('spd.edit', $spd->id) }}">Edit</a>
+
+            <form action="{{ route('spd.destroy', $spd->id) }}" method="POST" style="display:inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit">Hapus</button>
+            </form>
+        </td>
+    </tr>
+    @endforeach
+</table>
+
 @extends('layouts.admin')
 
 @section('title', 'Surat Perintah Dinas (SPD) - Halaman Depan')
@@ -433,9 +470,9 @@
                         <i class="fas fa-redo mr-2"></i> Reset
                     </a>
                 @endif
-                
+
                 <!-- Tombol Export Excel -->
-                <button type="button" 
+                <button type="button"
                         onclick="exportData()"
                         id="btn-export"
                         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
@@ -521,7 +558,7 @@
                                 }
                             }
                         @endphp
-                        
+
                         @if(count($pelaksanaList) > 0)
                             <div class="space-y-1">
                                 @foreach(array_slice($pelaksanaList, 0, 2) as $pelaksana)
@@ -725,24 +762,24 @@
 function exportData() {
     const btn = document.getElementById('btn-export');
     const originalHtml = btn.innerHTML;
-    
+
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
     btn.classList.add('btn-loading');
     btn.disabled = true;
-    
+
     const form = document.getElementById('filter-form');
     const formData = new FormData(form);
     const params = new URLSearchParams();
-    
+
     for (let [key, value] of formData.entries()) {
         if (value && value !== '') {
             params.append(key, value);
         }
     }
-    
+
     const exportUrl = "{{ route('spd.export') }}?" + params.toString();
     window.location.href = exportUrl;
-    
+
     setTimeout(() => {
         btn.innerHTML = originalHtml;
         btn.classList.remove('btn-loading');
@@ -799,7 +836,7 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
     submitBtn.disabled = true;
-    
+
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -836,7 +873,7 @@ function showPelaksanaDetail(pelaksanaList) {
     const modal = document.getElementById('pelaksana-modal');
     const listContainer = document.getElementById('pelaksana-list');
     listContainer.innerHTML = '';
-    
+
     if (pelaksanaList && pelaksanaList.length > 0) {
         pelaksanaList.forEach(pelaksana => {
             const item = document.createElement('div');
@@ -856,7 +893,7 @@ function showPelaksanaDetail(pelaksanaList) {
     } else {
         listContainer.innerHTML = '<p class="text-center text-gray-500 py-4">Tidak ada data pelaksana</p>';
     }
-    
+
     modal.classList.remove('hidden');
     modal.style.display = 'block';
 }

@@ -106,6 +106,38 @@
             height: 2px;
         }
 
+       /* ✅ FIX TITIK DUA SEJAJAR */
+        .info-kanan-atas {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .info-kanan-atas .info-block {
+            display: inline-block;
+            text-align: left;
+            font-size: 10pt;
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.8;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: flex-end;
+            white-space: nowrap;
+        }
+        .info-label {
+            text-align: left;
+            width: 75px;
+        }
+        .info-colon {
+            width: 10px;
+            text-align: center;
+        }
+        .info-value {
+            text-align: left;
+            min-width: 200px;
+        }
+
         .judul-surat {
             text-align: center;
             margin-bottom: 15px;
@@ -118,13 +150,6 @@
             text-transform: uppercase;
             margin: 0;
             letter-spacing: 1px;
-        }
-
-        .judul-surat .nomor {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 11.5pt;
-            margin-top: 5px;
-            font-weight: normal;
         }
 
         .spd-table {
@@ -277,9 +302,29 @@
 
             <div class="garis-kop"></div>
 
+            <!-- INFO DI KANAN ATAS - RATA KANAN, TITIK DUA SEJAJAR -->
+            <div class="info-kanan-atas">
+                <div class="info-block">
+                    <div class="info-row">
+                        <span class="info-label">Lembar ke</span>
+                        <span class="info-colon">        :</span>
+                        <span class="info-value"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Kode No</span>
+                        <span class="info-colon">:</span>
+                        <span class="info-value"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Nomor</span>
+                        <span class="info-colon">:</span>
+                        <span class="info-value">{{ $spd->nomor_surat ?? '000 1 2 3/MPT-10F/2024' }}</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="judul-surat">
                 <h1>SURAT PERJALANAN DINAS (SPD)</h1>
-                <div class="nomor">{{ $spd->nomor_surat ?? '-' }}</div>
             </div>
 
             <table class="spd-table">
@@ -375,7 +420,7 @@
                     </td>
                 </tr>
 
-                <!-- ROW 8 : NAMA PENGIKUT - TANGGAL LAHIR - KETERANGAN (3 KOLOM TERPISAH) -->
+                <!-- ROW 8 : NAMA PENGIKUT -->
                 <tr>
                     <td class="col-nomor">8.</td>
                     <td class="col-label">Nama Pengikut</td>
@@ -438,7 +483,6 @@
 
                     $ttdNama = $spd->penggunaAnggaran->nama ?? '-';
                     $ttdNip = $spd->penggunaAnggaran->nip ?? '-';
-                    $ttdPangkat = $spd->penggunaAnggaran->pangkat ?? '';
                     $ttdJabatan = $spd->penggunaAnggaran->jabatan ?? 'Pengguna Anggaran';
                 @endphp
 
