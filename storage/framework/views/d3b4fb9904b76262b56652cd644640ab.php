@@ -60,7 +60,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50" x-data="{ 
+<body class="bg-gray-50" x-data="{
     isMobile: window.innerWidth <= 768,
     sidebarOpen: true
 }">
@@ -76,15 +76,15 @@
     <!-- Desktop Layout -->
     <div x-show="!isMobile" class="min-h-screen flex">
         <!-- SIDEBAR dengan tema biru -->
-        <aside class="w-72 bg-gradient-to-br from-blue-50 via-white to-blue-50 shadow-2xl border-r border-blue-100 flex flex-col h-screen sticky top-0 transition-all duration-300" 
+        <aside class="w-72 bg-gradient-to-br from-blue-50 via-white to-blue-50 shadow-2xl border-r border-blue-100 flex flex-col h-screen sticky top-0 transition-all duration-300"
                :class="{'w-20': !sidebarOpen}">
-            
+
             <!-- Logo Area dengan background PUTIH agar logo terlihat jelas -->
             <div class="relative overflow-hidden bg-white border-b border-blue-100">
                 <div class="p-4" :class="{'px-3 py-4': !sidebarOpen}">
                     <div class="flex items-center gap-3" :class="{'justify-center': !sidebarOpen}">
-                        <img src="<?php echo e(asset('image/dpm.png')); ?>" 
-                             alt="Logo DPMPTSP" 
+                        <img src="<?php echo e(asset('image/dpm.png')); ?>"
+                             alt="Logo DPMPTSP"
                              class="h-16 w-auto object-contain drop-shadow-md">
                         <div x-show="sidebarOpen" x-transition.opacity.duration.200>
                             <h1 class="text-gray-800 font-bold text-xl tracking-tight">DPMPTSP</h1>
@@ -92,11 +92,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Toggle Sidebar Button - DIPERBESAR -->
-                <button @click="sidebarOpen = !sidebarOpen" 
+                <button @click="sidebarOpen = !sidebarOpen"
                         class="absolute -right-4 top-8 bg-white border-2 border-blue-300 rounded-full p-2 shadow-lg hover:bg-blue-50 transition-all z-20 hover:scale-110">
-                    <i class="fas fa-chevron-left text-blue-600 text-base transition-transform duration-300" 
+                    <i class="fas fa-chevron-left text-blue-600 text-base transition-transform duration-300"
                        :class="{'rotate-180': !sidebarOpen}"></i>
                 </button>
             </div>
@@ -123,12 +123,12 @@
                     <?php
                         $userLevel = session('user')['level'] ?? 'guest';
                     ?>
-                    
+
                     <!-- MENU UNTUK ADMIN (HANYA DATA MASTER) -->
                     <?php if($userLevel == 'admin'): ?>
                         <!-- User -->
                         <li>
-                            <a href="/user" 
+                            <a href="/user"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('user*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -136,10 +136,10 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">User</span>
                             </a>
                         </li>
-                        
+
                         <!-- Pegawai -->
                         <li>
-                            <a href="/pegawai" 
+                            <a href="/pegawai"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('pegawai*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -147,10 +147,10 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Pegawai</span>
                             </a>
                         </li>
-                        
+
                         <!-- Program -->
                         <li>
-                            <a href="/program" 
+                            <a href="/program"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('program*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -158,10 +158,10 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Program</span>
                             </a>
                         </li>
-                        
+
                         <!-- Uang Harian -->
                         <li>
-                            <a href="/uang-harian" 
+                            <a href="/uang-harian"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -169,12 +169,12 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Uang Harian</span>
                             </a>
                         </li>
-                        
-                    <!-- MENU UNTUK PEGAWAI (HANYA SPT, SPD, DLL) -->
+
+                    <!-- MENU UNTUK PEGAWAI (SPT, SPD, RINCIAN BIDANG, KWITANSI BIDANG, LHPD) -->
                     <?php elseif($userLevel == 'pegawai'): ?>
                         <!-- SPT -->
                         <li>
-                            <a href="/spt" 
+                            <a href="/spt"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -186,7 +186,7 @@
 
                         <!-- SPD DEPAN -->
                         <li>
-                            <a href="/spd" 
+                            <a href="/spd"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -197,9 +197,9 @@
 
                         <!-- RINCIAN BIDANG -->
                         <li>
-                            <a href="/pengaturan" 
+                            <a href="/rincian"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      <?php echo e(request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
+                                      <?php echo e(request()->is('rincian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-cog text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Rincian Bidang</span>
@@ -208,7 +208,7 @@
 
                         <!-- KWITANSI BIDANG -->
                         <li>
-                            <a href="/kwitansi" 
+                            <a href="/kwitansi"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -216,8 +216,20 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Kwitansi Bidang</span>
                             </a>
                         </li>
-                        
-                    <!-- MENU UNTUK KADIS (SEMUA MENU) -->
+
+                        <!-- LHPD (Laporan Hasil Perjalanan Dinas) - MENU TERAKHIR UNTUK PEGAWAI -->
+                        <li>
+                            <a href="/lhpd"
+                               class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
+                                      <?php echo e(request()->is('lhpd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
+                               :class="{'justify-center': !sidebarOpen}">
+                                <i class="fas fa-clipboard-list text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
+                                <span x-show="sidebarOpen" class="text-sm font-medium">LHPD</span>
+                                <span x-show="sidebarOpen" class="ml-auto bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">Laporan</span>
+                            </a>
+                        </li>
+
+                    <!-- MENU UNTUK KADIS (SEMUA MENU) - TANPA LHPD -->
                     <?php elseif($userLevel == 'kadis'): ?>
                         <!-- Data Master Section -->
                         <li class="mb-2">
@@ -225,10 +237,10 @@
                                 <i class="fas fa-database mr-2"></i> Data Master
                             </div>
                         </li>
-                        
+
                         <!-- User -->
                         <li>
-                            <a href="/user" 
+                            <a href="/user"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('user*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -236,10 +248,10 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">User</span>
                             </a>
                         </li>
-                        
+
                         <!-- Pegawai -->
                         <li>
-                            <a href="/pegawai" 
+                            <a href="/pegawai"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('pegawai*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -247,10 +259,10 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Pegawai</span>
                             </a>
                         </li>
-                        
+
                         <!-- Program -->
                         <li>
-                            <a href="/program" 
+                            <a href="/program"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('program*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -258,10 +270,10 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Program</span>
                             </a>
                         </li>
-                        
+
                         <!-- Uang Harian -->
                         <li>
-                            <a href="/uang-harian" 
+                            <a href="/uang-harian"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('uang-harian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -269,21 +281,21 @@
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Uang Harian</span>
                             </a>
                         </li>
-                        
+
                         <!-- Divider -->
                         <li class="my-3">
                             <div class="border-t border-blue-100" x-show="sidebarOpen"></div>
                         </li>
-                        
+
                         <li class="mb-2">
                             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 py-2" x-show="sidebarOpen">
-                                <i class="fas fa-file-alt mr-2"></i> spd
+                                <i class="fas fa-file-alt mr-2"></i> Perjalanan Dinas
                             </div>
                         </li>
-                        
+
                         <!-- SPT -->
                         <li>
-                            <a href="/spt" 
+                            <a href="/spt"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('spt*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -295,7 +307,7 @@
 
                         <!-- SPD DEPAN -->
                         <li>
-                            <a href="/spd" 
+                            <a href="/spd"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('spd*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -306,9 +318,9 @@
 
                         <!-- RINCIAN BIDANG -->
                         <li>
-                            <a href="/pengaturan" 
+                            <a href="/rincian"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
-                                      <?php echo e(request()->is('pengaturan*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
+                                      <?php echo e(request()->is('rincian*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
                                 <i class="fas fa-cog text-blue-500 text-lg w-6 group-hover:text-blue-600 transition-colors"></i>
                                 <span x-show="sidebarOpen" class="text-sm font-medium">Rincian Bidang</span>
@@ -317,7 +329,7 @@
 
                         <!-- KWITANSI BIDANG -->
                         <li>
-                            <a href="/kwitansi" 
+                            <a href="/kwitansi"
                                class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group
                                       <?php echo e(request()->is('kwitansi*') ? 'sidebar-link-active' : 'text-gray-700 hover:bg-blue-100 hover:text-blue-700 hover:shadow-sm'); ?>"
                                :class="{'justify-center': !sidebarOpen}">
@@ -331,7 +343,7 @@
 
             <!-- Logout Button at Bottom -->
             <div class="p-4 border-t border-blue-100" :class="{'px-2': !sidebarOpen}">
-                <a href="/logout" 
+                <a href="/logout"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group"
                    :class="{'justify-center': !sidebarOpen}">
                     <i class="fas fa-sign-out-alt text-lg w-6"></i>
@@ -387,7 +399,8 @@
             Alpine.reactive({ isMobile: window.innerWidth <= 768 });
         });
     </script>
-    
+
     <?php echo $__env->yieldContent('scripts'); ?>
 </body>
-</html><?php /**PATH C:\PKL POLITALA\dpmptsp\resources\views/layouts/admin.blade.php ENDPATH**/ ?>
+</html>
+<?php /**PATH C:\PKL POLITALA\dpmptsp\resources\views/layouts/admin.blade.php ENDPATH**/ ?>

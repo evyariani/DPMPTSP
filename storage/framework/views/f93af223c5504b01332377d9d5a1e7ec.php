@@ -257,13 +257,30 @@
 </head>
 <body>
 
-    <?php
-        $pelaksanaList = $spd->pelaksanaPerjadin ?? collect();
+<?php
+    // Gunakan snapshot jika ada, fallback ke relasi
+    $pelaksanaList = [];
 
-        if($pelaksanaList->count() == 0) {
-            $pelaksanaList = collect([(object)['nama' => '-', 'nip' => '-', 'pangkat' => '-', 'gol' => '-', 'jabatan' => '-']]);
+    if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+        // Data baru: gunakan snapshot
+        foreach ($spd->pelaksana_snapshot as $p) {
+            $pelaksanaList[] = (object)[
+                'nama' => $p['nama'] ?? '-',
+                'nip' => $p['nip'] ?? '-',
+                'pangkat' => $p['pangkat'] ?? '-',
+                'gol' => $p['gol'] ?? '-',
+                'jabatan' => $p['jabatan'] ?? '-',
+            ];
         }
-    ?>
+    } elseif ($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0) {
+        // Fallback untuk data lama
+        $pelaksanaList = $spd->pelaksanaPerjadin;
+    }
+
+    if(count($pelaksanaList) == 0) {
+        $pelaksanaList = collect([(object)['nama' => '-', 'nip' => '-', 'pangkat' => '-', 'gol' => '-', 'jabatan' => '-']]);
+    }
+?>
 
     <?php $__currentLoopData = $pelaksanaList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="spd-page" <?php if(!$loop->last): ?> style="page-break-after: always;" <?php endif; ?>>

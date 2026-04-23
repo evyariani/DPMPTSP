@@ -260,7 +260,7 @@
 @php
     // Gunakan snapshot jika ada, fallback ke relasi
     $pelaksanaList = [];
-    
+
     if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
         // Data baru: gunakan snapshot
         foreach ($spd->pelaksana_snapshot as $p) {
@@ -276,7 +276,7 @@
         // Fallback untuk data lama
         $pelaksanaList = $spd->pelaksanaPerjadin;
     }
-    
+
     if(count($pelaksanaList) == 0) {
         $pelaksanaList = collect([(object)['nama' => '-', 'nip' => '-', 'pangkat' => '-', 'gol' => '-', 'jabatan' => '-']]);
     }

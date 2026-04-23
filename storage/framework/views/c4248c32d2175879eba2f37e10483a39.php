@@ -504,24 +504,24 @@
                     <!-- Kolom Pegawai -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-pegawai table-cell-hover">
                         <?php if(!empty($spt->pegawai)): ?>
-                            <?php $pegawaiList = $spt->pegawai_list; ?>
+                            <?php $pegawaiList = $spt->pegawai_list_from_snapshot; ?>
                             <div class="space-y-2">
                                 <?php $__currentLoopData = $pegawaiList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="flex items-center tooltip">
                                         <div class="flex-shrink-0 h-6 w-6 mr-2">
                                             <div class="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center">
                                                 <span class="text-indigo-600 font-semibold text-xs">
-                                                    <?php echo e(strtoupper(substr($pegawai->nama, 0, 1))); ?>
+                                                    <?php echo e(strtoupper(substr($pegawai->nama??'-', 0, 1))); ?>
 
                                                 </span>
                                             </div>
                                         </div>
                                         <div class="text-sm text-gray-900" title="<?php echo e($pegawai->nama); ?>">
-                                            <?php echo e(Str::limit($pegawai->nama, 25)); ?>
+                                            <?php echo e(Str::limit($pegawai->nama??'-', 25)); ?>
 
                                         </div>
                                         <span class="tooltip-text">
-                                            <?php echo e($pegawai->nama); ?><br>
+                                            <?php echo e($pegawai->nama??'-'); ?><br>
                                             NIP: <?php echo e($pegawai->nip ?? '-'); ?><br>
                                             Jabatan: <?php echo e($pegawai->jabatan ?? '-'); ?>
 
@@ -576,27 +576,27 @@
                     
                     <!-- Kolom Penanda Tangan -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-penandatangan table-cell-hover">
-                        <?php if($spt->penandaTangan): ?>
+                        <?php if($spt->penanda_tangan_nama): ?>
                             <div class="flex items-center tooltip">
                                 <div class="flex-shrink-0 h-8 w-8 mr-3">
                                     <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
                                         <span class="text-green-600 font-semibold text-sm">
-                                            <?php echo e(strtoupper(substr($spt->penandaTangan->nama, 0, 1))); ?>
+                                            <?php echo e(strtoupper(substr($spt->penanda_tangan_nama, 0, 1))); ?>
 
                                         </span>
                                     </div>
                                 </div>
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900" title="<?php echo e($spt->penandaTangan->nama); ?>">
-                                        <?php echo e(Str::limit($spt->penandaTangan->nama, 30)); ?>
+                                    <div class="text-sm font-medium text-gray-900" title="<?php echo e($spt->penanda_tangan_nama); ?>">
+                                        <?php echo e(Str::limit($spt->penanda_tangan_nama, 30)); ?>
 
                                     </div>
-                                    <div class="text-xs text-gray-500"><?php echo e($spt->penandaTangan->jabatan ?? '-'); ?></div>
+                                    <div class="text-xs text-gray-500"><?php echo e($spt->penanda_tangan_jabatan ?? '-'); ?></div>
                                 </div>
                                 <span class="tooltip-text">
-                                    <?php echo e($spt->penandaTangan->nama); ?><br>
+                                    <?php echo e($spt->penanda_tangan_nama); ?><br>
                                     NIP: <?php echo e($spt->penandaTangan->nip ?? '-'); ?><br>
-                                    Jabatan: <?php echo e($spt->penandaTangan->jabatan ?? '-'); ?>
+                                    Jabatan: <?php echo e($spt->penanda_tangan_jabatan ?? '-'); ?>
 
                                 </span>
                             </div>
@@ -618,13 +618,7 @@
                             </a>
                             
                             <!-- Tombol Buat SPD dari SPT -->
-                            <a href="<?php echo e(route('spd.create-from-spt', $spt->id_spt)); ?>" 
-                               class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50 transition duration-150 tooltip"
-                               title="Buat SPD dari SPT ini"
-                               onclick="return confirmCreateSpd('<?php echo e(addslashes($spt->nomor_surat)); ?>')">
-                                <i class="fas fa-file-signature"></i>
-                                <span class="tooltip-text">Buat SPD dari SPT ini</span>
-                            </a>
+                            
                             
                             <!-- Tombol Print PDF -->
                             

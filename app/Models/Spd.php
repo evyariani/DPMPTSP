@@ -67,7 +67,7 @@ class SPD extends Model
     ];
 
     // ========== RELATIONS ==========
-    
+
     /**
      * Relasi ke SPT (source - untuk pembuatan otomatis)
      */
@@ -75,7 +75,7 @@ class SPD extends Model
     {
         return $this->belongsTo(SPT::class, 'spt_id', 'id_spt');
     }
-    
+
     /**
      * Relasi ke pengguna anggaran (tb_pegawai) - Kepala Dinas
      */
@@ -91,7 +91,7 @@ class SPD extends Model
     {
         return $this->belongsTo(Daerah::class, 'tempat_tujuan', 'id');
     }
-    
+
     /**
      * Relasi ke pejabat teknis (tb_program)
      */
@@ -99,7 +99,7 @@ class SPD extends Model
     {
         return $this->belongsTo(Program::class, 'pejabat_teknis_id', 'id_program');
     }
-    
+
     /**
      * Relasi ke pegawai pejabat teknis
      */
@@ -107,7 +107,7 @@ class SPD extends Model
     {
         return $this->belongsTo(Pegawai::class, 'pejabat_teknis_pegawai_id', 'id_pegawai');
     }
-    
+
     /**
      * Relasi many-to-many ke pelaksana perjalanan dinas
      */
@@ -122,7 +122,7 @@ class SPD extends Model
             'id_pegawai'
         )->withTimestamps();
     }
-    
+
     /**
      * Relasi one-to-one ke RincianBidang
      */
@@ -132,7 +132,7 @@ class SPD extends Model
     }
 
     // ========== ACCESSORS PENANDA TANGAN ==========
-    
+
     /**
      * Mendapatkan informasi lengkap penanda tangan dalam satu string
      * Gunakan: $spd->penanda_tangan_lengkap
@@ -146,7 +146,7 @@ class SPD extends Model
         if ($this->penanda_tangan_instansi) $parts[] = $this->penanda_tangan_instansi;
         return implode(' | ', $parts);
     }
-    
+
     /**
      * Mendapatkan format penanda tangan untuk tampilan (dengan baris baru)
      * Gunakan: $spd->penanda_tangan_formatted
@@ -157,15 +157,15 @@ class SPD extends Model
         $nip = $this->penanda_tangan_nip ? "NIP. {$this->penanda_tangan_nip}" : '';
         $jabatan = $this->penanda_tangan_jabatan ?? '';
         $instansi = $this->penanda_tangan_instansi ?? '';
-        
+
         $result = $nama;
         if ($nip) $result .= "\n{$nip}";
         if ($jabatan) $result .= "\n{$jabatan}";
         if ($instansi) $result .= "\n{$instansi}";
-        
+
         return nl2br(e($result));
     }
-    
+
     /**
      * Cek apakah SPD memiliki data penanda tangan
      * Gunakan: $spd->has_penanda_tangan
@@ -176,7 +176,7 @@ class SPD extends Model
     }
 
     // ========== ACCESSORS PELAKSANA (MENGGUNAKAN SNAPSHOT) ==========
-    
+
     /**
      * Mendapatkan daftar pelaksana dari snapshot (data saat SPD dibuat)
      * Gunakan: $spd->pelaksana_dari_snapshot
@@ -186,12 +186,12 @@ class SPD extends Model
         if (empty($this->pelaksana_snapshot)) {
             return collect([]);
         }
-        
+
         return collect($this->pelaksana_snapshot)->map(function ($item) {
             return (object) $item;
         });
     }
-    
+
     /**
      * Mendapatkan nama-nama pelaksana dari snapshot
      * Gunakan: $spd->nama_pelaksana_dari_snapshot
@@ -201,13 +201,13 @@ class SPD extends Model
         if (empty($this->pelaksana_snapshot)) {
             return '-';
         }
-        
+
         $namaList = array_column($this->pelaksana_snapshot, 'nama');
         return implode(', ', $namaList);
     }
 
     // ========== ACCESSORS LAINNYA ==========
-    
+
     /**
      * Accessor untuk mendapatkan nomor surat SPT asal
      * Gunakan: $spd->nomor_surat_spt_asal
@@ -219,7 +219,7 @@ class SPD extends Model
         }
         return $this->spt?->nomor_surat ?? '-';
     }
-    
+
     /**
      * Accessor untuk mendapatkan nama pengguna anggaran
      * Gunakan: $spd->nama_pengguna_anggaran
@@ -245,7 +245,7 @@ class SPD extends Model
 
         return $this->tempatTujuan?->nama ?? '-';
     }
-    
+
     /**
      * Accessor untuk mendapatkan nama pejabat teknis
      * Gunakan: $spd->nama_pejabat_teknis
@@ -255,10 +255,10 @@ class SPD extends Model
         if (empty($this->pejabat_teknis_pegawai_id)) {
             return '-';
         }
-        
+
         return $this->pejabatTeknisPegawai?->nama ?? '-';
     }
-    
+
     /**
      * Accessor untuk mendapatkan nip pejabat teknis
      * Gunakan: $spd->nip_pejabat_teknis
@@ -268,10 +268,10 @@ class SPD extends Model
         if (empty($this->pejabat_teknis_pegawai_id)) {
             return '-';
         }
-        
+
         return $this->pejabatTeknisPegawai?->nip ?? '-';
     }
-    
+
     /**
      * Accessor untuk mendapatkan jabatan pejabat teknis
      * Gunakan: $spd->jabatan_pejabat_teknis
@@ -281,10 +281,10 @@ class SPD extends Model
         if (empty($this->pejabat_teknis_pegawai_id)) {
             return '-';
         }
-        
+
         return $this->pejabatTeknisPegawai?->jabatan ?? '-';
     }
-    
+
     /**
      * Accessor untuk mendapatkan data lengkap pejabat teknis
      * Gunakan: $spd->data_pejabat_teknis
@@ -294,7 +294,7 @@ class SPD extends Model
         if (empty($this->pejabat_teknis_id)) {
             return null;
         }
-        
+
         return (object) [
             'id_program' => $this->pejabat_teknis_id,
             'program' => $this->pejabat_teknis_program,
@@ -307,7 +307,7 @@ class SPD extends Model
             'pegawai_jabatan' => $this->jabatan_pejabat_teknis,
         ];
     }
-    
+
     /**
      * Accessor untuk mendapatkan daftar pelaksana perjadin (dari relasi - HATI-HATI bisa berubah)
      * @deprecated Gunakan pelaksana_dari_snapshot untuk tampilan
@@ -316,7 +316,7 @@ class SPD extends Model
     {
         return $this->pelaksanaPerjadin()->get();
     }
-    
+
     /**
      * Accessor untuk mendapatkan nama-nama pelaksana perjadin (dari relasi - HATI-HATI bisa berubah)
      * @deprecated Gunakan nama_pelaksana_dari_snapshot untuk tampilan
@@ -327,10 +327,10 @@ class SPD extends Model
         if ($pelaksana->isEmpty()) {
             return '-';
         }
-        
+
         return $pelaksana->pluck('nama')->implode(', ');
     }
-    
+
     /**
      * Accessor untuk mendapatkan jumlah pelaksana
      * Gunakan: $spd->jumlah_pelaksana
@@ -382,7 +382,7 @@ class SPD extends Model
 
         return $berangkat . ' s/d ' . $kembali;
     }
-    
+
     /**
      * Accessor untuk mendapatkan kode rekening dari pejabat teknis
      * Gunakan: $spd->kode_rekening_teknis
@@ -391,7 +391,7 @@ class SPD extends Model
     {
         return $this->pejabat_teknis_kode_rekening ?? $this->kode_rek;
     }
-    
+
     /**
      * Accessor untuk mengecek apakah SPD dibuat dari SPT
      * Gunakan: $spd->is_dari_spt
@@ -402,7 +402,7 @@ class SPD extends Model
     }
 
     // ========== SCOPES ==========
-    
+
     /**
      * Scope untuk filter berdasarkan SKPD
      */
@@ -435,7 +435,7 @@ class SPD extends Model
         }
         return $query;
     }
-    
+
     /**
      * Scope untuk filter berdasarkan pejabat teknis
      */
@@ -446,7 +446,7 @@ class SPD extends Model
         }
         return $query;
     }
-    
+
     /**
      * Scope untuk filter berdasarkan program
      */
@@ -457,7 +457,7 @@ class SPD extends Model
         }
         return $query;
     }
-    
+
     /**
      * Scope untuk filter berdasarkan pelaksana
      */
@@ -470,7 +470,7 @@ class SPD extends Model
         }
         return $query;
     }
-    
+
     /**
      * Scope untuk filter berdasarkan SPT asal
      */
@@ -481,7 +481,7 @@ class SPD extends Model
         }
         return $query;
     }
-    
+
     /**
      * Scope untuk mengambil SPD yang dibuat dari SPT
      */
@@ -489,7 +489,7 @@ class SPD extends Model
     {
         return $query->whereNotNull('spt_id');
     }
-    
+
     /**
      * Scope untuk mengambil SPD yang dibuat manual (bukan dari SPT)
      */
@@ -497,7 +497,7 @@ class SPD extends Model
     {
         return $query->whereNull('spt_id');
     }
-    
+
     /**
      * Scope untuk filter berdasarkan penanda tangan
      */
@@ -510,21 +510,21 @@ class SPD extends Model
     }
 
     // ========== HELPER METHODS ==========
-    
+
     /**
      * Sync pelaksana perjalanan dinas dan update snapshot
      */
     public function syncPelaksana(array $pegawaiIds)
     {
         $result = $this->pelaksanaPerjadin()->sync($pegawaiIds);
-        
+
         // Update snapshot setelah sync pelaksana
         $this->createPelaksanaSnapshot();
         $this->saveQuietly();
-        
+
         return $result;
     }
-    
+
     /**
      * Membuat snapshot pelaksana dari data pegawai yang terkait
      * Simpan data lengkap pegawai saat SPD dibuat/diupdate
@@ -533,7 +533,7 @@ class SPD extends Model
     {
         $pelaksana = $this->pelaksanaPerjadin()->get();
         $snapshot = [];
-        
+
         foreach ($pelaksana as $pegawai) {
             $snapshot[] = [
                 'id_pegawai' => $pegawai->id_pegawai,
@@ -544,12 +544,12 @@ class SPD extends Model
                 'gol' => $pegawai->gol ?? '-',
             ];
         }
-        
+
         $this->pelaksana_snapshot = $snapshot;
-        
+
         return $this;
     }
-    
+
     /**
      * Set pejabat teknis dari program
      */
@@ -561,10 +561,10 @@ class SPD extends Model
         $this->pejabat_teknis_program = $program->program;
         $this->pejabat_teknis_kegiatan = $program->kegiatan;
         $this->pejabat_teknis_sub_kegiatan = $program->sub_kegiatan;
-        
+
         return $this;
     }
-    
+
     /**
      * Set penanda tangan (eksternal)
      */
@@ -574,10 +574,10 @@ class SPD extends Model
         $this->penanda_tangan_nip = $nip;
         $this->penanda_tangan_jabatan = $jabatan;
         $this->penanda_tangan_instansi = $instansi;
-        
+
         return $this;
     }
-    
+
     /**
      * Cek apakah SPD memiliki pelaksana
      */
@@ -585,7 +585,7 @@ class SPD extends Model
     {
         return $this->pelaksanaPerjadin()->count() > 0;
     }
-    
+
     /**
      * Cek apakah SPD memiliki pejabat teknis
      */
@@ -593,7 +593,7 @@ class SPD extends Model
     {
         return !empty($this->pejabat_teknis_id);
     }
-    
+
     /**
      * Cek apakah SPD memiliki penanda tangan
      */
@@ -601,7 +601,7 @@ class SPD extends Model
     {
         return !empty($this->penanda_tangan_nama);
     }
-    
+
     /**
      * Cek apakah SPD dibuat dari SPT
      */
@@ -609,7 +609,7 @@ class SPD extends Model
     {
         return !empty($this->spt_id);
     }
-    
+
     /**
      * Sync/Update RincianBidang otomatis
      */
@@ -617,7 +617,7 @@ class SPD extends Model
     {
         return RincianBidang::syncFromSpd($this, $additionalData);
     }
-    
+
     /**
      * Override booted method untuk auto sync RincianBidang dan snapshot
      */
@@ -628,35 +628,35 @@ class SPD extends Model
             // Buat snapshot pelaksana
             $spd->createPelaksanaSnapshot();
             $spd->saveQuietly();
-            
+
             // Sync RincianBidang
             $spd->syncRincianBidang();
         });
-        
+
         // Event saat SPD diupdate
         static::updated(function ($spd) {
             // Cek apakah ada perubahan pada pelaksana
             if ($spd->isDirty('pelaksana_perjadin')) {
                 $spd->createPelaksanaSnapshot();
             }
-            
+
             // Cek apakah ada perubahan pada data yang mempengaruhi RincianBidang
             $dirtyFields = ['nomor_surat', 'tempat_tujuan', 'tanggal_berangkat', 'tanggal_kembali', 'lama_perjadin'];
             $isRelatedChanged = false;
-            
+
             foreach ($dirtyFields as $field) {
                 if ($spd->isDirty($field)) {
                     $isRelatedChanged = true;
                     break;
                 }
             }
-            
+
             if ($spd->isDirty('pelaksana_perjadin') || $isRelatedChanged) {
                 $spd->syncRincianBidang();
             }
         });
     }
-    
+
     /**
      * Ambil point pertama dari tujuan SPT untuk dijadikan maksud perjadin
      */
@@ -665,22 +665,22 @@ class SPD extends Model
         if (empty($tujuan)) {
             return '';
         }
-        
+
         // Pisahkan berdasarkan baris baru
         if (strpos($tujuan, "\n") !== false) {
             $lines = explode("\n", $tujuan);
             return trim($lines[0]);
         }
-        
+
         // Pisahkan berdasarkan titik
         if (strpos($tujuan, ".") !== false) {
             $firstPoint = substr($tujuan, 0, strpos($tujuan, "."));
             return trim($firstPoint);
         }
-        
+
         return trim($tujuan);
     }
-    
+
     /**
      * Buat SPD dari data SPT
      */
@@ -688,7 +688,7 @@ class SPD extends Model
     {
         // Ekstrak maksud perjadin dari tujuan SPT
         $maksudPerjadin = self::extractMaksudPerjadinFromSptTujuan($spt->tujuan);
-        
+
         // Ambil daftar pegawai dari SPT untuk dijadikan pelaksana (gunakan snapshot SPT)
         $pelaksanaIds = [];
         $pegawaiList = $spt->pegawai_list_from_snapshot;
@@ -697,7 +697,7 @@ class SPD extends Model
                 $pelaksanaIds[] = $pegawai->id_pegawai;
             }
         }
-        
+
         // Data dasar SPD
         $data = array_merge([
             'spt_id' => $spt->id_spt,
@@ -711,15 +711,15 @@ class SPD extends Model
             'lama_perjadin' => 1,
             'keterangan' => "Dibuat otomatis dari SPT Nomor: {$spt->nomor_surat}",
         ], $additionalData);
-        
+
         // Buat SPD
         $spd = self::create($data);
-        
+
         // Sync pelaksana
         if (!empty($pelaksanaIds)) {
             $spd->syncPelaksana($pelaksanaIds);
         }
-        
+
         // Snapshot pelaksana akan otomatis dibuat via booted created event
         // RincianBidang akan otomatis dibuat via booted created event
         return $spd;

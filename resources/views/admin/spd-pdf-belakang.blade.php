@@ -2,263 +2,319 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surat Perintah Dinas (SPD) - Halaman Belakang</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surat Perintah Dinas (SPD) - Halaman Belakang</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.4;
-            color: #000;
-            background: #fff;
-            padding: 1.5cm;
-        }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11pt;
+      line-height: 1.4;
+      color: #000;
+      background: #fff;
+      padding: 1cm;
+    }
 
-        .container {
-            max-width: 21cm;
-            margin: 0 auto;
-        }
+    .container {
+      max-width: 21cm;
+      margin: 0 auto;
+    }
 
-        /* Format perjalanan dinas */
-        .perjalanan-dinas {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            font-size: 11pt;
-        }
+    /* Tabel Utama */
+    .perjalanan-dinas {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
 
-        .perjalanan-dinas th,
-        .perjalanan-dinas td {
-            border: 1px solid #000;
-            padding: 8px 5px;
-            vertical-align: top;
-        }
+    .perjalanan-dinas th,
+    .perjalanan-dinas td {
+      border: 1px solid #000;
+      padding: 0;
+      vertical-align: top;
+    }
 
-        .perjalanan-dinas th {
-            background-color: #f0f0f0;
-            font-weight: bold;
-            text-align: center;
-        }
+    .perjalanan-dinas th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+      text-align: center;
+      padding: 6px;
+    }
 
-        .perjalanan-dinas .no-col {
-            width: 5%;
-            text-align: center;
-        }
+    .no-col {
+      width: 5%;
+      text-align: center;
+      vertical-align: top;
+      padding: 6px !important;
+    }
 
-        .perjalanan-dinas .rincian-col {
-            width: 95%;
-        }
+    .rincian-col {
+      width: 95%;
+      padding: 0 !important;
+    }
 
-        .rincian-perjalanan {
-            margin: 0;
-            padding-left: 15px;
-        }
+    /* Inner table: 2 kolom 50%:50% dengan garis vertikal */
+    .inner-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: none;
+      margin: 0;
+      table-layout: fixed;
+    }
 
-        .rincian-perjalanan li {
-            margin-bottom: 8px;
-            list-style: none;
-            position: relative;
-        }
+    .inner-table td {
+      border: none;
+      padding: 8px 10px;
+      vertical-align: top;
+    }
 
-        .rincian-perjalanan li strong {
-            display: inline-block;
-            min-width: 120px;
-        }
+    .inner-table .col-left {
+      width: 50%;
+      border-right: 1px solid #000;
+      padding-right: 10px;
+    }
 
-        /* Tanda tangan */
-        .ttd-wrapper {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-        }
+    .inner-table .col-right {
+      width: 50%;
+      padding-left: 10px;
+    }
 
-        .ttd-box {
-            width: 45%;
-        }
+    /* Format teks */
+    .row-group {
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
 
-        .ttd-box p {
-            margin: 5px 0;
-        }
+    .row-label {
+      display: inline-block;
+      width: 115px;
+      font-weight: normal;
+    }
 
-        .ttd-box .jabatan {
-            margin-bottom: 50px;
-        }
+    /* Tanda Tangan */
+    .ttd-wrapper {
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+    }
 
-        .ttd-box .nama {
-            font-weight: bold;
-            text-decoration: underline;
-        }
+    .ttd-box {
+      width: 45%;
+    }
 
-        .ttd-box .nip {
-            font-size: 10pt;
-        }
+    .ttd-box p {
+      margin: 5px 0;
+    }
 
-        /* Keterangan */
-        .keterangan {
-            margin-top: 30px;
-            font-size: 10pt;
-            font-style: italic;
-            text-align: justify;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
-        }
+    .ttd-box .jabatan {
+      margin-bottom: 50px;
+    }
 
-        /* Print optimization */
-        @media print {
-            body {
-                padding: 0;
-                margin: 0;
-            }
-            .no-print {
-                display: none;
-            }
-            .perjalanan-dinas th,
-            .perjalanan-dinas td {
-                border-color: #000;
-            }
-        }
-    </style>
+    .ttd-box .nama {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    .ttd-box .nip {
+      font-size: 10pt;
+    }
+
+    .keterangan {
+      margin-top: 30px;
+      font-size: 10pt;
+      font-style: italic;
+      text-align: justify;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    @media print {
+      body { padding: 0; margin: 0; }
+      .no-print { display: none; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        {{-- TABEL RINCIAN PERJALANAN DINAS --}}
-        <table class="perjalanan-dinas">
-            <thead>
-                <tr>
-                    <th class="no-col">No</th>
-                    <th class="rincian-col">Rincian Perjalanan Dinas</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{-- I. Berangkat dari Pelaihari --}}
-                <tr>
-                    <td class="no-col">I.</td>
-                    <td>
-                        <ul class="rincian-perjalanan">
-                            <li><strong>Berangkat dari :</strong> {{ $spd->tempat_berangkat ?? 'Pelaihari (tempat kedudukan)' }}</li>
-                            <li><strong>Ke :</strong> {{ $spd->tempatTujuan->nama ?? 'Kota Banjarbaru' }}</li>
-                            <li><strong>Pada Tanggal :</strong> {{ $spd->tanggal_berangkat ? $spd->tanggal_berangkat->format('d F Y') : '08 Juli 2024' }}</li>
-                            <li><strong>Kasubbag Umum dan Kepegawaian</strong> Selaku Pejabat Pelaksana Teknis Kegiatan</li>
-                            <li style="margin-top: 15px;">
-                                <strong>{{ $spd->pejabatTeknisPegawai->nama ?? 'LASMIATI, S. Tr' }}</strong><br>
-                                NIP. {{ $spd->pejabatTeknisPegawai->nip ?? '19860412 201001 2 001' }}
-                            </li>
-                        </ul>
-                    </td>
-                </tr>
+  <div class="container">
+    <table class="perjalanan-dinas">
+      <thead>
+        <tr>
+          <th class="no-col">No</th>
+          <th class="rincian-col">Rincian Perjalanan Dinas</th>
+        </tr>
+      </thead>
+      <tbody>
 
-                {{-- II. Tiba di Banjarbaru --}}
-                <tr>
-                    <td class="no-col">II.</td>
-                    <td>
-                        <ul class="rincian-perjalanan">
-                            <li><strong>Tiba :</strong> {{ $spd->tempatTujuan->nama ?? 'Kota Banjarbaru' }}</li>
-                            <li><strong>Pada tanggal :</strong> {{ $spd->tanggal_berangkat ? $spd->tanggal_berangkat->format('d F Y') : '08 Juli 2024' }}</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                            <li style="margin-top: 10px;">
-                                <strong>Berangkat dari :</strong> {{ $spd->tempatTujuan->nama ?? 'Kota Banjarbaru' }}
-                            </li>
-                            <li><strong>Pada tanggal :</strong> {{ $spd->tanggal_kembali ? $spd->tanggal_kembali->format('d F Y') : '09 Juli 2024' }}</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                        </ul>
-                    </td>
-                </tr>
+        {{-- I. BERANGKAT --}}
+        <tr>
+          <td class="no-col">I.</td>
+          <td class="rincian-col">
+            <table class="inner-table">
+              <tr>
+                <td class="col-left"></td>
+                <td class="col-right">
+                  <div class="row-group">
+                    <span class="row-label">Berangkat dari :</span>
+                    {{ $spd->tempat_berangkat ?? 'Pelaihari' }}
+                  </div>
+                  <div class="row-group">
+                    <span class="row-label">Ke :</span>
+                    {{ $spd->tempatTujuan->nama ?? 'BANJARBARU' }}
+                  </div>
+                  <div class="row-group">
+                    <span class="row-label">Pada Tanggal :</span>
+                    {{ $spd->tanggal_berangkat ? $spd->tanggal_berangkat->isoFormat('D MMMM Y') : '22 April 2026' }}
+                  </div>
+                  <div class="row-group">
+                    <span class="row-label"></span>
+                    Kasubbag Umum dan Kepegawaian Selaku Pejabat Pelaksana Teknis Kegiatan
+                  </div>
+                  <div class="row-group" style="margin-top: 8px;">
+                    <span class="row-label"></span>
+                    {{ $spd->pejabatTeknisPegawai->nama ?? 'M. HAYAT, S. Sos' }}<br>
+                    NIP. {{ $spd->pejabatTeknisPegawai->nip ?? '19701013 199203 1 006' }}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-                {{-- III. (Kosong sesuai format) --}}
-                <tr>
-                    <td class="no-col">III.</td>
-                    <td>
-                        <ul class="rincian-perjalanan">
-                            <li><strong>Tiba :</strong> _________________</li>
-                            <li><strong>Pada tanggal :</strong> _________________</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                            <li style="margin-top: 10px;">
-                                <strong>Berangkat dari :</strong> _________________
-                            </li>
-                            <li><strong>Pada tanggal :</strong> _________________</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                        </ul>
-                    </td>
-                </tr>
+        {{-- II. TIBA & BERANGKAT DARI TUJUAN --}}
+        <tr>
+          <td class="no-col">II.</td>
+          <td class="rincian-col">
+            <table class="inner-table">
+              <tr>
+                <td class="col-left">
+                  <strong>Tiba di :</strong> {{ $spd->tempatTujuan->nama ?? 'BANJARBARU' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_berangkat ? $spd->tanggal_berangkat->isoFormat('D MMMM Y') : '22 April 2026' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_tujuan_kedatangan ?? '_________________' }}
+                </td>
+                <td class="col-right">
+                  <strong>Berangkat dari :</strong> {{ $spd->tempatTujuan->nama ?? 'BANJARBARU' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_kembali ? $spd->tanggal_kembali->isoFormat('D MMMM Y') : '22 April 2026' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_tujuan_keberangkatan ?? '_________________' }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-                {{-- IV. (Kosong) --}}
-                <tr>
-                    <td class="no-col">IV.</td>
-                    <td>
-                        <ul class="rincian-perjalanan">
-                            <li><strong>Tiba :</strong> _________________</li>
-                            <li><strong>Pada tanggal :</strong> _________________</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                            <li style="margin-top: 10px;">
-                                <strong>Berangkat dari :</strong> _________________
-                            </li>
-                            <li><strong>Untuk :</strong> _________________</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                        </ul>
-                    </td>
-                </tr>
+        {{-- III. TEMPAT LAIN 1 --}}
+        <tr>
+          <td class="no-col">III.</td>
+          <td class="rincian-col">
+            <table class="inner-table">
+              <tr>
+                <td class="col-left">
+                  <strong>Tiba di :</strong> {{ $spd->tempat_lain_1_tiba ?? '_________________' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_lain_1_tiba ? \Carbon\Carbon::parse($spd->tanggal_lain_1_tiba)->isoFormat('D MMMM Y') : '_________________' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_lain_1_tiba ?? '_________________' }}
+                </td>
+                <td class="col-right">
+                  <strong>Berangkat dari :</strong> {{ $spd->tempat_lain_1_berangkat ?? '_________________' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_lain_1_berangkat ? \Carbon\Carbon::parse($spd->tanggal_lain_1_berangkat)->isoFormat('D MMMM Y') : '_________________' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_lain_1_berangkat ?? '_________________' }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-                {{-- V. (Kosong) --}}
-                <tr>
-                    <td class="no-col">V.</td>
-                    <td>
-                        <ul class="rincian-perjalanan">
-                            <li><strong>Tiba :</strong> _________________</li>
-                            <li><strong>Pada tanggal :</strong> _________________</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                            <li style="margin-top: 10px;">
-                                <strong>Berangkat dari :</strong> _________________
-                            </li>
-                            <li><strong>Pada tanggal :</strong> _________________</li>
-                            <li><strong>Kepala :</strong> _________________</li>
-                        </ul>
-                    </td>
-                </tr>
+        {{-- IV. TEMPAT LAIN 2 --}}
+        <tr>
+          <td class="no-col">IV.</td>
+          <td class="rincian-col">
+            <table class="inner-table">
+              <tr>
+                <td class="col-left">
+                  <strong>Tiba di :</strong> {{ $spd->tempat_lain_2_tiba ?? '_________________' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_lain_2_tiba ? \Carbon\Carbon::parse($spd->tanggal_lain_2_tiba)->isoFormat('D MMMM Y') : '_________________' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_lain_2_tiba ?? '_________________' }}
+                </td>
+                <td class="col-right">
+                  <strong>Berangkat dari :</strong> {{ $spd->tempat_lain_2_berangkat ?? '_________________' }}<br>
+                  <strong>Untuk :</strong> {{ $spd->tempat_lain_2_tujuan ?? '_________________' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_lain_2_berangkat ?? '_________________' }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-                {{-- VI. Kembali ke Pelaihari --}}
-                <tr>
-                    <td class="no-col">VI.</td>
-                    <td>
-                        <ul class="rincian-perjalanan">
-                            <li><strong>Tiba :</strong> {{ $spd->tempat_berangkat ?? 'Pelaihari, Kab. Tanah Laut' }}</li>
-                            <li><strong>Pada tanggal :</strong> {{ $spd->tanggal_kembali ? $spd->tanggal_kembali->format('d F Y') : '09 Juli 2024' }}</li>
-                            <li><strong>Kepala :</strong> Pengguna Anggaran</li>
-                        </ul>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        {{-- V. TEMPAT LAIN 3 --}}
+        <tr>
+          <td class="no-col">V.</td>
+          <td class="rincian-col">
+            <table class="inner-table">
+              <tr>
+                <td class="col-left">
+                  <strong>Tiba di :</strong> {{ $spd->tempat_lain_3_tiba ?? '_________________' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_lain_3_tiba ? \Carbon\Carbon::parse($spd->tanggal_lain_3_tiba)->isoFormat('D MMMM Y') : '_________________' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_lain_3_tiba ?? '_________________' }}
+                </td>
+                <td class="col-right">
+                  <strong>Berangkat dari :</strong> {{ $spd->tempat_lain_3_berangkat ?? '_________________' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_lain_3_berangkat ? \Carbon\Carbon::parse($spd->tanggal_lain_3_berangkat)->isoFormat('D MMMM Y') : '_________________' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_lain_3_berangkat ?? '_________________' }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-        {{-- KETERANGAN TELAH DIPERIKSA --}}
-        <div class="keterangan">
-            Telah diperiksa, dengan keterangan bahwa perjalanan tersebut di atas dilakukan atas perintahnya
-            dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.
-        </div>
+        {{-- VI. KEMBALI --}}
+        <tr>
+          <td class="no-col">VI.</td>
+          <td class="rincian-col">
+            <table class="inner-table">
+              <tr>
+                <td class="col-left">
+                  <strong>Tiba di :</strong> {{ $spd->tempat_berangkat ?? 'Pelaihari' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_kembali ? $spd->tanggal_kembali->isoFormat('D MMMM Y') : '22 April 2026' }}<br>
+                  <strong>Kepala :</strong> Pengguna Anggaran
+                </td>
+                <td class="col-right">
+                  <strong>Berangkat dari :</strong> {{ $spd->tempat_terakhir ?? $spd->tempatTujuan->nama ?? 'BANJARBARU' }}<br>
+                  <strong>Pada tanggal :</strong> {{ $spd->tanggal_kembali ? $spd->tanggal_kembali->isoFormat('D MMMM Y') : '22 April 2026' }}<br>
+                  <strong>Kepala :</strong> {{ $spd->kepala_kembali ?? '_________________' }}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-        {{-- TANDA TANGAN (kiri: Pejabat Teknis, kanan: Penanda Tangan Tujuan) --}}
-        <div class="ttd-wrapper">
-            <div class="ttd-box">
-                <p class="jabatan">Pejabat Pelaksana Teknis Kegiatan,</p>
-                <br><br><br>
-                <p class="nama">{{ $spd->pejabatTeknisPegawai->nama ?? 'LASMIATI, S. Tr' }}</p>
-                <p class="nip">NIP. {{ $spd->pejabatTeknisPegawai->nip ?? '19860412 201001 2 001' }}</p>
-            </div>
-            <div class="ttd-box">
-                <p class="jabatan">
-                    {{ $spd->penanda_tangan_jabatan ?? 'Kepala' }},
-                </p>
-                <br><br><br>
-                <p class="nama">{{ $spd->penanda_tangan_nama ?? '_________________' }}</p>
-                <p class="nip">NIP. {{ $spd->penanda_tangan_nip ?? '_________________' }}</p>
-            </div>
-        </div>
+      </tbody>
+    </table>
+
+    {{-- KETERANGAN --}}
+    <div class="keterangan">
+      Telah diperiksa, dengan keterangan bahwa perjalanan tersebut di atas dilakukan atas perintahnya
+      dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.
     </div>
+
+    {{-- TANDA TANGAN --}}
+    <div class="ttd-wrapper">
+      <div class="ttd-box">
+        <p class="jabatan">Pejabat Pelaksana Teknis Kegiatan,</p>
+        <br><br><br>
+        <p class="nama">{{ $spd->pejabatTeknisPegawai->nama ?? 'M. HAYAT, S. Sos' }}</p>
+        <p class="nip">NIP. {{ $spd->pejabatTeknisPegawai->nip ?? '19701013 199203 1 006' }}</p>
+      </div>
+      <div class="ttd-box">
+        <p class="jabatan">{{ $spd->penanda_tangan_jabatan ?? 'Kepala' }},</p>
+        <br><br><br>
+        <p class="nama">{{ $spd->penanda_tangan_nama ?? '_________________' }}</p>
+        <p class="nip">NIP. {{ $spd->penanda_tangan_nip ?? '_________________' }}</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

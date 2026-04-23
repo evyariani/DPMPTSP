@@ -132,21 +132,21 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::where('id_spd', $id)->first();
-            
+
             if (!$spd) {
                 return redirect()->route('spd.index')
                     ->with('error', 'Data SPD tidak ditemukan.');
             }
-            
+
             $spd->load(['pejabatTeknisPegawai', 'spt', 'tempatTujuan']);
-            
+
             Log::info('BELAKANG - Data akan ditampilkan:', [
                 'penanda_tangan_nama' => $spd->penanda_tangan_nama,
                 'penanda_tangan_nip' => $spd->penanda_tangan_nip,
                 'penanda_tangan_jabatan' => $spd->penanda_tangan_jabatan,
                 'penanda_tangan_instansi' => $spd->penanda_tangan_instansi,
             ]);
-            
+
             return view('admin.spd-belakang', compact('spd'));
         } catch (\Exception $e) {
             Log::error('Error di SPDController@belakang: ' . $e->getMessage());
@@ -160,29 +160,29 @@ class SPDController extends Controller
         if (!$tahun) {
             $tahun = date('Y');
         }
-        
+
         $nomorUrutFormatted = str_pad($nomorUrut, 3, '0', STR_PAD_LEFT);
-        
+
         return "000.1.2.3/{$nomorUrutFormatted}/DPMPTSP/{$tahun}";
     }
-    
+
     public function getNextNomorUrut($tahun = null)
     {
         if (!$tahun) {
             $tahun = date('Y');
         }
-        
+
         $lastSPD = SPD::whereYear('tanggal_berangkat', $tahun)
             ->orderBy('id_spd', 'desc')
             ->first();
-        
+
         if ($lastSPD && $lastSPD->nomor_surat) {
             preg_match('/000\.1\.2\.3\/(\d+)\/DPMPTSP\/\d{4}/', $lastSPD->nomor_surat, $matches);
             if (isset($matches[1])) {
                 return (int)$matches[1] + 1;
             }
         }
-        
+
         return 1;
     }
 
@@ -236,10 +236,10 @@ class SPDController extends Controller
                 return redirect()->route('spd.belakang', $id)
                     ->with('warning', "Tidak ada perubahan data penanda tangan.");
             }
-            
+
         } catch (\Exception $e) {
             Log::error('Error di SPDController@updateBelakang: ' . $e->getMessage());
-            
+
             return redirect()->route('spd.belakang', $id)
                 ->with('error', 'Gagal memperbarui data penanda tangan SPD: ' . $e->getMessage());
         }
@@ -249,10 +249,10 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::with([
-                'penggunaAnggaran', 
-                'tempatTujuan', 
-                'pelaksanaPerjadin', 
-                'pejabatTeknis', 
+                'penggunaAnggaran',
+                'tempatTujuan',
+                'pelaksanaPerjadin',
+                'pejabatTeknis',
                 'pejabatTeknisPegawai',
                 'spt'
             ])->findOrFail($id);
@@ -269,7 +269,7 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::with(['pelaksanaPerjadin', 'spt'])->findOrFail($id);
-            
+
             $nomorUrut = null;
             if ($spd->nomor_surat) {
                 preg_match('/000\.1\.2\.3\/(\d+)\/DPMPTSP\/\d{4}/', $spd->nomor_surat, $matches);
@@ -300,13 +300,13 @@ class SPDController extends Controller
             $nomorSuratTemplate = '000.1.2.3/           /DPMPTSP/' . date('Y', strtotime($spd->tanggal_berangkat));
 
             return view('admin.spd-edit', compact(
-                'spd', 
-                'kepalaDinas', 
+                'spd',
+                'kepalaDinas',
                 'semuaPegawai',
                 'programs',
-                'daerahs', 
-                'alatTransportasiList', 
-                'nomorUrut', 
+                'daerahs',
+                'alatTransportasiList',
+                'nomorUrut',
                 'nomorSuratTemplate',
                 'selectedPelaksana'
             ));
@@ -350,11 +350,11 @@ class SPDController extends Controller
 
             $tahun = date('Y', strtotime($request->tanggal_berangkat));
             $nomorSuratBaru = $this->generateNomorSurat($request->nomor_urut, $tahun);
-            
+
             $exists = SPD::where('nomor_surat', $nomorSuratBaru)
                 ->where('id_spd', '!=', $id)
                 ->exists();
-            
+
             if ($exists) {
                 return redirect()->back()
                     ->withInput()
@@ -362,7 +362,7 @@ class SPDController extends Controller
             }
 
             $program = Program::with('pegawai')->find($request->pejabat_teknis_id);
-            
+
             if (!$program) {
                 return redirect()->back()
                     ->withInput()
@@ -370,7 +370,7 @@ class SPDController extends Controller
             }
 
             DB::beginTransaction();
-            
+
             $data = [
                 'nomor_surat' => $nomorSuratBaru,
                 'pengguna_anggaran' => $validated['pengguna_anggaran'],
@@ -395,28 +395,28 @@ class SPDController extends Controller
 
             $spd->update($data);
             $spd->syncPelaksana($request->pelaksana_perjadin);
-            
+
             // ========== UPDATE RINCIAN BIDANG OTOMATIS ==========
             try {
                 $spd->syncRincianBidang();
             } catch (\Exception $e) {
                 Log::warning('Gagal sync RincianBidang: ' . $e->getMessage());
             }
-            
+
             // ========== UPDATE LHPD OTOMATIS ==========
             $lhpdController = new LhpdController();
             $lhpdController->updateLhpdFromSpd($spd);
-            
+
             DB::commit();
 
             return redirect()->route('spd.index')
                 ->with('success', "Data SPD halaman depan berhasil diperbarui. Nomor Surat: {$nomorSuratBaru}, Rincian Bidang dan LHPD juga telah diperbarui.");
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error di SPDController@update: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
-            
+
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Gagal memperbarui data SPD: ' . $e->getMessage());
@@ -428,11 +428,11 @@ class SPDController extends Controller
         try {
             $spd = SPD::findOrFail($id);
             $nomorSurat = $spd->nomor_surat;
-            
+
             DB::beginTransaction();
-            
+
             $spd->pelaksanaPerjadin()->detach();
-            
+
             if ($spd->spt) {
                 $lhpd = \App\Models\Lhpd::where('tujuan', $spd->spt->tujuan)
                     ->where('tanggal_berangkat', $spd->spt->tanggal)
@@ -442,7 +442,7 @@ class SPDController extends Controller
                     Log::info('LHPD terkait SPD dihapus, ID LHPD: ' . $lhpd->id_lhpd);
                 }
             }
-            
+
             $spd->delete();
             DB::commit();
 
@@ -455,11 +455,11 @@ class SPDController extends Controller
 
             return redirect()->route('spd.index')
                 ->with('success', "Data SPD dengan nomor '{$nomorSurat}' dan LHPD terkait berhasil dihapus.");
-                
+
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error di SPDController@destroy: ' . $e->getMessage());
-            
+
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -484,9 +484,9 @@ class SPDController extends Controller
                 Log::info('SPD sudah ada untuk SPT ID: ' . $spt->id_spt);
                 return $existingSpd;
             }
-            
+
             $maksudPerjadin = $spt->tujuan;
-            
+
             // Gunakan SNAPSHOT dari SPT untuk mengambil data pegawai
             $pegawaiSnapshot = $spt->pegawai_snapshot ?? [];
             $pelaksanaIds = [];
@@ -497,17 +497,17 @@ class SPDController extends Controller
             }
             // Filter null values
             $pelaksanaIds = array_filter($pelaksanaIds);
-            
+
             $kepalaDinas = Pegawai::where('jabatan', 'Kepala Dinas')->first();
             if (!$kepalaDinas) {
                 $kepalaDinas = Pegawai::first();
                 Log::warning('Tidak ada pegawai dengan jabatan Kepala Dinas, menggunakan pegawai pertama sebagai fallback');
             }
-            
+
             $tahun = date('Y', strtotime($spt->tanggal));
             $nextNomorUrut = $this->getNextNomorUrut($tahun);
             $nomorSurat = $this->generateNomorSurat($nextNomorUrut, $tahun);
-            
+
             $data = [
                 'nomor_surat' => $nomorSurat,
                 'pengguna_anggaran' => $kepalaDinas->id_pegawai ?? null,
@@ -524,19 +524,19 @@ class SPDController extends Controller
                 'tanggal_dikeluarkan' => date('Y-m-d'),
                 'spt_id' => $spt->id_spt,
             ];
-            
+
             // LANGSUNG CREATE tanpa transaction (transaction sudah di SPTController)
             $spd = SPD::create($data);
-            
+
             if (!empty($pelaksanaIds)) {
                 $spd->syncPelaksana($pelaksanaIds);
             }
-            
+
             // CATATAN: LHPD dibuat di SPTController, TIDAK di sini
-            
+
             Log::info('SPD berhasil dibuat dari SPT ID: ' . $spt->id_spt . ', Nomor Surat: ' . $nomorSurat);
             return $spd;
-            
+
         } catch (\Exception $e) {
             Log::error('Gagal membuat SPD dari SPT: ' . $e->getMessage());
             throw $e; // Lempar exception agar ditangani oleh SPTController
@@ -548,7 +548,7 @@ class SPDController extends Controller
         try {
             $spt = SPT::with(['pegawai_list', 'penandaTangan'])->findOrFail($sptId);
             $spd = $this->createSpdFromSpt($spt);
-            
+
             if ($spd) {
                 return redirect()->route('spd.belakang', $spd->id_spd)
                     ->with('success', "SPD berhasil dibuat dari SPT. Silakan lengkapi data penanda tangan. LHPD juga telah dibuat otomatis.");
@@ -556,7 +556,7 @@ class SPDController extends Controller
                 return redirect()->route('spt.index')
                     ->with('error', 'Gagal membuat SPD dari SPT.');
             }
-            
+
         } catch (\Exception $e) {
             Log::error('Error di SPDController@createFromSpt: ' . $e->getMessage());
             return redirect()->route('spt.index')
@@ -568,7 +568,7 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::with(['pejabatTeknisPegawai', 'spt'])->findOrFail($id);
-            
+
             return response()->json([
                 'success' => true,
                 'program' => $spd->pejabat_teknis_program,
@@ -598,10 +598,10 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::with([
-                'penggunaAnggaran', 
-                'tempatTujuan', 
-                'pelaksanaPerjadin', 
-                'pejabatTeknis', 
+                'penggunaAnggaran',
+                'tempatTujuan',
+                'pelaksanaPerjadin',
+                'pejabatTeknis',
                 'pejabatTeknisPegawai',
                 'spt'
             ])->findOrFail($id);
@@ -622,10 +622,10 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::with([
-                'penggunaAnggaran', 
-                'tempatTujuan', 
-                'pelaksanaPerjadin', 
-                'pejabatTeknis', 
+                'penggunaAnggaran',
+                'tempatTujuan',
+                'pelaksanaPerjadin',
+                'pejabatTeknis',
                 'pejabatTeknisPegawai',
                 'spt'
             ])->findOrFail($id);
@@ -646,10 +646,10 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::with([
-                'penggunaAnggaran', 
-                'tempatTujuan', 
-                'pelaksanaPerjadin', 
-                'pejabatTeknis', 
+                'penggunaAnggaran',
+                'tempatTujuan',
+                'pelaksanaPerjadin',
+                'pejabatTeknis',
                 'pejabatTeknisPegawai',
                 'spt'
             ])->findOrFail($id);
@@ -670,10 +670,10 @@ class SPDController extends Controller
     {
         try {
             $spd = SPD::with([
-                'penggunaAnggaran', 
-                'tempatTujuan', 
-                'pelaksanaPerjadin', 
-                'pejabatTeknis', 
+                'penggunaAnggaran',
+                'tempatTujuan',
+                'pelaksanaPerjadin',
+                'pejabatTeknis',
                 'pejabatTeknisPegawai',
                 'spt'
             ])->findOrFail($id);
@@ -695,7 +695,7 @@ class SPDController extends Controller
         try {
             $tahun = $request->input('tahun', date('Y'));
             $nextNomorUrut = $this->getNextNomorUrut($tahun);
-            
+
             return response()->json([
                 'success' => true,
                 'nomor_urut' => $nextNomorUrut,
@@ -714,7 +714,7 @@ class SPDController extends Controller
     {
         try {
             $program = Program::with('pegawai')->findOrFail($id);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -846,9 +846,9 @@ class SPDController extends Controller
     {
         try {
             $spt = SPT::with(['pegawai_list', 'penandaTangan'])->findOrFail($id);
-            
+
             $maksudPerjadin = $spt->tujuan;
-            
+
             // Gunakan snapshot SPT jika ada
             $pegawaiSnapshot = $spt->pegawai_snapshot ?? [];
             $pelaksana = [];
@@ -875,9 +875,9 @@ class SPDController extends Controller
                     }
                 }
             }
-            
+
             $existingSpd = SPD::where('spt_id', $spt->id_spt)->first();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [

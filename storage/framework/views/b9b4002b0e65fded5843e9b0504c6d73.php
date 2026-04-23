@@ -1,4 +1,4 @@
-<?php $__env->startSection('title', 'Surat Perintah Dinas (SPD) - Halaman Depan'); ?>
+<?php $__env->startSection('title', 'Surat Perintah Dinas (SPD)'); ?>
 
 <?php $__env->startSection('content'); ?>
 <style>
@@ -231,40 +231,18 @@
 .btn-primary:hover {
     background-color: #1d4ed8;
 }
-
-.btn-secondary {
-    background-color: #9ca3af;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #6b7280;
-}
-
-.btn-danger {
-    background-color: #dc2626;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #b91c1c;
-}
-
-.btn-warning {
-    background-color: #f59e0b;
-    color: white;
-}
-
-.btn-warning:hover {
-    background-color: #d97706;
-}
 </style>
 
 <div class="mb-6">
     <div class="flex justify-between items-center">
         <div>
-            <h2 class="text-lg font-semibold text-gray-700">Surat Perintah Dinas (SPD) - Halaman Depan</h2>
-            <p class="text-gray-500">Kelola data Surat Perintah Dinas (Data Perjalanan)</p>
+            <h2 class="text-lg font-semibold text-gray-700">Surat Perintah Dinas (SPD)</h2>
+            <p class="text-gray-500">Kelola data Surat Perintah Dinas - SPD dibuat otomatis dari SPT</p>
+        </div>
+        <div>
+            <a href="<?php echo e(route('spt.index')); ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center transition duration-200">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke SPT
+            </a>
         </div>
     </div>
 </div>
@@ -309,6 +287,28 @@
         </div>
         <div class="mt-2 w-full bg-red-200 rounded-full h-1">
             <div id="error-progress" class="bg-red-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if(session('info')): ?>
+<div id="info-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
+    <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <p class="font-medium">Informasi!</p>
+                <p class="text-sm mt-1"><?php echo e(session('info')); ?></p>
+            </div>
+            <button type="button" onclick="hideNotification('info')" class="ml-4 text-blue-600 hover:text-blue-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mt-2 w-full bg-blue-200 rounded-full h-1">
+            <div id="info-progress" class="bg-blue-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
         </div>
     </div>
 </div>
@@ -432,9 +432,9 @@
                         <i class="fas fa-redo mr-2"></i> Reset
                     </a>
                 <?php endif; ?>
-                
+
                 <!-- Tombol Export Excel -->
-                <button type="button" 
+                <button type="button"
                         onclick="exportData()"
                         id="btn-export"
                         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
@@ -479,7 +479,7 @@
                                 <i class="fas fa-link mr-1 text-xs"></i> dari SPT
                             </span>
                         <?php endif; ?>
-                    </td>
+                     </td>
 
                     <!-- Kolom Pengguna Anggaran (Kepala Dinas) -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-pengguna">
@@ -504,31 +504,46 @@
                         <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
                         <?php endif; ?>
-                    </td>
+                     </td>
 
                     <!-- Kolom Pelaksana Perjalanan Dinas -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-pelaksana">
-                        <?php if($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0): ?>
+                        <?php
+                            $pelaksanaList = [];
+                            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                                $pelaksanaList = $spd->pelaksana_snapshot;
+                            } elseif ($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0) {
+                                foreach ($spd->pelaksanaPerjadin as $p) {
+                                    $pelaksanaList[] = [
+                                        'nama' => $p->nama,
+                                        'nip' => $p->nip,
+                                        'jabatan' => $p->jabatan,
+                                    ];
+                                }
+                            }
+                        ?>
+
+                        <?php if(count($pelaksanaList) > 0): ?>
                             <div class="space-y-1">
-                                <?php $__currentLoopData = $spd->pelaksanaPerjadin->take(2); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelaksana): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php $__currentLoopData = array_slice($pelaksanaList, 0, 2); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelaksana): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="pelaksana-badge">
                                         <i class="fas fa-user-check mr-1 text-xs"></i>
-                                        <?php echo e(Str::limit($pelaksana->nama, 20)); ?>
+                                        <?php echo e(Str::limit($pelaksana['nama'] ?? '-', 20)); ?>
 
                                     </div>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                <?php if($spd->pelaksanaPerjadin->count() > 2): ?>
+                                <?php if(count($pelaksanaList) > 2): ?>
                                     <div class="text-xs text-blue-600 mt-1 cursor-pointer hover:underline"
-                                         onclick="showPelaksanaDetail(<?php echo e(json_encode($spd->pelaksanaPerjadin->map(function($p) { return ['nama' => $p->nama, 'nip' => $p->nip, 'jabatan' => $p->jabatan]; }))); ?>)">
+                                         onclick="showPelaksanaDetail(<?php echo e(json_encode($pelaksanaList)); ?>)">
                                         <i class="fas fa-plus-circle mr-1"></i>
-                                        +<?php echo e($spd->pelaksanaPerjadin->count() - 2); ?> lainnya
+                                        +<?php echo e(count($pelaksanaList) - 2); ?> lainnya
                                     </div>
                                 <?php endif; ?>
                             </div>
                         <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
                         <?php endif; ?>
-                    </td>
+                     </td>
 
                     <!-- Kolom Maksud Perjadin -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-maksud">
@@ -536,7 +551,7 @@
                             <?php echo e(Str::limit($spd->maksud_perjadin, 60)); ?>
 
                         </div>
-                    </td>
+                     </td>
 
                     <!-- Kolom Tanggal Perjadin -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-tanggal">
@@ -555,7 +570,7 @@
                         <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
                         <?php endif; ?>
-                    </td>
+                     </td>
 
                     <!-- Kolom Aksi -->
                     <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -564,19 +579,14 @@
                                class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition duration-150 tooltip"
                                title="Edit SPD Halaman Depan">
                                 <i class="fas fa-edit"></i>
+                                <span class="tooltip-text">Edit SPD Halaman Depan</span>
                             </a>
 
                             <a href="<?php echo e(route('spd.belakang', $spd->id_spd)); ?>"
                                class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition duration-150 tooltip"
                                title="Halaman Belakang SPD">
                                 <i class="fas fa-file-alt"></i>
-                            </a>
-
-                            <a href="<?php echo e(route('spd.print-depan', $spd->id_spd)); ?>"
-                               target="_blank"
-                               class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition duration-150 tooltip"
-                               title="Download PDF Halaman Depan">
-                                <i class="fas fa-file-pdf"></i>
+                                <span class="tooltip-text">Halaman Belakang SPD</span>
                             </a>
 
                             <a href="<?php echo e(route('spd.preview-depan', $spd->id_spd)); ?>"
@@ -584,6 +594,7 @@
                                class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition duration-150 tooltip"
                                title="Preview PDF Halaman Depan">
                                 <i class="fas fa-eye"></i>
+                                <span class="tooltip-text">Preview PDF Halaman Depan</span>
                             </a>
 
                             <button type="button"
@@ -595,9 +606,10 @@
                                     class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition duration-150 tooltip"
                                     title="Hapus SPD">
                                 <i class="fas fa-trash"></i>
+                                <span class="tooltip-text">Hapus SPD</span>
                             </button>
                         </div>
-                    </td>
+                     </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
@@ -606,8 +618,8 @@
                             <i class="fas fa-file-alt text-gray-300 text-5xl mb-3"></i>
                             <p class="text-lg">Tidak ada data SPD</p>
                             <p class="text-sm mt-1">SPD akan dibuat otomatis saat membuat SPT</p>
-                            <a href="<?php echo e(route('spt.index')); ?>" class="mt-3 btn-primary btn">
-                                <i class="fas fa-plus"></i> Buat SPD dari SPT
+                            <a href="<?php echo e(route('spt.index')); ?>" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                                <i class="fas fa-plus mr-2"></i> Buat SPT Baru
                             </a>
                         </div>
                     </td>
@@ -643,7 +655,7 @@
 </div>
 
 <!-- Pagination -->
-<?php if($spds->hasPages()): ?>
+<?php if(method_exists($spds, 'hasPages') && $spds->hasPages()): ?>
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan
@@ -656,54 +668,8 @@
     </div>
 
     <div class="flex items-center space-x-1">
-        <?php if($spds->onFirstPage()): ?>
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
-                <i class="fas fa-chevron-left text-xs"></i>
-            </span>
-        <?php else: ?>
-            <a href="<?php echo e($spds->previousPageUrl()); ?>" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
-                <i class="fas fa-chevron-left text-xs"></i>
-            </a>
-        <?php endif; ?>
+        <?php echo e($spds->links()); ?>
 
-        <?php
-            $current = $spds->currentPage();
-            $last = $spds->lastPage();
-            $start = max($current - 2, 1);
-            $end = min($current + 2, $last);
-        ?>
-
-        <?php if($start > 1): ?>
-            <a href="<?php echo e($spds->url(1)); ?>" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
-            <?php if($start > 2): ?>
-                <span class="px-3 py-1.5 text-gray-500">...</span>
-            <?php endif; ?>
-        <?php endif; ?>
-
-        <?php for($page = $start; $page <= $end; $page++): ?>
-            <?php if($page == $current): ?>
-                <span class="px-3 py-1.5 border rounded bg-blue-600 text-white"><?php echo e($page); ?></span>
-            <?php else: ?>
-                <a href="<?php echo e($spds->url($page)); ?>" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150"><?php echo e($page); ?></a>
-            <?php endif; ?>
-        <?php endfor; ?>
-
-        <?php if($end < $last): ?>
-            <?php if($end < $last - 1): ?>
-                <span class="px-3 py-1.5 text-gray-500">...</span>
-            <?php endif; ?>
-            <a href="<?php echo e($spds->url($last)); ?>" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150"><?php echo e($last); ?></a>
-        <?php endif; ?>
-
-        <?php if($spds->hasMorePages()): ?>
-            <a href="<?php echo e($spds->nextPageUrl()); ?>" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
-                <i class="fas fa-chevron-right text-xs"></i>
-            </a>
-        <?php else: ?>
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
-                <i class="fas fa-chevron-right text-xs"></i>
-            </span>
-        <?php endif; ?>
     </div>
 </div>
 <?php endif; ?>
@@ -715,24 +681,24 @@
 function exportData() {
     const btn = document.getElementById('btn-export');
     const originalHtml = btn.innerHTML;
-    
+
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
     btn.classList.add('btn-loading');
     btn.disabled = true;
-    
+
     const form = document.getElementById('filter-form');
     const formData = new FormData(form);
     const params = new URLSearchParams();
-    
+
     for (let [key, value] of formData.entries()) {
         if (value && value !== '') {
             params.append(key, value);
         }
     }
-    
+
     const exportUrl = "<?php echo e(route('spd.export')); ?>?" + params.toString();
     window.location.href = exportUrl;
-    
+
     setTimeout(() => {
         btn.innerHTML = originalHtml;
         btn.classList.remove('btn-loading');
@@ -752,12 +718,15 @@ function hideNotification(type) {
     }
 }
 
+// Auto hide notifications after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         const successNotif = document.getElementById('success-notification');
         const errorNotif = document.getElementById('error-notification');
+        const infoNotif = document.getElementById('info-notification');
         if (successNotif) hideNotification('success');
         if (errorNotif) hideNotification('error');
+        if (infoNotif) hideNotification('info');
     }, 5000);
 });
 
@@ -781,6 +750,7 @@ function hideDeleteModal() {
     modal.style.display = 'none';
 }
 
+// Handle delete form submission
 document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const form = this;
@@ -789,18 +759,23 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
     submitBtn.disabled = true;
-    
+
     fetch(form.action, {
         method: 'POST',
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             showDeleteSuccess(currentDeleteId);
             hideDeleteModal();
-            setTimeout(() => { window.location.reload(); }, 2000);
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
         } else {
             throw new Error(data.message || 'Gagal menghapus data');
         }
@@ -818,7 +793,10 @@ function showDeleteSuccess(id) {
     message.textContent = `Data SPD berhasil dihapus.`;
     notification.classList.remove('hidden');
     notification.style.display = 'block';
-    setTimeout(() => { hideNotification('delete'); }, 5000);
+    notification.classList.add('animate-slide-in-bottom');
+    setTimeout(() => {
+        hideNotification('delete');
+    }, 5000);
 }
 
 // ========== PELAKSANA MODAL ==========
@@ -826,7 +804,7 @@ function showPelaksanaDetail(pelaksanaList) {
     const modal = document.getElementById('pelaksana-modal');
     const listContainer = document.getElementById('pelaksana-list');
     listContainer.innerHTML = '';
-    
+
     if (pelaksanaList && pelaksanaList.length > 0) {
         pelaksanaList.forEach(pelaksana => {
             const item = document.createElement('div');
@@ -836,7 +814,7 @@ function showPelaksanaDetail(pelaksanaList) {
                     <i class="fas fa-user text-blue-600 text-sm"></i>
                 </div>
                 <div class="flex-1">
-                    <p class="text-sm font-medium text-gray-900">${escapeHtml(pelaksana.nama)}</p>
+                    <p class="text-sm font-medium text-gray-900">${escapeHtml(pelaksana.nama || '-')}</p>
                     <p class="text-xs text-gray-500">NIP: ${escapeHtml(pelaksana.nip || '-')}</p>
                     <p class="text-xs text-gray-500">Jabatan: ${escapeHtml(pelaksana.jabatan || '-')}</p>
                 </div>
@@ -846,7 +824,7 @@ function showPelaksanaDetail(pelaksanaList) {
     } else {
         listContainer.innerHTML = '<p class="text-center text-gray-500 py-4">Tidak ada data pelaksana</p>';
     }
-    
+
     modal.classList.remove('hidden');
     modal.style.display = 'block';
 }
@@ -885,4 +863,5 @@ window.onclick = function(event) {
 }
 </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PKL POLITALA\dpmptsp\resources\views/admin/spd.blade.php ENDPATH**/ ?>

@@ -250,12 +250,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     Nomor Surat Lengkap
                 </label>
-                <input type="text" 
+                <input type="text"
                        value="<?php echo e($spd->nomor_surat); ?>"
                        class="form-input readonly-field bg-gray-100 font-mono"
                        readonly
                        disabled>
-                
+
                 <!-- ✅ TAMBAHKAN HIDDEN INPUT UNTUK NOMOR URUT -->
                 <?php
                     // Extract nomor urut dari nomor surat
@@ -269,10 +269,10 @@
                     }
                 ?>
                 <input type="hidden" name="nomor_urut" value="<?php echo e($nomorUrut); ?>">
-                
+
                 <?php if($spd->spt_id): ?>
                     <p class="mt-2 text-xs text-gray-500">
-                        <i class="fas fa-link mr-1"></i> 
+                        <i class="fas fa-link mr-1"></i>
                         Berasal dari SPT: <strong><?php echo e($spd->spt?->nomor_surat ?? '-'); ?></strong>
                         (<?php echo e($spd->spt?->tanggal ? \Carbon\Carbon::parse($spd->spt->tanggal)->format('d/m/Y') : '-'); ?>)
                     </p>
@@ -295,13 +295,13 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Pilih Program
                     </label>
-                    <select name="pejabat_teknis_id" 
+                    <select name="pejabat_teknis_id"
                             id="pejabat_teknis_id"
                             class="form-input"
                             required>
                         <option value="">Pilih Program</option>
                         <?php $__currentLoopData = $programs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $program): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($program->id_program); ?>" 
+                            <option value="<?php echo e($program->id_program); ?>"
                                 data-program="<?php echo e($program->program); ?>"
                                 data-kegiatan="<?php echo e($program->kegiatan); ?>"
                                 data-sub-kegiatan="<?php echo e($program->sub_kegiatan); ?>"
@@ -371,19 +371,20 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                     Maksud Perjalanan Dinas
                 </label>
-                <textarea name="maksud_perjadin" 
+                <textarea name="maksud_perjadin"
                           rows="3"
+                          readonly
                           class="form-input"
                           required><?php echo e(old('maksud_perjadin', $spd->maksud_perjadin)); ?></textarea>
                 <p class="mt-1 text-xs text-gray-500">Jelaskan maksud dan tujuan perjalanan dinas secara jelas</p>
             </div>
-            
+
             <!-- Alat Transportasi -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                     Alat Transportasi
                 </label>
-                <select name="alat_transportasi" 
+                <select name="alat_transportasi"
                         class="form-input"
                         required>
                     <option value="">Pilih Alat Transportasi</option>
@@ -395,31 +396,32 @@
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
             </div>
-            
+
             <!-- Tempat Berangkat dan Tujuan -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tempat Berangkat
                     </label>
-                    <input type="text" 
-                           name="tempat_berangkat" 
+                    <input type="text"
+                           name="tempat_berangkat"
                            value="<?php echo e(old('tempat_berangkat', $spd->tempat_berangkat)); ?>"
                            class="form-input"
                            placeholder="Contoh: Pelaihari"
+                           readonly
                            required>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tempat Tujuan
                     </label>
-                    <select name="tempat_tujuan" 
+                    <select name="tempat_tujuan"
                             class="form-input"
                             required>
                         <option value="">Pilih Tempat Tujuan</option>
                         <?php $__currentLoopData = $daerahs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $daerah): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($daerah->id); ?>" 
+                            <option value="<?php echo e($daerah->id); ?>"
                                 <?php echo e(old('tempat_tujuan', $spd->tempat_tujuan) == $daerah->id ? 'selected' : ''); ?>>
                                 <?php echo e($daerah->nama); ?>
 
@@ -428,39 +430,39 @@
                     </select>
                 </div>
             </div>
-            
+
             <!-- Tanggal Perjalanan -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tanggal Berangkat
                     </label>
-                    <input type="date" 
-                           name="tanggal_berangkat" 
+                    <input type="date"
+                           name="tanggal_berangkat"
                            id="tanggal_berangkat"
                            value="<?php echo e(old('tanggal_berangkat', $spd->tanggal_berangkat ? $spd->tanggal_berangkat->format('Y-m-d') : '')); ?>"
                            class="form-input"
                            required>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tanggal Kembali
                     </label>
-                    <input type="date" 
-                           name="tanggal_kembali" 
+                    <input type="date"
+                           name="tanggal_kembali"
                            id="tanggal_kembali"
                            value="<?php echo e(old('tanggal_kembali', $spd->tanggal_kembali ? $spd->tanggal_kembali->format('Y-m-d') : '')); ?>"
                            class="form-input"
                            required>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Lama Perjalanan (Hari)
                     </label>
-                    <input type="number" 
-                           name="lama_perjadin" 
+                    <input type="number"
+                           name="lama_perjadin"
                            id="lama_perjadin"
                            value="<?php echo e(old('lama_perjadin', $spd->lama_perjadin)); ?>"
                            class="form-input readonly-field bg-gray-100"
@@ -482,116 +484,163 @@
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
-                        Pengguna Anggaran (Kepala Dinas)
-                    </label>
-                    <select name="pengguna_anggaran" 
-                            class="form-input"
-                            required>
-                        <option value="">Pilih Kepala Dinas</option>
-                        <?php $__currentLoopData = $semuaPegawai; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($pegawai->id_pegawai); ?>" 
-                                <?php echo e(old('pengguna_anggaran', $spd->pengguna_anggaran) == $pegawai->id_pegawai ? 'selected' : ''); ?>>
-                                <?php echo e($pegawai->nama); ?> - <?php echo e($pegawai->nip); ?> (<?php echo e($pegawai->jabatan); ?>)
-                            </option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </select>
-                </div>
-                
+    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
+        Pengguna Anggaran (Kepala Dinas)
+    </label>
+
+    <?php
+        // Cari data Kepala Dinas dari koleksi $semuaPegawai
+        // Sesuaikan kondisi pencarian Kadis dengan database Anda
+        $kadis = $semuaPegawai->firstWhere('jabatan', 'Kepala Dinas');
+        // Atau bisa pakai: $semuaPegawai->where('is_kadis', true)->first();
+
+        $idKadis = $kadis->id_pegawai ?? '';
+        $namaKadis = $kadis ? $kadis->nama . ' - ' . $kadis->nip . ' (' . $kadis->jabatan . ')' : 'Kepala Dinas tidak ditemukan';
+    ?>
+
+    <input type="text"
+           class="form-input bg-gray-100"
+           value="<?php echo e($namaKadis); ?>"
+           readonly
+           disabled>
+
+    <input type="hidden" name="pengguna_anggaran" value="<?php echo e($idKadis); ?>">
+</div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         SKPD
                     </label>
-                    <input type="text" 
-                           name="skpd" 
+                    <input type="text"
+                           name="skpd"
                            value="<?php echo e(old('skpd', $spd->skpd)); ?>"
                            class="form-input"
+                           readonly
                            placeholder="Contoh: Dinas Penanaman Modal dan PTSP">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Tempat Dikeluarkan
                     </label>
-                    <input type="text" 
-                           name="tempat_dikeluarkan" 
+                    <input type="text"
+                           name="tempat_dikeluarkan"
                            value="<?php echo e(old('tempat_dikeluarkan', $spd->tempat_dikeluarkan)); ?>"
                            class="form-input"
+                           readonly
                            placeholder="Contoh: Pelaihari">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Tanggal Dikeluarkan
                     </label>
-                    <input type="date" 
-                           name="tanggal_dikeluarkan" 
+                    <input type="date"
+                           name="tanggal_dikeluarkan"
                            value="<?php echo e(old('tanggal_dikeluarkan', $spd->tanggal_dikeluarkan ? $spd->tanggal_dikeluarkan->format('Y-m-d') : '')); ?>"
-                           class="form-input">
+                           class="form-input"
+                           readonly>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CARD 5: PELAKSANA PERJALANAN DINAS (READONLY - DARI SPT) -->
-    <div class="info-card">
-        <div class="info-card-header">
-            <h3 class="info-card-title">
-                <i class="fas fa-users text-teal-500 mr-2"></i>
-                Pelaksana Perjalanan Dinas
-            </h3>
-        </div>
-        <div class="p-6">
-            <?php if($spd->spt_id): ?>
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded">
-                    <div class="flex items-start">
-                        <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
-                        <p class="text-sm text-blue-700">
-                            Pelaksana perjalanan dinas diambil dari <strong>SPT asal</strong> dan tidak dapat diubah di sini.
-                            <?php if($spd->spt_id): ?>
-                                <br>Untuk mengubah pelaksana, silakan edit <strong>SPT Nomor: <?php echo e($spd->spt?->nomor_surat ?? '-'); ?></strong>.
-                            <?php endif; ?>
-                        </p>
-                    </div>
+   <!-- CARD 5: PELAKSANA PERJALANAN DINAS (READONLY - DARI SPT/SPD) -->
+<div class="info-card">
+    <div class="info-card-header">
+        <h3 class="info-card-title">
+            <i class="fas fa-users text-teal-500 mr-2"></i>
+            Pelaksana Perjalanan Dinas
+        </h3>
+    </div>
+    <div class="p-6">
+        <?php if($spd->spt_id): ?>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
+                    <p class="text-sm text-blue-700">
+                        Pelaksana perjalanan dinas diambil dari <strong>SPT asal</strong> dan tidak dapat diubah di sini.
+                        <?php if($spd->spt_id): ?>
+                            <br>Untuk mengubah pelaksana, silakan edit <strong>SPT Nomor: <?php echo e($spd->spt?->nomor_surat ?? '-'); ?></strong>.
+                        <?php endif; ?>
+                    </p>
                 </div>
-            <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
-            <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-gray-50">
-                <?php if($selectedPelaksana && count($selectedPelaksana) > 0): ?>
-                    <div class="space-y-2">
-                        <?php $__currentLoopData = $semuaPegawai; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <?php if(in_array($pegawai->id_pegawai, $selectedPelaksana)): ?>
-                                <div class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200">
-                                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
-                                        <i class="fas fa-user-check text-teal-600 text-sm"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <span class="font-medium text-gray-800"><?php echo e($pegawai->nama); ?></span>
-                                        <div class="text-xs text-gray-500">
-                                            NIP: <?php echo e($pegawai->nip ?? '-'); ?> | Jabatan: <?php echo e($pegawai->jabatan ?? '-'); ?>
+        <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-gray-50">
+            <?php
+                // Gunakan snapshot untuk menampilkan data pelaksana (agar tidak berubah)
+                $pelaksanaList = [];
+                $pelaksanaIds = [];
 
-                                        </div>
-                                    </div>
-                                    <span class="info-badge info-badge-blue text-xs">dari SPT</span>
+                if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                    // Data baru: gunakan snapshot
+                    $pelaksanaList = $spd->pelaksana_snapshot;
+                    foreach ($pelaksanaList as $p) {
+                        $pelaksanaIds[] = $p['id_pegawai'] ?? null;
+                    }
+                } elseif ($selectedPelaksana && count($selectedPelaksana) > 0) {
+                    // Fallback untuk data lama: ambil dari relasi
+                    $pelaksanaIds = $selectedPelaksana;
+                    foreach ($semuaPegawai as $pegawai) {
+                        if (in_array($pegawai->id_pegawai, $selectedPelaksana)) {
+                            $pelaksanaList[] = [
+                                'id_pegawai' => $pegawai->id_pegawai,
+                                'nama' => $pegawai->nama,
+                                'nip' => $pegawai->nip,
+                                'jabatan' => $pegawai->jabatan,
+                            ];
+                        }
+                    }
+                }
+
+                // Filter null values
+                $pelaksanaIds = array_filter($pelaksanaIds);
+            ?>
+
+            <?php if(count($pelaksanaList) > 0): ?>
+                <div class="space-y-2">
+                    <?php $__currentLoopData = $pelaksanaList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelaksana): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200">
+                            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                                <i class="fas fa-user-check text-teal-600 text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-medium text-gray-800"><?php echo e($pelaksana['nama'] ?? '-'); ?></span>
+                                <div class="text-xs text-gray-500">
+                                    NIP: <?php echo e($pelaksana['nip'] ?? '-'); ?> | Jabatan: <?php echo e($pelaksana['jabatan'] ?? '-'); ?>
+
                                 </div>
-                            <?php endif; ?>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </div>
-                <?php else: ?>
-                    <p class="text-center text-gray-500 py-4">Tidak ada data pelaksana dari SPT</p>
-                <?php endif; ?>
-            </div>
-            
-            <!-- Hidden input untuk menyimpan pelaksana dari SPT (tidak bisa diubah) -->
-            <?php $__currentLoopData = $selectedPelaksana; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelaksanaId): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <input type="hidden" name="pelaksana_perjadin[]" value="<?php echo e($pelaksanaId); ?>">
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            
-            <p class="mt-3 text-xs text-gray-500 text-center">
-                <i class="fas fa-lock mr-1"></i> Pelaksana perjalanan dinas diambil dari SPT dan tidak dapat diubah
-            </p>
+                            </div>
+                            <span class="info-badge info-badge-blue text-xs">
+                                <?php if($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0): ?>
+                                    dari snapshot
+                                <?php else: ?>
+                                    dari SPT
+                                <?php endif; ?>
+                            </span>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            <?php else: ?>
+                <p class="text-center text-gray-500 py-4">Tidak ada data pelaksana dari SPT</p>
+            <?php endif; ?>
         </div>
+
+        <!-- Hidden input untuk menyimpan pelaksana dari SPT (tidak bisa diubah) -->
+        <?php $__currentLoopData = $pelaksanaIds; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pelaksanaId): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <input type="hidden" name="pelaksana_perjadin[]" value="<?php echo e($pelaksanaId); ?>">
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+        <p class="mt-3 text-xs text-gray-500 text-center">
+            <i class="fas fa-lock mr-1"></i> Pelaksana perjalanan dinas diambil dari data saat SPD dibuat dan tidak dapat diubah di sini.
+            <?php if($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0): ?>
+                <br><i class="fas fa-info-circle mr-1"></i> Data pelaksana adalah snapshot saat SPD dibuat.
+            <?php endif; ?>
+        </p>
     </div>
+</div>
 
     <!-- CARD 6: INFORMASI SPT ASAL -->
     <?php if($spd->spt_id): ?>
@@ -711,7 +760,7 @@ const kodeRekManual = document.getElementById('kode_rek_manual');
 
 function updateDetailProgram() {
     const selectedOption = programSelect.options[programSelect.selectedIndex];
-    
+
     if (selectedOption && selectedOption.value) {
         document.getElementById('detail_program').textContent = selectedOption.dataset.program || '-';
         document.getElementById('detail_kegiatan').textContent = selectedOption.dataset.kegiatan || '-';
@@ -720,7 +769,7 @@ function updateDetailProgram() {
         document.getElementById('detail_pegawai_nama').textContent = selectedOption.dataset.pegawaiNama || '-';
         document.getElementById('detail_pegawai_nip').textContent = selectedOption.dataset.pegawaiNip ? `NIP: ${selectedOption.dataset.pegawaiNip}` : 'NIP: -';
         document.getElementById('detail_pegawai_jabatan').textContent = selectedOption.dataset.pegawaiJabatan ? `Jabatan: ${selectedOption.dataset.pegawaiJabatan}` : 'Jabatan: -';
-        
+
         // Jika kode rekening manual kosong, isi dengan kode rekening dari program
         if (!kodeRekManual.value) {
             kodeRekManual.value = selectedOption.dataset.kodeRekening || '';
@@ -742,4 +791,5 @@ programSelect.addEventListener('change', updateDetailProgram);
 hitungLamaPerjadin();
 </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\PKL POLITALA\dpmptsp\resources\views/admin/spd-edit.blade.php ENDPATH**/ ?>
