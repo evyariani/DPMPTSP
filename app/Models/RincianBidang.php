@@ -30,8 +30,6 @@ class RincianBidang extends Model
         'bendahara_jabatan',
         'uang_harian_id',
         'uang_harian',
-        'uang_transport',
-        'transport',
         'total',
         'terbilang',
         'pegawai'
@@ -69,23 +67,22 @@ class RincianBidang extends Model
 
     // ========== ACCESSORS ==========
     
+    /**
+     * Total uang harian untuk semua pegawai
+     * Rumus: uang_harian * lama_perjadin * jumlah_pegawai
+     */
     public function getTotalUangHarianKeseluruhanAttribute()
     {
         $jumlahPegawai = is_array($this->pegawai) ? count($this->pegawai) : 0;
         return ($this->uang_harian ?? 0) * ($this->lama_perjadin ?? 0) * $jumlahPegawai;
     }
     
-    public function getTotalUangTransportKeseluruhanAttribute()
-    {
-        $jumlahPegawai = is_array($this->pegawai) ? count($this->pegawai) : 0;
-        return ($this->uang_transport ?? 0) * $jumlahPegawai;
-    }
-
+    /**
+     * Total keseluruhan (hanya uang harian, karena transport terpisah)
+     */
     public function getTotalKeseluruhanAttribute()
     {
-        return $this->total_uang_harian_keseluruhan + 
-               $this->total_uang_transport_keseluruhan + 
-               ($this->transport ?? 0);
+        return $this->total_uang_harian_keseluruhan;
     }
 
     public function getDaftarNamaPegawaiAttribute()
@@ -201,13 +198,14 @@ class RincianBidang extends Model
             ->first();
     }
     
+    /**
+     * Hitung total biaya (HANYA uang harian)
+     * Uang transport TIDAK termasuk, akan dikwitansi terpisah
+     */
     public function hitungTotal(): float
     {
         $jumlahPegawai = is_array($this->pegawai) ? count($this->pegawai) : 0;
-        $totalUangHarian = ($this->uang_harian ?? 0) * ($this->lama_perjadin ?? 0) * $jumlahPegawai;
-        $totalUangTransport = ($this->uang_transport ?? 0) * $jumlahPegawai;
-        
-        return $totalUangHarian + $totalUangTransport + ($this->transport ?? 0);
+        return ($this->uang_harian ?? 0) * ($this->lama_perjadin ?? 0) * $jumlahPegawai;
     }
     
     public function updateTotal(): self
@@ -326,11 +324,10 @@ class RincianBidang extends Model
             if ($uangHarianData) {
                 $rincianBidang->uang_harian_id = $uangHarianData->id_uang_harian;
                 $rincianBidang->uang_harian = $uangHarianData->uang_harian;
-                $rincianBidang->uang_transport = $uangHarianData->uang_transport;
+                // TIDAK mengambil uang_transport karena akan dikwitansi terpisah
             } else {
                 $rincianBidang->uang_harian_id = null;
                 $rincianBidang->uang_harian = 0;
-                $rincianBidang->uang_transport = 0;
             }
         }
         
@@ -387,11 +384,15 @@ class RincianBidang extends Model
             $rincianBidang->bendahara_jabatan = null;
         }
         
-        $rincianBidang->transport = $additionalData['transport'] ?? 0;
+        // TIDAK mengambil transport dari additionalData
         $rincianBidang->total = $rincianBidang->hitungTotal();
         $rincianBidang->terbilang = $rincianBidang->generateTerbilang();
         
+        // Proses additionalData (kecuali transport yang sudah dihapus)
         foreach ($additionalData as $key => $value) {
+            // Skip 'transport' karena tidak ada di fillable lagi
+            if ($key === 'transport') continue;
+            
             if (in_array($key, $rincianBidang->fillable) && $key !== 'spd_id') {
                 $rincianBidang->$key = $value;
             }

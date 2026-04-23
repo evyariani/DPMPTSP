@@ -12,7 +12,6 @@ return new class extends Migration
             $table->id();
             
             // ========== RELASI KE SPD ==========
-            // Mengambil data dari SPD (nomor_surat, tempat_tujuan, tanggal, lama_perjadin)
             $table->unsignedBigInteger('spd_id');
             
             // ========== INFORMASI DASAR (dari SPD) ==========
@@ -25,10 +24,10 @@ return new class extends Migration
             $table->unsignedBigInteger('tempat_tujuan_id')->nullable()->comment('ID daerah tujuan dari spd.tempat_tujuan');
             $table->string('tempat_tujuan')->nullable()->comment('Nama tempat tujuan (denormalisasi)');
             
-            // ========== BENDAHARA PENGELUARAN (relasi ke tb_pegawai) ==========
+            // ========== BENDAHARA PENGELUARAN ==========
             $table->unsignedBigInteger('bendahara_pengeluaran_id')->nullable()->comment('Bendahara pengeluaran (referensi ke tb_pegawai)');
             
-            // ========== SNAPSHOT BENDAHARA (agar tidak berubah jika data master berubah) ==========
+            // ========== SNAPSHOT BENDAHARA ==========
             $table->string('bendahara_nama', 150)->nullable()->comment('Nama bendahara pengeluaran (snapshot)');
             $table->string('bendahara_nip', 50)->nullable()->comment('NIP bendahara pengeluaran (snapshot)');
             $table->string('bendahara_jabatan', 150)->nullable()->comment('Jabatan bendahara pengeluaran (snapshot)');
@@ -36,41 +35,35 @@ return new class extends Migration
             // ========== DATA UANG HARIAN (dari tb_uang_harian) ==========
             $table->unsignedBigInteger('uang_harian_id')->nullable()->comment('ID dari tb_uang_harian');
             $table->decimal('uang_harian', 15, 0)->default(0)->comment('Biaya harian per hari');
-            $table->decimal('uang_transport', 15, 0)->default(0)->comment('Biaya transport per hari');
             
-            // ========== PERHITUNGAN BIAYA ==========
-            $table->integer('transport')->default(0)->comment('Biaya transportasi (bisa diinput manual)');
-            $table->bigInteger('total')->default(0)->comment('Total biaya: (uang_harian * lama_perjadin) + transport');
+            // ========== PERHITUNGAN BIAYA (HANYA UANG HARIAN) ==========
+            // Uang transport TIDAK dimasukkan di sini, akan dikwitansi terpisah
+            $table->bigInteger('total')->default(0)->comment('Total biaya: uang_harian * lama_perjadin');
             
             // ========== LAIN-LAIN ==========
             $table->text('terbilang')->nullable()->comment('Total dalam bentuk terbilang');
             
             // ========== JSON UNTUK PEGAWAI (pelaksana) ==========
-            // Menyimpan data pegawai dari spd_pelaksana atau spt
             $table->json('pegawai')->nullable()->comment('JSON berisi daftar pegawai pelaksana');
             
             $table->timestamps();
             
             // ========== FOREIGN KEYS ==========
-            // Relasi ke tabel spd
             $table->foreign('spd_id')
                   ->references('id_spd')
                   ->on('spd')
                   ->onDelete('cascade');
             
-            // Relasi ke tabel tb_daerah (tempat tujuan)
             $table->foreign('tempat_tujuan_id')
                   ->references('id')
                   ->on('tb_daerah')
                   ->onDelete('set null');
             
-            // Relasi ke tabel tb_pegawai (bendahara pengeluaran)
             $table->foreign('bendahara_pengeluaran_id')
                   ->references('id_pegawai')
                   ->on('tb_pegawai')
                   ->onDelete('set null');
             
-            // Relasi ke tabel tb_uang_harian
             $table->foreign('uang_harian_id')
                   ->references('id_uang_harian')
                   ->on('tb_uang_harian')

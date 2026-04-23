@@ -15,14 +15,13 @@ class Lhpd extends Model
     protected $primaryKey = 'id_lhpd';
 
     protected $fillable = [
-        'spt_id',  // TAMBAHKAN INI
-        'dasar',
-        'tujuan',
-        'id_pegawai',
-        'pegawai_snapshot',
-        'tanggal_berangkat',
-        'id_daerah',
-        'tempat_tujuan_snapshot',
+        'spt_id',
+        'dasar',                    // INPUT MANUAL, bukan dari SPT
+        'tujuan',                   // snapshot dari SPT
+        'pegawai_snapshot',         // snapshot dari SPT
+        'tanggal_berangkat',        // snapshot dari SPD
+        'id_daerah',                // referensi daerah tujuan
+        'tempat_tujuan_snapshot',   // snapshot nama tempat tujuan
         'hasil',
         'tempat_dikeluarkan',
         'tempat_dikeluarkan_snapshot',
@@ -34,8 +33,7 @@ class Lhpd extends Model
     ];
 
     protected $casts = [
-        'dasar' => 'array',
-        'id_pegawai' => 'array',
+        'dasar' => 'array',              // JSON untuk multiple dasar
         'pegawai_snapshot' => 'array',
         'foto' => 'array',
         'tanggal_berangkat' => 'date',
@@ -47,7 +45,7 @@ class Lhpd extends Model
     // ========== RELATIONS ==========
     
     /**
-     * Relasi ke SPT (source)
+     * Relasi ke SPT (sumber data)
      */
     public function spt(): BelongsTo
     {
@@ -55,61 +53,26 @@ class Lhpd extends Model
     }
     
     /**
-     * Relasi ke tabel tb_daerah (daerah tujuan dari SPD)
-     * Hanya untuk referensi, jangan gunakan untuk tampilan
+     * Relasi ke daerah tujuan (referensi, gunakan snapshot untuk tampilan)
      */
-    public function daerahTujuan()
+    public function daerahTujuan(): BelongsTo
     {
         return $this->belongsTo(Daerah::class, 'id_daerah', 'id');
     }
 
     /**
-     * Relasi ke tabel tb_daerah (tempat LHPD dikeluarkan)
-     * Hanya untuk referensi, jangan gunakan untuk tampilan
+     * Relasi ke tempat dikeluarkan (referensi, gunakan snapshot untuk tampilan)
      */
-    public function tempatDikeluarkan()
+    public function tempatDikeluarkan(): BelongsTo
     {
         return $this->belongsTo(Daerah::class, 'tempat_dikeluarkan', 'id');
     }
 
-    // ========== ACCESSORS (MENGGUNAKAN SNAPSHOT) ==========
+    // ========== ACCESSORS - DASAR (INPUT MANUAL) ==========
     
     /**
-     * Mendapatkan data pegawai dari snapshot (data saat LHPD dibuat)
-     * Gunakan: $lhpd->pegawai_list_from_snapshot
-     */
-    public function getPegawaiListFromSnapshotAttribute()
-    {
-        if (empty($this->pegawai_snapshot)) {
-            return collect();
-        }
-        
-        return collect($this->pegawai_snapshot)->map(function ($item) {
-            return (object) $item;
-        });
-    }
-    
-    /**
-     * Mendapatkan data pegawai (dari relasi - HATI-HATI bisa berubah)
-     * @deprecated Gunakan getPegawaiListFromSnapshotAttribute untuk tampilan
-     */
-    public function getPegawaiListAttribute()
-    {
-        if (empty($this->id_pegawai)) {
-            return collect();
-        }
-        
-        $pegawaiIds = is_array($this->id_pegawai) ? $this->id_pegawai : json_decode($this->id_pegawai, true);
-        
-        if (empty($pegawaiIds)) {
-            return collect();
-        }
-        
-        return Pegawai::whereIn('id_pegawai', $pegawaiIds)->get();
-    }
-
-    /**
-     * Mendapatkan data dasar dari JSON
+     * Mendapatkan daftar dasar perjalanan dari input manual LHPD
+     * Gunakan: $lhpd->dasar_list
      */
     public function getDasarListAttribute()
     {
@@ -117,29 +80,110 @@ class Lhpd extends Model
             return collect();
         }
         
-        return is_array($this->dasar) ? collect($this->dasar) : collect(json_decode($this->dasar, true));
+        $dasar = is_array($this->dasar) ? $this->dasar : json_decode($this->dasar, true);
+        
+        return collect($dasar);
     }
     
     /**
-     * Mendapatkan nama tempat tujuan dari snapshot
+     * Menampilkan dasar sebagai teks dengan pemisah
+     * Gunakan: $lhpd->dasar_text
      */
-    public function getNamaTempatTujuanAttribute()
+    public function getDasarTextAttribute(): string
+    {
+        $dasarList = $this->getDasarListAttribute();
+        
+        if ($dasarList->isEmpty()) {
+            return '-';
+        }
+        
+        return $dasarList->implode(', ');
+    }
+    
+    /**
+     * Menampilkan dasar sebagai list HTML
+     * Gunakan: {!! $lhpd->dasar_html !!}
+     */
+    public function getDasarHtmlAttribute(): string
+    {
+        $dasarList = $this->getDasarListAttribute();
+        
+        if ($dasarList->isEmpty()) {
+            return '-';
+        }
+        
+        $html = '<ul class="list-disc list-inside">';
+        foreach ($dasarList as $item) {
+            $html .= '<li>' . e($item) . '</li>';
+        }
+        $html .= '</ul>';
+        
+        return $html;
+    }
+
+    // ========== ACCESSORS - PEGAWAI SNAPSHOT ==========
+    
+    /**
+     * Mendapatkan data pegawai dari snapshot
+     * Gunakan: $lhpd->pegawai_list
+     */
+    public function getPegawaiListAttribute()
+    {
+        if (empty($this->pegawai_snapshot)) {
+            return collect();
+        }
+        
+        $pegawai = is_array($this->pegawai_snapshot) 
+            ? $this->pegawai_snapshot 
+            : json_decode($this->pegawai_snapshot, true);
+        
+        return collect($pegawai)->map(function ($item) {
+            return (object) $item;
+        });
+    }
+    
+    /**
+     * Mendapatkan nama-nama pegawai dari snapshot (untuk ditampilkan)
+     * Gunakan: $lhpd->nama_pegawai
+     */
+    public function getNamaPegawaiAttribute(): string
+    {
+        $pegawaiList = $this->getPegawaiListAttribute();
+        
+        if ($pegawaiList->isEmpty()) {
+            return '-';
+        }
+        
+        return $pegawaiList->map(function ($pegawai) {
+            return $pegawai->nama ?? $pegawai['nama'] ?? '-';
+        })->implode(', ');
+    }
+
+    // ========== ACCESSORS - TEMPAT & TUJUAN ==========
+    
+    /**
+     * Mendapatkan nama tempat tujuan (prioritas snapshot)
+     * Gunakan: $lhpd->tempat_tujuan
+     */
+    public function getTempatTujuanAttribute(): string
     {
         return $this->tempat_tujuan_snapshot ?? ($this->daerahTujuan?->nama ?? '-');
     }
     
     /**
-     * Mendapatkan nama tempat dikeluarkan dari snapshot
+     * Mendapatkan nama tempat dikeluarkan (prioritas snapshot)
+     * Gunakan: $lhpd->tempat_dikeluarkan_nama
      */
-    public function getNamaTempatDikeluarkanAttribute()
+    public function getTempatDikeluarkanNamaAttribute(): string
     {
         return $this->tempat_dikeluarkan_snapshot ?? ($this->tempatDikeluarkan?->nama ?? '-');
     }
 
-    // ========== ACCESSORS FOTO ==========
+    // ========== ACCESSORS - FOTO ==========
     
     /**
-     * Accessor untuk mendapatkan URL foto lengkap
+     * Mendapatkan URL foto lengkap
+     * Gunakan: $lhpd->foto_urls
      */
     public function getFotoUrlsAttribute()
     {
@@ -154,32 +198,30 @@ class Lhpd extends Model
         }
         
         return collect($fotos)->map(function ($foto) {
+            // Cek apakah sudah ada storage path atau raw path
+            if (str_starts_with($foto, 'http')) {
+                return $foto;
+            }
             return Storage::url($foto);
         });
     }
 
     /**
-     * Accessor untuk mendapatkan foto pertama (thumbnail)
+     * Mendapatkan foto pertama (thumbnail)
+     * Gunakan: $lhpd->first_foto_url
      */
-    public function getFirstFotoUrlAttribute()
+    public function getFirstFotoUrlAttribute(): ?string
     {
-        if (empty($this->foto)) {
-            return null;
-        }
+        $urls = $this->getFotoUrlsAttribute();
         
-        $fotos = is_array($this->foto) ? $this->foto : json_decode($this->foto, true);
-        
-        if (empty($fotos)) {
-            return null;
-        }
-        
-        return Storage::url($fotos[0]);
+        return $urls->isNotEmpty() ? $urls->first() : null;
     }
 
     /**
-     * Accessor untuk mendapatkan jumlah foto
+     * Mendapatkan jumlah foto
+     * Gunakan: $lhpd->foto_count
      */
-    public function getFotoCountAttribute()
+    public function getFotoCountAttribute(): int
     {
         if (empty($this->foto)) {
             return 0;
@@ -190,82 +232,30 @@ class Lhpd extends Model
         return count($fotos);
     }
 
-    // ========== HELPER METHODS ==========
+    // ========== ACCESSORS - BIAYA ==========
     
     /**
-     * Membuat snapshot pegawai dari array ID pegawai
+     * Format uang harian dengan rupiah
      */
-    public function createPegawaiSnapshot()
+    public function getUangHarianRupiahAttribute(): string
     {
-        if (empty($this->id_pegawai)) {
-            $this->pegawai_snapshot = [];
-            return;
-        }
-        
-        $pegawaiIds = is_array($this->id_pegawai) ? $this->id_pegawai : json_decode($this->id_pegawai, true);
-        
-        if (empty($pegawaiIds)) {
-            $this->pegawai_snapshot = [];
-            return;
-        }
-        
-        $pegawaiList = Pegawai::whereIn('id_pegawai', $pegawaiIds)->get();
-        
-        $snapshot = [];
-        foreach ($pegawaiList as $pegawai) {
-            $snapshot[] = [
-                'id_pegawai' => $pegawai->id_pegawai,
-                'nama' => $pegawai->nama,
-                'nip' => $pegawai->nip ?? '-',
-                'jabatan' => $pegawai->jabatan ?? '-',
-                'pangkat' => $pegawai->pangkat ?? '-',
-                'gol' => $pegawai->gol ?? '-',
-            ];
-        }
-        
-        $this->pegawai_snapshot = $snapshot;
+        return 'Rp ' . number_format($this->uang_harian_snapshot, 0, ',', '.');
     }
     
     /**
-     * Membuat snapshot tempat tujuan dari ID daerah
+     * Format uang transport dengan rupiah
      */
-    public function createTempatTujuanSnapshot()
+    public function getUangTransportRupiahAttribute(): string
     {
-        if (empty($this->id_daerah)) {
-            $this->tempat_tujuan_snapshot = null;
-            return;
-        }
-        
-        $daerah = Daerah::find($this->id_daerah);
-        if ($daerah) {
-            $this->tempat_tujuan_snapshot = $daerah->nama;
-        }
+        return 'Rp ' . number_format($this->uang_transport_snapshot, 0, ',', '.');
     }
     
     /**
-     * Membuat snapshot tempat dikeluarkan dari ID daerah
+     * Format total biaya dengan rupiah
      */
-    public function createTempatDikeluarkanSnapshot()
+    public function getTotalBiayaRupiahAttribute(): string
     {
-        if (empty($this->tempat_dikeluarkan)) {
-            $this->tempat_dikeluarkan_snapshot = null;
-            return;
-        }
-        
-        $daerah = Daerah::find($this->tempat_dikeluarkan);
-        if ($daerah) {
-            $this->tempat_dikeluarkan_snapshot = $daerah->nama;
-        }
-    }
-    
-    /**
-     * Update semua snapshot (dipanggil saat create/update)
-     */
-    public function updateSnapshots()
-    {
-        $this->createPegawaiSnapshot();
-        $this->createTempatTujuanSnapshot();
-        $this->createTempatDikeluarkanSnapshot();
+        return 'Rp ' . number_format($this->total_biaya_snapshot, 0, ',', '.');
     }
 
     // ========== SCOPES ==========
@@ -313,22 +303,45 @@ class Lhpd extends Model
         return $query->where('tempat_dikeluarkan', $tempatId);
     }
     
-    // ========== BOOTED ==========
-    
-    protected static function booted()
+    /**
+     * Scope untuk pencarian teks (dasar, tujuan, hasil)
+     */
+    public function scopeSearch($query, $search)
     {
-        // Auto create snapshot saat LHPD dibuat
-        static::creating(function ($lhpd) {
-            $lhpd->updateSnapshots();
-        });
+        if (empty($search)) {
+            return $query;
+        }
         
-        // Auto update snapshot saat LHPD diupdate
-        static::updating(function ($lhpd) {
-            if ($lhpd->isDirty('id_pegawai') || 
-                $lhpd->isDirty('id_daerah') || 
-                $lhpd->isDirty('tempat_dikeluarkan')) {
-                $lhpd->updateSnapshots();
-            }
+        return $query->where(function ($q) use ($search) {
+            $q->where('tujuan', 'like', "%{$search}%")
+              ->orWhere('hasil', 'like', "%{$search}%")
+              ->orWhere('tempat_tujuan_snapshot', 'like', "%{$search}%")
+              ->orWhere('tempat_dikeluarkan_snapshot', 'like', "%{$search}%")
+              ->orWhereJsonContains('dasar', $search);
         });
+    }
+
+    // ========== HELPER METHODS ==========
+    
+    /**
+     * Cek apakah LHPD sudah lengkap datanya
+     */
+    public function isComplete(): bool
+    {
+        return !empty($this->hasil) 
+            && !empty($this->tanggal_lhpd)
+            && !empty($this->tempat_dikeluarkan_snapshot);
+    }
+    
+    /**
+     * Mendapatkan total hari perjalanan (jika ada tanggal berangkat dan tanggal lhpd)
+     */
+    public function getTotalHariAttribute(): ?int
+    {
+        if (empty($this->tanggal_berangkat) || empty($this->tanggal_lhpd)) {
+            return null;
+        }
+        
+        return $this->tanggal_berangkat->diffInDays($this->tanggal_lhpd) + 1;
     }
 }

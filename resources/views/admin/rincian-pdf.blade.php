@@ -82,6 +82,7 @@
         .signature-wrapper {
             width: 100%;
             margin: 15px 0;
+            overflow: hidden;
         }
         .sign-left {
             width: 48%;
@@ -138,37 +139,77 @@
             border-bottom: 1px solid black;
             margin-bottom: 5px;
         }
+        
+        /* PAGE BREAK */
+        .page-break {
+            page-break-before: always;
+        }
     </style>
 </head>
 <body>
     @php
-        // Data dari database
-        $nomorSppd = $rincian->nomor ?? '000.1.2.3/DPMPTSP/2025';
-        $tanggal = isset($rincian->tanggal) ? \Carbon\Carbon::parse($rincian->tanggal) : \Carbon\Carbon::now();
-        $tujuan = $rincian->tujuan ?? 'Kota Banjarbaru';
-        $transport = $rincian->transport ?? 250000;
-        $total = $rincian->total ?? 850000;
-        $terbilang = $rincian->terbilang ?? 'Delapan Ratus Lima Puluh Ribu Rupiah';
+        // ========== AMBIL DATA DARI DATABASE VIA $rincian ==========
         
-        $pegawaiList = $rincian->pegawai ?? [];
+        // Nomor SPPD (dari tb_rincianbidang.nomor_sppd)
+        $nomorSppd = $rincian->nomor_sppd ?? '-';
+        
+        // Tanggal (gunakan created_at atau tanggal_berangkat)
+        $tanggal = $rincian->created_at ?? $rincian->tanggal_berangkat ?? now();
+        if ($tanggal instanceof \Carbon\Carbon) {
+            $tanggal = \Carbon\Carbon::parse($tanggal);
+        } else {
+            $tanggal = \Carbon\Carbon::now();
+        }
+        
+        // Tujuan (dari tb_rincianbidang.tempat_tujuan)
+        $tujuan = $rincian->tempat_tujuan ?? '-';
+        
+        // Data pegawai dari JSON
+        $pegawaiList = is_array($rincian->pegawai) ? $rincian->pegawai : [];
+        
+        // Uang harian per hari (dari tb_rincianbidang.uang_harian)
+        $uangHarian = $rincian->uang_harian ?? 0;
+        
+        // Lama perjalanan (dari tb_rincianbidang.lama_perjadin)
+        $lamaPerjadin = $rincian->lama_perjadin ?? 1;
+        
+        // Total (dari tb_rincianbidang.total)
+        $total = $rincian->total_keseluruhan ?? $rincian->total ?? 0;
+        
+        // Terbilang (dari tb_rincianbidang.terbilang)
+        $terbilang = $rincian->terbilang ?? 'Nol Rupiah';
+        
+        // Bendahara (dari snapshot)
+        $bendaharaNama = $rincian->bendahara_nama ?? '-';
+        $bendaharaNip = $rincian->bendahara_nip ?? '-';
+        $bendaharaJabatan = $rincian->bendahara_jabatan ?? '-';
+        
+        // ========== FALLBACK jika data kosong ==========
         if (empty($pegawaiList)) {
-            $pegawaiList = [
-                ['nama' => 'LIDIA MIRANTI MAYASARI, SE', 'nip' => '19840817 200903 2 022', 'nominal' => 300000, 'hari' => 1],
-                ['nama' => 'NURLITA FEBRIANA PRATWI, A.Md', 'nip' => '19980208 202012 2 007', 'nominal' => 300000, 'hari' => 1]
-            ];
+            // Coba ambil dari relasi spd jika ada
+            if ($rincian->spd && $rincian->spd->pelaksanaPerjadin) {
+                foreach ($rincian->spd->pelaksanaPerjadin as $peg) {
+                    $pegawaiList[] = [
+                        'id_pegawai' => $peg->id_pegawai,
+                        'nama' => $peg->nama,
+                        'nip' => $peg->nip ?? '-',
+                        'jabatan' => $peg->jabatan ?? '-',
+                        'gol' => $peg->gol ?? '-',
+                        'nominal' => $uangHarian,
+                        'hari' => $lamaPerjadin,
+                    ];
+                }
+            }
         }
         
-        // Hitung total uang harian
-        $totalUangHarian = 0;
-        foreach($pegawaiList as $p) {
-            $totalUangHarian += ($p['nominal'] * $p['hari']);
+        // Hitung total uang harian per pegawai
+        foreach($pegawaiList as &$p) {
+            $p['nominal'] = $p['nominal'] ?? $uangHarian;
+            $p['hari'] = $p['hari'] ?? $lamaPerjadin;
+            $p['subtotal'] = ($p['nominal'] ?? 0) * ($p['hari'] ?? 1);
         }
         
-        $bendaharaNama = $rincian->bendahara['nama'] ?? 'NURLITA FEBRIANA PRATWI, A.Md';
-        $bendaharaNip = $rincian->bendahara['nip'] ?? '19980208 202012 2 007';
-        $kepalaDinasNama = $rincian->kepala_dinas['nama'] ?? 'BUDI ANDRIAN SUTANTO, S. Sos., MM';
-        $kepalaDinasNip = $rincian->kepala_dinas['nip'] ?? '19760218 200701 1 006';
-        
+        // Nama bulan Indonesia
         $bulanIndonesia = [
             'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
             'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
@@ -176,6 +217,9 @@
             'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'
         ];
         $tanggalFormat = $tanggal->format('d') . ' ' . $bulanIndonesia[$tanggal->format('F')] . ' ' . $tanggal->format('Y');
+        
+        // Format tempat tujuan untuk uang harian
+        $tujuanText = $tujuan;
     @endphp
 
     <!-- JUDUL -->
@@ -187,7 +231,7 @@
         <tr><td>Tanggal</td><td>:</td><td>{{ $tanggalFormat }}</td></tr>
     </table>
 
-    <!-- TABEL RINCIAN BIAYA (PERSIS SEPERTI GAMBAR) -->
+    <!-- TABEL RINCIAN BIAYA -->
     <table class="bordered-table">
         <thead>
             <tr>
@@ -204,28 +248,23 @@
                 @if($index == 0)
                 <td class="text-center" style="vertical-align: middle;" rowspan="{{ count($pegawaiList) }}">1</td>
                 <td style="vertical-align: middle;">
-                    Uang Harian Ke : {{ $tujuan }}<br>
+                    Uang Harian Ke : {{ $tujuanText }}
                 </td>
                 @else
                 <td style="vertical-align: middle;">
                 </td>
                 @endif
                 <td class="text-right" style="vertical-align: middle;">
-                    Rp {{ number_format($pegawai['nominal']) }} x {{ $pegawai['hari'] }} (satu hari)
+                    {{ $pegawai['nama'] ?? '-' }}<br>
+                    Rp {{ number_format($pegawai['nominal'] ?? 0, 0, ',', '.') }} x {{ $pegawai['hari'] ?? 1 }} (hari)
                 </td>
                 <td class="text-right" style="vertical-align: middle;">
-                    Rp {{ number_format($pegawai['nominal'] * $pegawai['hari']) }}
+                    Rp {{ number_format($pegawai['subtotal'] ?? 0, 0, ',', '.') }}
                 </td>
             </tr>
             @endforeach
             
-            <!-- BARIS UANG TRANSPORT -->
-            <tr>
-                <td class="text-center">2</td>
-                <td>Uang Transport</td>
-                <td class="text-right">Rp {{ number_format($transport) }}</td>
-                <td class="text-right">Rp {{ number_format($total) }}</td>
-            </tr>
+            <!-- CATATAN: UANG TRANSPORT TIDAK DIMUNCULKAN (KWITANSI TERPISAH) -->
         </tbody>
     </table>
 
@@ -239,9 +278,9 @@
     <div class="signature-wrapper">
         <!-- KOLOM KIRI - BENDAHARA PENGELUARAN -->
         <div class="sign-left">
-            <div>Pelaihari, {{ $tanggal->format('Y') }}</div>
+            <div>Pelaihari, {{ $tanggalFormat }}</div>
             <div style="margin-top: 8px;">Telah dibayar sejumlah:</div>
-            <div class="bold" style="margin: 4px 0;">Rp {{ number_format($total) }}</div>
+            <div class="bold" style="margin: 4px 0;">Rp {{ number_format($total, 0, ',', '.') }}</div>
             <div style="margin-top: 8px;">Bendahara Pengeluaran,</div>
             <div class="sign-space">
                 <div class="sign-line"></div>
@@ -254,12 +293,12 @@
         <div class="sign-right">
             <div>&nbsp;</div>
             <div style="margin-top: 8px;">Telah menerima jumlah uang sebesar:</div>
-            <div class="bold" style="margin: 4px 0;">Rp {{ number_format($total) }}</div>
+            <div class="bold" style="margin: 4px 0;">Rp {{ number_format($total, 0, ',', '.') }}</div>
             <div style="margin-top: 8px;">Yang Menerima,</div>
             <div class="sign-space">
                 @foreach($pegawaiList as $pegawai)
                     <div class="sign-line"></div>
-                    <div class="bold" style="margin-top: 5px;">{{ $pegawai['nama'] }}</div>
+                    <div class="bold" style="margin-top: 5px;">{{ $pegawai['nama'] ?? '-' }}</div>
                     <div class="nip">NIP. {{ $pegawai['nip'] ?? '-' }}</div>
                     @if(!$loop->last)
                         <div style="margin-top: 15px;"></div>
@@ -278,15 +317,15 @@
         <div class="calculation-title">PERHITUNGAN SPPD RAMPUNG</div>
         <div class="calculation-item">
             <span class="calculation-label">Ditetapkan sejumlah</span>
-            <span>: Rp {{ number_format($total) }}</span>
+            <span>: Rp {{ number_format($total, 0, ',', '.') }}</span>
         </div>
         <div class="calculation-item">
             <span class="calculation-label">Yang telah dibayar semula</span>
-            <span>: Rp -</span>
+            <span>: Rp 0</span>
         </div>
         <div class="calculation-item">
             <span class="calculation-label">Sisa kurang / lebih</span>
-            <span>: Rp {{ number_format($total) }}</span>
+            <span>: Rp {{ number_format($total, 0, ',', '.') }}</span>
         </div>
     </div>
 
@@ -296,8 +335,8 @@
         <div>Kab. Tanah Laut</div>
         <div class="ttd-space">
             <div class="sign-line" style="width: 250px;"></div>
-            <div class="bold" style="margin-top: 5px;">{{ $kepalaDinasNama }}</div>
-            <div class="nip">NIP. {{ $kepalaDinasNip }}</div>
+            <div class="bold" style="margin-top: 5px;">{{ $kepalaDinasNama ?? '_________________' }}</div>
+            <div class="nip">NIP. {{ $kepalaDinasNip ?? '_________________' }}</div>
         </div>
     </div>
 </body>

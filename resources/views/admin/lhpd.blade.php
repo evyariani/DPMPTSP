@@ -130,6 +130,11 @@
     max-width: 200px;
 }
 
+.fixed-col-dasar {
+    min-width: 180px;
+    max-width: 250px;
+}
+
 /* Badge status */
 .status-badge {
     @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
@@ -297,6 +302,29 @@
     font-size: 0.65rem;
     color: #3b82f6;
     cursor: help;
+}
+
+/* Dasar list styling */
+.dasar-list {
+    max-height: 80px;
+    overflow-y: auto;
+    font-size: 0.75rem;
+    line-height: 1.4;
+}
+
+.dasar-list ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.dasar-list li {
+    margin-bottom: 0.125rem;
+    color: #4b5563;
+}
+
+.dasar-list .no-data {
+    color: #9ca3af;
+    font-style: italic;
 }
 </style>
 
@@ -467,7 +495,7 @@
     <form method="GET" action="{{ route('lhpd.index') }}" id="filter-form">
         <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
             <div class="flex-1">
-                <input type="text" name="search" placeholder="Cari tujuan, hasil LHPD, atau daerah..."
+                <input type="text" name="search" placeholder="Cari tujuan, dasar, hasil LHPD, atau daerah..."
                        value="{{ request('search') }}"
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
@@ -533,6 +561,7 @@
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">No</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-dasar">Dasar Perjalanan</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tujuan">Tujuan Perjalanan</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tanggal">Tanggal Berangkat</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-daerah">Daerah Tujuan</th>
@@ -550,16 +579,39 @@
                         {{ $lhpdList->firstItem() + $index }}
                     </td>
 
+                    <!-- Kolom Dasar Perjalanan (Input Manual) -->
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-dasar">
+                        @php
+                            $dasarList = $lhpd->dasar_list;
+                        @endphp
+                        @if($dasarList && $dasarList->count() > 0)
+                            <div class="dasar-list">
+                                <ul class="list-disc list-inside">
+                                    @foreach($dasarList->take(3) as $dasar)
+                                        <li title="{{ $dasar }}">{{ Str::limit($dasar, 40) }}</li>
+                                    @endforeach
+                                    @if($dasarList->count() > 3)
+                                        <li class="text-blue-500 tooltip">
+                                            +{{ $dasarList->count() - 3 }} dasar lainnya
+                                            <span class="tooltip-text">
+                                                @foreach($dasarList->skip(3) as $dasar)
+                                                    {{ $dasar }}@if(!$loop->last), @endif
+                                                @endforeach
+                                            </span>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </div>
+                        @else
+                            <span class="text-gray-400 text-sm italic">Belum diisi</span>
+                        @endif
+                    </td>
+
                     <!-- Kolom Tujuan -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-tujuan">
                         <div class="text-sm font-medium text-gray-900" title="{{ $lhpd->tujuan }}">
                             {{ Str::limit($lhpd->tujuan, 50) }}
                         </div>
-                        @if(!$lhpd->hasil)
-                            <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium status-incomplete">
-                                <i class="fas fa-clock mr-1 text-xs"></i> Belum diisi
-                            </span>
-                        @endif
                     </td>
 
                     <!-- Kolom Tanggal Berangkat -->
@@ -574,24 +626,24 @@
                     </td>
 
                     <!-- Kolom Daerah Tujuan -->
-<td class="px-6 py-4 text-wrap-cell fixed-col-daerah">
-    @php
-        $daerahTujuan = $lhpd->tempat_tujuan_snapshot ?? ($lhpd->daerahTujuan?->nama ?? null);
-    @endphp
-    @if($daerahTujuan)
-        <div class="text-sm text-gray-900">
-            {{ $daerahTujuan }}
-        </div>
-        @if($lhpd->tempat_tujuan_snapshot)
-            <span class="text-xs text-blue-500 tooltip">
-                <i class="fas fa-camera"></i> snapshot
-                <span class="tooltip-text">Data snapshot (tidak berubah)</span>
-            </span>
-        @endif
-    @else
-        <span class="text-gray-400 text-sm">-</span>
-    @endif
-</td>
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-daerah">
+                        @php
+                            $daerahTujuan = $lhpd->tempat_tujuan;
+                        @endphp
+                        @if($daerahTujuan && $daerahTujuan != '-')
+                            <div class="text-sm text-gray-900">
+                                {{ $daerahTujuan }}
+                            </div>
+                            @if($lhpd->tempat_tujuan_snapshot)
+                                <span class="snapshot-badge tooltip">
+                                    <i class="fas fa-camera-retro text-xs"></i> snapshot
+                                    <span class="tooltip-text">Data snapshot (tidak berubah)</span>
+                                </span>
+                            @endif
+                        @else
+                            <span class="text-gray-400 text-sm">-</span>
+                        @endif
+                    </td>
 
                     <!-- Kolom Hasil LHPD -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-hasil">
@@ -599,30 +651,36 @@
                             <div class="text-sm text-gray-900" title="{{ $lhpd->hasil }}">
                                 {{ Str::limit($lhpd->hasil, 80) }}
                             </div>
+                            <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium status-complete">
+                                <i class="fas fa-check-circle mr-1 text-xs"></i> Selesai
+                            </span>
                         @else
                             <span class="text-gray-400 text-sm italic">Belum diisi</span>
+                            <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium status-incomplete">
+                                <i class="fas fa-clock mr-1 text-xs"></i> Perlu diisi
+                            </span>
                         @endif
                     </td>
 
                     <!-- Kolom Tempat Dikeluarkan -->
-<td class="px-6 py-4 text-wrap-cell fixed-col-tempat">
-    @php
-        $tempatDikeluarkan = $lhpd->tempat_dikeluarkan_snapshot ?? ($lhpd->tempatDikeluarkan?->nama ?? null);
-    @endphp
-    @if($tempatDikeluarkan)
-        <div class="text-sm text-gray-900">
-            {{ $tempatDikeluarkan }}
-        </div>
-        @if($lhpd->tempat_dikeluarkan_snapshot)
-            <span class="text-xs text-blue-500 tooltip">
-                <i class="fas fa-camera"></i> snapshot
-                <span class="tooltip-text">Data snapshot (tidak berubah)</span>
-            </span>
-        @endif
-    @else
-        <span class="text-gray-400 text-sm">-</span>
-    @endif
-</td>
+                    <td class="px-6 py-4 text-wrap-cell fixed-col-tempat">
+                        @php
+                            $tempatDikeluarkan = $lhpd->tempat_dikeluarkan_nama;
+                        @endphp
+                        @if($tempatDikeluarkan && $tempatDikeluarkan != '-')
+                            <div class="text-sm text-gray-900">
+                                {{ $tempatDikeluarkan }}
+                            </div>
+                            @if($lhpd->tempat_dikeluarkan_snapshot)
+                                <span class="snapshot-badge tooltip">
+                                    <i class="fas fa-camera-retro text-xs"></i> snapshot
+                                    <span class="tooltip-text">Data snapshot (tidak berubah)</span>
+                                </span>
+                            @endif
+                        @else
+                            <span class="text-gray-400 text-sm">-</span>
+                        @endif
+                    </td>
 
                     <!-- Kolom Tanggal LHPD -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-tanggal">
@@ -630,11 +688,6 @@
                             <div class="text-sm text-gray-900">
                                 {{ \Carbon\Carbon::parse($lhpd->tanggal_lhpd)->format('d/m/Y') }}
                             </div>
-                            @if($lhpd->hasil)
-                                <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium status-complete">
-                                    <i class="fas fa-check-circle mr-1 text-xs"></i> Lengkap
-                                </span>
-                            @endif
                         @else
                             <span class="text-gray-400 text-sm">-</span>
                         @endif
@@ -668,45 +721,47 @@
                         @endif
                     </td>
 
-                    <!-- Kolom Aksi -->
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <div class="flex justify-center gap-2">
-                            <a href="{{ route('lhpd.edit', $lhpd->id_lhpd) }}"
-                               class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition duration-150 tooltip"
-                               title="Edit LHPD">
-                                <i class="fas fa-edit"></i>
-                            </a>
+<!-- Kolom Aksi -->
+<td class="px-6 py-4 whitespace-nowrap text-center">
+    <div class="flex justify-center gap-2">
+        <a href="{{ route('lhpd.edit', $lhpd->id_lhpd) }}"
+           class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition duration-150 tooltip"
+           title="Edit LHPD">
+            <i class="fas fa-edit"></i>
+        </a>
 
-                            <a href="{{ route('lhpd.print', $lhpd->id_lhpd) }}"
-                               target="_blank"
-                               class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition duration-150 tooltip"
-                               title="Download PDF">
-                                <i class="fas fa-file-pdf"></i>
-                            </a>
+        <!-- Tombol Download PDF - SELALU TAMPIL -->
+        <a href="{{ route('lhpd.print', $lhpd->id_lhpd) }}"
+           target="_blank"
+           class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition duration-150 tooltip"
+           title="Download PDF">
+            <i class="fas fa-file-pdf"></i>
+        </a>
 
-                            <a href="{{ route('lhpd.preview-pdf', $lhpd->id_lhpd) }}"
-                               target="_blank"
-                               class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition duration-150 tooltip"
-                               title="Preview PDF">
-                                <i class="fas fa-eye"></i>
-                            </a>
+        <!-- Tombol Preview PDF - SELALU TAMPIL -->
+        <a href="{{ route('lhpd.preview-pdf', $lhpd->id_lhpd) }}"
+           target="_blank"
+           class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition duration-150 tooltip"
+           title="Preview PDF">
+            <i class="fas fa-eye"></i>
+        </a>
 
-                            <button type="button"
-                                    onclick="showDeleteConfirmation(
-                                        {{ $lhpd->id_lhpd }},
-                                        '{{ addslashes(Str::limit($lhpd->tujuan, 50)) }}',
-                                        '{{ addslashes($lhpd->tanggal_berangkat ? \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') : '-') }}'
-                                    )"
-                                    class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition duration-150 tooltip"
-                                    title="Hapus LHPD">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+        <button type="button"
+                onclick="showDeleteConfirmation(
+                    {{ $lhpd->id_lhpd }},
+                    '{{ addslashes(Str::limit($lhpd->tujuan, 50)) }}',
+                    '{{ addslashes($lhpd->tanggal_berangkat ? \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') : '-') }}'
+                )"
+                class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition duration-150 tooltip"
+                title="Hapus LHPD">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</td>
                 </tr>
-                @empty
+                              @empty
                 <tr>
-                    <td colspan="9" class="px-6 py-12 text-center text-gray-500">
+                    <td colspan="10" class="px-6 py-12 text-center text-gray-500">
                         <div class="flex flex-col items-center justify-center">
                             <i class="fas fa-file-alt text-gray-300 text-5xl mb-3"></i>
                             <p class="text-lg">Tidak ada data LHPD</p>
@@ -960,9 +1015,17 @@ function openImageViewer(index) {
     const modal = document.getElementById('image-modal');
     const modalImage = document.getElementById('modal-image');
     const counter = document.getElementById('image-counter');
+    const nav = document.getElementById('image-navigation');
     
     modalImage.src = currentGalleryImages[currentImageIndex].url;
     counter.textContent = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
+    
+    // Tampilkan navigasi jika lebih dari 1 foto
+    if (currentGalleryImages.length > 1) {
+        nav.style.display = 'flex';
+    } else {
+        nav.style.display = 'none';
+    }
     
     modal.classList.remove('hidden');
     modal.style.display = 'block';
@@ -997,22 +1060,6 @@ function nextImage() {
         modalImage.src = currentGalleryImages[currentImageIndex].url;
         counter.textContent = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
     }
-}
-
-// ========== SINGLE IMAGE PREVIEW (untuk edit/create) ==========
-function showImagePreview(imageUrl) {
-    const modal = document.getElementById('image-modal');
-    const modalImage = document.getElementById('modal-image');
-    const counter = document.getElementById('image-counter');
-    
-    modalImage.src = imageUrl;
-    counter.textContent = '1 / 1';
-    currentGalleryImages = [{ url: imageUrl }];
-    currentImageIndex = 0;
-    
-    modal.classList.remove('hidden');
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
 }
 
 // Close modals with Escape key

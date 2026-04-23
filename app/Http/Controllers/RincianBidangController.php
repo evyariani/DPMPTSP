@@ -36,34 +36,34 @@ class RincianBidangController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi untuk create dari SPD
+        // Validasi untuk create dari SPD (TANPA transport)
         $request->validate([
             'spd_id' => 'required|exists:spd,id_spd',
             'bendahara_pengeluaran_id' => 'nullable|exists:tb_pegawai,id_pegawai',
-            'transport' => 'nullable|numeric|min:0',
+            // transport TIDAK divalidasi karena akan dikwitansi terpisah
         ]);
 
         $spd = SPD::with('tempatTujuan', 'pelaksanaPerjadin')->findOrFail($request->spd_id);
         
-        // Sync RincianBidang dari SPD
+        // Sync RincianBidang dari SPD (TANPA transport)
         $rincianBidang = RincianBidang::syncFromSpd($spd, [
             'bendahara_pengeluaran_id' => $request->bendahara_pengeluaran_id,
-            'transport' => $request->transport ?? 0,
+            // transport TIDAK dikirim
         ]);
 
         return redirect()->route('rincian.index')->with('success', 'Berhasil tambah rincian biaya dari SPD');
     }
 
-public function show($id)
-{
-    $rincian = RincianBidang::with('spd', 'tempatTujuan', 'uangHarian')
-        ->findOrFail($id);
-    
-    // Gunakan snapshot bendahara jika ada
-    $bendahara = $rincian->bendahara_snapshot;
-    
-    return view('admin.rincian-detail', compact('rincian', 'bendahara'));
-}
+    public function show($id)
+    {
+        $rincian = RincianBidang::with('spd', 'tempatTujuan', 'uangHarian')
+            ->findOrFail($id);
+        
+        // Gunakan snapshot bendahara jika ada
+        $bendahara = $rincian->bendahara_snapshot;
+        
+        return view('admin.rincian-detail', compact('rincian', 'bendahara'));
+    }
 
     public function edit($id)
     {
@@ -81,19 +81,19 @@ public function show($id)
     {
         $rincian = RincianBidang::findOrFail($id);
 
-        // Validasi untuk update
+        // Validasi untuk update (TANPA transport)
         $request->validate([
             'spd_id' => 'required|exists:spd,id_spd',
             'bendahara_pengeluaran_id' => 'nullable|exists:tb_pegawai,id_pegawai',
-            'transport' => 'nullable|numeric|min:0',
+            // transport TIDAK divalidasi
         ]);
 
         $spd = SPD::with('tempatTujuan', 'pelaksanaPerjadin')->findOrFail($request->spd_id);
         
-        // Sync ulang RincianBidang dari SPD
+        // Sync ulang RincianBidang dari SPD (TANPA transport)
         $updatedRincian = RincianBidang::syncFromSpd($spd, [
             'bendahara_pengeluaran_id' => $request->bendahara_pengeluaran_id,
-            'transport' => $request->transport ?? 0,
+            // transport TIDAK dikirim
         ]);
 
         return redirect()->route('rincian.index')->with('success', 'Berhasil update rincian biaya');
@@ -115,10 +115,10 @@ public function show($id)
         $rincian = RincianBidang::with('spd', 'tempatTujuan', 'uangHarian')
             ->findOrFail($id);
 
-            $bendahara = $rincian->bendahara_snapshot;
+        $bendahara = $rincian->bendahara_snapshot;
         
         // Load view khusus PDF
-        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian','bendahara'));
+        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian', 'bendahara'));
         
         // Set kertas A4
         $pdf->setPaper('A4', 'portrait');
@@ -141,7 +141,7 @@ public function show($id)
 
         $bendahara = $rincian->bendahara_snapshot;
         
-        $pdf = Pdf::loadView('admin.rincian-cetak', compact('rincian','bendahara'));
+        $pdf = Pdf::loadView('admin.rincian-cetak', compact('rincian', 'bendahara'));
         $pdf->setPaper('A4', 'portrait');
         
         $namaFile = 'Rincian_Biaya_' . ($rincian->nomor_sppd ?? $rincian->id) . '.pdf';
@@ -160,10 +160,10 @@ public function show($id)
             ->where('spd_id', $spdId)
             ->firstOrFail();
 
-    // Gunakan snapshot bendahara
-    $bendahara = $rincian->bendahara_snapshot;
+        // Gunakan snapshot bendahara
+        $bendahara = $rincian->bendahara_snapshot;
         
-        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian','bendahara'));
+        $pdf = Pdf::loadView('admin.rincian-pdf', compact('rincian', 'bendahara'));
         $pdf->setPaper('A4', 'portrait');
         
         $namaFile = 'Rincian_Biaya_SPD_' . ($rincian->nomor_sppd ?? $spdId) . '_' . date('Ymd') . '.pdf';
@@ -200,19 +200,19 @@ public function show($id)
                 'pegawai' => $rincian->pegawai,
                 'daftar_pegawai_lengkap' => $rincian->daftar_pegawai_lengkap,
                 'uang_harian' => $rincian->uang_harian,
-                'uang_transport' => $rincian->uang_transport,
-                'transport' => $rincian->transport,
+                // 'uang_transport' => Dihapus - dikwitansi terpisah
+                // 'transport' => Dihapus - dikwitansi terpisah
                 'total' => $rincian->total,
                 'total_rupiah' => $rincian->total_rupiah,
                 'total_keseluruhan' => $rincian->total_keseluruhan,
                 'total_keseluruhan_rupiah' => $rincian->total_keseluruhan_rupiah,
                 'terbilang' => $rincian->terbilang,
-'bendahara' => $rincian->bendahara_snapshot ? [
-    'id' => $rincian->bendahara_snapshot->id ?? null,
-    'nama' => $rincian->bendahara_snapshot->nama ?? $rincian->bendahara_nama,
-    'nip' => $rincian->bendahara_snapshot->nip ?? $rincian->bendahara_nip,
-    'jabatan' => $rincian->bendahara_snapshot->jabatan ?? $rincian->bendahara_jabatan,
-] : null,
+                'bendahara' => $rincian->bendahara_snapshot ? [
+                    'id' => $rincian->bendahara_snapshot->id ?? null,
+                    'nama' => $rincian->bendahara_snapshot->nama ?? $rincian->bendahara_nama,
+                    'nip' => $rincian->bendahara_snapshot->nip ?? $rincian->bendahara_nip,
+                    'jabatan' => $rincian->bendahara_snapshot->jabatan ?? $rincian->bendahara_jabatan,
+                ] : null,
             ]
         ]);
     }
@@ -250,4 +250,13 @@ public function show($id)
                 ->with('error', 'Gagal sync data: ' . $e->getMessage());
         }
     }
+
+    /**
+     * CATATAN PENTING:
+     * Uang Transport (transport) TIDAK termasuk dalam RincianBidang ini
+     * karena akan dikwitansi secara terpisah sesuai kebijakan.
+     * 
+     * Jika ada kebutuhan untuk mencatat uang transport, buat tabel terpisah
+     * atau modul Kwitansi Transport sendiri.
+     */
 }
