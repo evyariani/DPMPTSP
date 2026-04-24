@@ -7,6 +7,7 @@ use App\Models\SPT;
 use App\Models\Pegawai;
 use App\Models\Daerah;
 use App\Models\Program;
+use App\Models\Kwitansi;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -424,6 +425,7 @@ public function update(Request $request, $id)
         $spd->update($data);
         $spd->syncPelaksana($request->pelaksana_perjadin);
         
+
         // ========== UPDATE RINCIAN BIDANG OTOMATIS ==========
         // TAMBAHKAN INI - Sync RincianBidang setelah SPD diupdate
         try {
@@ -431,6 +433,14 @@ public function update(Request $request, $id)
         } catch (\Exception $e) {
             Log::warning('Gagal sync RincianBidang: ' . $e->getMessage());
             // Lanjutkan proses, jangan rollback
+        }
+
+        // ✅ TAMBAHKAN INI - SYNC KWITANSI OTOMATIS
+        try {
+            Kwitansi::syncFromSpd($spd);
+            Log::info('Kwitansi auto-synced untuk SPD ID: ' . $spd->id_spd);
+        } catch (\Exception $e) {
+            Log::warning('Gagal sync Kwitansi: ' . $e->getMessage());
         }
         
         // ========== UPDATE LHPD OTOMATIS ==========
@@ -560,6 +570,14 @@ public function update(Request $request, $id)
             $spd = SPD::create($data);
             if (!empty($pelaksanaIds)) {
                 $spd->syncPelaksana($pelaksanaIds);
+            }
+
+            // ⬇️⬇️⬇️ TAMBAHKAN INI - SYNC KWITANSI OTOMATIS ⬇️⬇️⬇️
+            try {
+                Kwitansi::syncFromSpd($spd);
+                Log::info('Kwitansi auto-synced untuk SPD ID: ' . $spd->id_spd);
+            } catch (\Exception $e) {
+            Log::warning('Gagal sync Kwitansi: ' . $e->getMessage());
             }
             
             // ========== BUAT LHPD OTOMATIS ==========

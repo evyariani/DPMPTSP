@@ -418,6 +418,31 @@ class RincianBidang extends Model
             'bendahara_id' => $rincianBidang->bendahara_pengeluaran_id,
         ]);
         
+        // ========== TAMBAHKAN INI: SYNC KWITANSI OTOMATIS ==========
+        // JANGAN DIHAPUS! Ini untuk sync kwitansi saat rincian bidang di-sync
+        try {
+            // Pastikan use App\Models\Kwitansi sudah ditambahkan di atas
+            $kwitansiData = [
+                'nominal' => $rincianBidang->total_keseluruhan ?? $rincianBidang->total ?? 0,
+                'terbilang' => $rincianBidang->terbilang,
+                'tanggal_kwitansi' => date('Y-m-d'),
+            ];
+            
+            // Jika ada bendahara, gunakan untuk kwitansi
+            if ($rincianBidang->bendaharaPengeluaran) {
+                $kwitansiData['bendahara_pengeluaran'] = $rincianBidang->bendaharaPengeluaran->nama;
+                $kwitansiData['nip_bendahara'] = $rincianBidang->bendaharaPengeluaran->nip;
+            }
+            
+            // Panggil sync kwitansi
+            Kwitansi::syncFromSpd($spd, $kwitansiData);
+            \Illuminate\Support\Facades\Log::info('Kwitansi auto-synced dari RincianBidang');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal auto-sync kwitansi: ' . $e->getMessage());
+            // Jangan gagalkan proses utama sync rincian bidang
+        }
+        // ========== SAMPAI SINI ==========
+        
         return $rincianBidang;
     }
 }

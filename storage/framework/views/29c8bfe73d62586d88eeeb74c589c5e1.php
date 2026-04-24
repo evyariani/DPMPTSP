@@ -141,17 +141,77 @@
 .pegawai-count-badge {
     @apply ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded;
 }
+
+/* Loading spinner untuk export */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-loading {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.btn-loading i {
+    animation: spin 1s linear infinite;
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: #1f2937;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
 </style>
 
 <div class="mb-6">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center flex-wrap gap-4">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Surat Perintah Tugas (SPT)</h2>
             <p class="text-gray-500">Kelola data Surat Perintah Tugas</p>
         </div>
-        <a href="<?php echo e(route('spt.create')); ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
-            <i class="fas fa-plus mr-2"></i> Tambah SPT
-        </a>
+        <div class="flex space-x-2">
+            <!-- SATU TOMBOL EXPORT - akan mengambil semua filter yang aktif -->
+            <button type="button" 
+                    onclick="exportData()"
+                    id="btn-export"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
+            
+            <!-- Tombol Tambah SPT -->
+            <a href="<?php echo e(route('spt.create')); ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+                <i class="fas fa-plus mr-2"></i> Tambah SPT
+            </a>
+        </div>
     </div>
 </div>
 
@@ -195,6 +255,28 @@
         </div>
         <div class="mt-2 w-full bg-red-200 rounded-full h-1">
             <div id="error-progress" class="bg-red-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if(session('warning')): ?>
+<div id="warning-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
+    <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg shadow-lg">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
+            </div>
+            <div class="ml-3 flex-1">
+                <p class="font-medium">Perhatian!</p>
+                <p class="text-sm mt-1"><?php echo e(session('warning')); ?></p>
+            </div>
+            <button type="button" onclick="hideNotification('warning')" class="ml-4 text-yellow-600 hover:text-yellow-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mt-2 w-full bg-yellow-200 rounded-full h-1">
+            <div id="warning-progress" class="bg-yellow-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
         </div>
     </div>
 </div>
@@ -281,55 +363,57 @@
 
 <!-- Filter dan Search -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
-    <form method="GET" action="<?php echo e(route('spt.index')); ?>" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-        <div class="flex-1">
-            <input type="text" name="search" placeholder="Cari nomor surat, tujuan, lokasi, atau nama pegawai..." 
-                   value="<?php echo e(request('search')); ?>"
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-        </div>
-        <div class="flex flex-wrap gap-2">
-            <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Bulan</option>
-                <option value="1" <?php echo e(request('bulan') == '1' ? 'selected' : ''); ?>>Januari</option>
-                <option value="2" <?php echo e(request('bulan') == '2' ? 'selected' : ''); ?>>Februari</option>
-                <option value="3" <?php echo e(request('bulan') == '3' ? 'selected' : ''); ?>>Maret</option>
-                <option value="4" <?php echo e(request('bulan') == '4' ? 'selected' : ''); ?>>April</option>
-                <option value="5" <?php echo e(request('bulan') == '5' ? 'selected' : ''); ?>>Mei</option>
-                <option value="6" <?php echo e(request('bulan') == '6' ? 'selected' : ''); ?>>Juni</option>
-                <option value="7" <?php echo e(request('bulan') == '7' ? 'selected' : ''); ?>>Juli</option>
-                <option value="8" <?php echo e(request('bulan') == '8' ? 'selected' : ''); ?>>Agustus</option>
-                <option value="9" <?php echo e(request('bulan') == '9' ? 'selected' : ''); ?>>September</option>
-                <option value="10" <?php echo e(request('bulan') == '10' ? 'selected' : ''); ?>>Oktober</option>
-                <option value="11" <?php echo e(request('bulan') == '11' ? 'selected' : ''); ?>>November</option>
-                <option value="12" <?php echo e(request('bulan') == '12' ? 'selected' : ''); ?>>Desember</option>
-            </select>
-            
-            <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Tahun</option>
-                <?php for($year = date('Y'); $year >= date('Y')-5; $year--): ?>
-                    <option value="<?php echo e($year); ?>" <?php echo e(request('tahun') == $year ? 'selected' : ''); ?>><?php echo e($year); ?></option>
-                <?php endfor; ?>
-            </select>
-            
-            <select name="penanda_tangan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <option value="">Semua Penanda Tangan</option>
-                <?php $__currentLoopData = $pegawais ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <option value="<?php echo e($pegawai->id_pegawai); ?>" <?php echo e(request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : ''); ?>>
-                        <?php echo e($pegawai->nama); ?>
+    <form method="GET" action="<?php echo e(route('spt.index')); ?>" id="filter-form">
+        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div class="flex-1">
+                <input type="text" name="search" placeholder="Cari nomor surat, tujuan, lokasi, atau nama pegawai..." 
+                       value="<?php echo e(request('search')); ?>"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Semua Bulan</option>
+                    <option value="1" <?php echo e(request('bulan') == '1' ? 'selected' : ''); ?>>Januari</option>
+                    <option value="2" <?php echo e(request('bulan') == '2' ? 'selected' : ''); ?>>Februari</option>
+                    <option value="3" <?php echo e(request('bulan') == '3' ? 'selected' : ''); ?>>Maret</option>
+                    <option value="4" <?php echo e(request('bulan') == '4' ? 'selected' : ''); ?>>April</option>
+                    <option value="5" <?php echo e(request('bulan') == '5' ? 'selected' : ''); ?>>Mei</option>
+                    <option value="6" <?php echo e(request('bulan') == '6' ? 'selected' : ''); ?>>Juni</option>
+                    <option value="7" <?php echo e(request('bulan') == '7' ? 'selected' : ''); ?>>Juli</option>
+                    <option value="8" <?php echo e(request('bulan') == '8' ? 'selected' : ''); ?>>Agustus</option>
+                    <option value="9" <?php echo e(request('bulan') == '9' ? 'selected' : ''); ?>>September</option>
+                    <option value="10" <?php echo e(request('bulan') == '10' ? 'selected' : ''); ?>>Oktober</option>
+                    <option value="11" <?php echo e(request('bulan') == '11' ? 'selected' : ''); ?>>November</option>
+                    <option value="12" <?php echo e(request('bulan') == '12' ? 'selected' : ''); ?>>Desember</option>
+                </select>
+                
+                <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Semua Tahun</option>
+                    <?php for($year = date('Y'); $year >= date('Y')-5; $year--): ?>
+                        <option value="<?php echo e($year); ?>" <?php echo e(request('tahun') == $year ? 'selected' : ''); ?>><?php echo e($year); ?></option>
+                    <?php endfor; ?>
+                </select>
+                
+                <select name="penanda_tangan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Semua Penanda Tangan</option>
+                    <?php $__currentLoopData = $pegawais ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($pegawai->id_pegawai); ?>" <?php echo e(request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : ''); ?>>
+                            <?php echo e($pegawai->nama); ?>
 
-                    </option>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </select>
-            
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-search mr-2"></i> Cari
-            </button>
-            
-            <?php if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan')): ?>
-                <a href="<?php echo e(route('spt.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
-                    <i class="fas fa-redo mr-2"></i> Reset
-                </a>
-            <?php endif; ?>
+                        </option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </select>
+                
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                    <i class="fas fa-search mr-2"></i> Cari
+                </button>
+                
+                <?php if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan')): ?>
+                    <a href="<?php echo e(route('spt.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+                        <i class="fas fa-redo mr-2"></i> Reset
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
     </form>
 </div>
@@ -423,7 +507,7 @@
                             <?php $pegawaiList = $spt->pegawai_list; ?>
                             <div class="space-y-2">
                                 <?php $__currentLoopData = $pegawaiList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pegawai): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <div class="flex items-center">
+                                    <div class="flex items-center tooltip">
                                         <div class="flex-shrink-0 h-6 w-6 mr-2">
                                             <div class="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center">
                                                 <span class="text-indigo-600 font-semibold text-xs">
@@ -436,10 +520,15 @@
                                             <?php echo e(Str::limit($pegawai->nama, 25)); ?>
 
                                         </div>
+                                        <span class="tooltip-text">
+                                            <?php echo e($pegawai->nama); ?><br>
+                                            NIP: <?php echo e($pegawai->nip ?? '-'); ?><br>
+                                            Jabatan: <?php echo e($pegawai->jabatan ?? '-'); ?>
+
+                                        </span>
                                     </div>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
-                            
                         <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
                         <?php endif; ?>
@@ -488,7 +577,7 @@
                     <!-- Kolom Penanda Tangan -->
                     <td class="px-6 py-4 text-wrap-cell fixed-col-penandatangan table-cell-hover">
                         <?php if($spt->penandaTangan): ?>
-                            <div class="flex items-center">
+                            <div class="flex items-center tooltip">
                                 <div class="flex-shrink-0 h-8 w-8 mr-3">
                                     <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
                                         <span class="text-green-600 font-semibold text-sm">
@@ -504,6 +593,12 @@
                                     </div>
                                     <div class="text-xs text-gray-500"><?php echo e($spt->penandaTangan->jabatan ?? '-'); ?></div>
                                 </div>
+                                <span class="tooltip-text">
+                                    <?php echo e($spt->penandaTangan->nama); ?><br>
+                                    NIP: <?php echo e($spt->penandaTangan->nip ?? '-'); ?><br>
+                                    Jabatan: <?php echo e($spt->penandaTangan->jabatan ?? '-'); ?>
+
+                                </span>
                             </div>
                         <?php else: ?>
                             <span class="text-gray-400 text-sm">-</span>
@@ -512,49 +607,52 @@
                     
                     <!-- Kolom Aksi -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex flex-col space-y-2">
+                        <div class="flex flex-wrap gap-2">
+                            <?php if(isset($spt->id_spt)): ?>
+                            <!-- Tombol Edit -->
+                            <a href="<?php echo e(route('spt.edit', $spt->id_spt)); ?>" 
+                               class="text-green-600 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50 transition duration-150 tooltip"
+                               title="Edit SPT">
+                                <i class="fas fa-edit"></i>
+                                <span class="tooltip-text">Edit SPT</span>
+                            </a>
                             
-                            <div class="flex space-x-2">
-                                <?php if(isset($spt->id_spt)): ?>
-                                <a href="<?php echo e(route('spt.edit', $spt->id_spt)); ?>" 
-                                   class="text-green-600 hover:text-green-900 px-3 py-1 rounded hover:bg-green-50 transition duration-150"
-                                   title="Edit SPT">
-                                    <i class="fas fa-edit mr-1"></i> Edit
-                                </a>
-                                
-                                <!-- Tombol Print -->
-                               <!-- Di view spt/index.blade.php, bagian tombol aksi -->
-<a href="<?php echo e(route('spt.print', $spt->id_spt)); ?>" 
-   target="_blank"
-   class="text-purple-600 hover:text-purple-900 px-3 py-1 rounded hover:bg-purple-50 transition duration-150"
-   title="Download PDF SPT">
-    <i class="fas fa-download mr-1"></i> PDF
-</a>
+                            <!-- Tombol Buat SPD dari SPT -->
+                            <a href="<?php echo e(route('spd.create-from-spt', $spt->id_spt)); ?>" 
+                               class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50 transition duration-150 tooltip"
+                               title="Buat SPD dari SPT ini"
+                               onclick="return confirmCreateSpd('<?php echo e(addslashes($spt->nomor_surat)); ?>')">
+                                <i class="fas fa-file-signature"></i>
+                                <span class="tooltip-text">Buat SPD dari SPT ini</span>
+                            </a>
+                            
+                            <!-- Tombol Print PDF -->
+                            
 
-<!-- Tambahkan tombol preview jika diperlukan -->
-<a href="<?php echo e(route('spt.preview-pdf', $spt->id_spt)); ?>" 
-   target="_blank"
-   class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
-   title="Preview PDF SPT">
-    <i class="fas fa-eye mr-1"></i> Preview
-</a>
-                                <!-- Tombol Hapus dengan Modal -->
-                                <button type="button" 
-                                        onclick="showDeleteConfirmation(
-                                            <?php echo e($spt->id_spt); ?>, 
-                                            '<?php echo e(addslashes(Str::limit($spt->nomor_surat, 30))); ?>', 
-                                            '<?php echo e(addslashes(Str::limit($spt->tujuan, 50))); ?>'
-                                        )"
-                                        class="text-red-600 hover:text-red-900 px-3 py-1 rounded hover:bg-red-50 transition duration-150"
-                                        title="Hapus SPT">
-                                    <i class="fas fa-trash mr-1"></i> Hapus
-                                </button>
-                                <?php else: ?>
-                                <span class="text-gray-400 px-3 py-1">Detail</span>
-                                <span class="text-gray-400 px-3 py-1">Edit</span>
-                                <span class="text-gray-400 px-3 py-1">Hapus</span>
-                                <?php endif; ?>
-                            </div>
+                            <!-- Tombol Preview PDF -->
+                            <a href="<?php echo e(route('spt.preview-pdf', $spt->id_spt)); ?>" 
+                               target="_blank"
+                               class="text-indigo-600 hover:text-indigo-900 px-2 py-1 rounded hover:bg-indigo-50 transition duration-150 tooltip"
+                               title="Preview PDF SPT">
+                                <i class="fas fa-eye"></i>
+                                <span class="tooltip-text">Preview PDF SPT</span>
+                            </a>
+                            
+                            <!-- Tombol Hapus dengan Modal -->
+                            <button type="button" 
+                                    onclick="showDeleteConfirmation(
+                                        <?php echo e($spt->id_spt); ?>, 
+                                        '<?php echo e(addslashes(Str::limit($spt->nomor_surat, 30))); ?>', 
+                                        '<?php echo e(addslashes(Str::limit($spt->tujuan, 50))); ?>'
+                                    )"
+                                    class="text-red-600 hover:text-red-900 px-2 py-1 rounded hover:bg-red-50 transition duration-150 tooltip"
+                                    title="Hapus SPT">
+                                <i class="fas fa-trash"></i>
+                                <span class="tooltip-text">Hapus SPT</span>
+                            </button>
+                            <?php else: ?>
+                            <span class="text-gray-400 px-2 py-1">-</span>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>
@@ -580,13 +678,13 @@
 <!-- Pagination -->
 <?php
     // Cek apakah $spts ada dan memiliki method hasPages
-    $showPagination = true;
+    $showPagination = false;
     if (isset($spts) && method_exists($spts, 'hasPages') && $spts->hasPages()) {
         $showPagination = true;
     }
 ?>
 
-<?php if($showPagination): ?>
+<?php if($showPagination && $spts->count() > 0): ?>
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
@@ -662,6 +760,44 @@
 
 <?php $__env->startSection('scripts'); ?>
 <script>
+// ========== CONFIRM CREATE SPD FROM SPT ==========
+function confirmCreateSpd(nomorSurat) {
+    return confirm(`Apakah Anda yakin ingin membuat SPD dari SPT dengan nomor "${nomorSurat}"?\n\nData SPD akan dibuat otomatis berdasarkan data SPT ini.`);
+}
+
+// ========== EXPORT FUNCTION (SATU UNTUK SEMUA FILTER) ==========
+function exportData() {
+    const btn = document.getElementById('btn-export');
+    const originalHtml = btn.innerHTML;
+    
+    // Show loading state
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    
+    // Get all filter values from the form
+    const form = document.getElementById('filter-form');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (value && value !== '') {
+            params.append(key, value);
+        }
+    }
+    
+    // Redirect to export URL with filters (gunakan route spt.export)
+    const exportUrl = "<?php echo e(route('spt.export')); ?>?" + params.toString();
+    window.location.href = exportUrl;
+    
+    // Reset button after 2 seconds
+    setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+    }, 2000);
+}
+
 // ========== NOTIFICATION FUNCTIONS ==========
 function hideNotification(type) {
     const notification = document.getElementById(`${type}-notification`);
@@ -670,6 +806,7 @@ function hideNotification(type) {
         notification.classList.add('animate-slide-out-bottom');
         setTimeout(() => {
             notification.style.display = 'none';
+            notification.classList.add('hidden');
         }, 300);
     }
 }
@@ -680,9 +817,11 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         const successNotif = document.getElementById('success-notification');
         const errorNotif = document.getElementById('error-notification');
+        const warningNotif = document.getElementById('warning-notification');
         
         if (successNotif) hideNotification('success');
         if (errorNotif) hideNotification('error');
+        if (warningNotif) hideNotification('warning');
     }, 5000);
 });
 

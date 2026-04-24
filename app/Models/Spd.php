@@ -129,6 +129,14 @@ class SPD extends Model
         return $this->hasOne(RincianBidang::class, 'spd_id', 'id_spd');
     }
 
+    /**
+     * Relasi one-to-one ke Kwitansi
+     */
+    public function kwitansi()
+    {
+    return $this->hasOne(Kwitansi::class, 'spd_id', 'id_spd');
+    }
+
     // ========== ACCESSORS PENANDA TANGAN ==========
     
     /**

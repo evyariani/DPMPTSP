@@ -13,44 +13,79 @@
         
         body {
             font-family: 'Times New Roman', Times, serif;
-            background: white;
+            background: #e0e0e0;
             padding: 20px;
         }
         
         .kwitansi-container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         
-        /* Kop Surat */
+        /* KOP SURAT DENGAN LOGO */
         .kop-surat {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
             margin-bottom: 15px;
         }
         
-        .kop-surat h2 {
+        .kop-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .kop-table td {
+            vertical-align: middle;
+            padding: 5px 0;
+        }
+        
+        .logo-cell {
+            width: 100px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 80px;
+            height: auto;
+        }
+        
+        .logo img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .header-text {
+            text-align: center;
+        }
+        
+        .header-text .pemkab {
             font-size: 14px;
             font-weight: normal;
             letter-spacing: 2px;
         }
         
-        .kop-surat h1 {
+        .header-text .dinas {
             font-size: 18px;
             font-weight: bold;
             margin: 5px 0;
+            text-transform: uppercase;
         }
         
-        .kop-surat p {
+        .header-text .alamat {
             font-size: 11px;
             margin: 2px 0;
         }
         
-        .kop-surat .website {
+        .header-text .kontak {
             font-size: 10px;
+            margin: 2px 0;
+        }
+        
+        .garis-kop {
+            border-bottom: 2px solid #000;
+            margin-top: 8px;
+            margin-bottom: 15px;
         }
         
         /* Tabel Info */
@@ -62,23 +97,40 @@
         }
         
         .info-table td {
-            padding: 3px 5px;
+            padding: 4px 5px;
             vertical-align: top;
         }
         
         .info-table td:first-child {
-            width: 130px;
+            width: 110px;
             font-weight: bold;
         }
         
         .info-table td:nth-child(2) {
-            width: 10px;
+            width: 15px;
+        }
+        
+        .info-table td:nth-child(3) {
+            width: 35%;
+        }
+        
+        .info-table td:nth-child(4) {
+            width: 130px;
+            font-weight: bold;
+        }
+        
+        .info-table td:nth-child(5) {
+            width: 15px;
+        }
+        
+        .info-table td:nth-child(6) {
+            width: 35%;
         }
         
         /* Judul Kwitansi */
         .judul-kwitansi {
             text-align: center;
-            margin: 20px 0;
+            margin: 25px 0 20px 0;
         }
         
         .judul-kwitansi h1 {
@@ -90,11 +142,11 @@
         
         /* Body Kwitansi */
         .body-kwitansi {
-            margin: 20px 0;
+            margin: 20px 0 25px 0;
         }
         
         .body-row {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-size: 12px;
             line-height: 1.5;
         }
@@ -102,16 +154,22 @@
         .body-label {
             font-weight: bold;
             display: inline-block;
-            width: 130px;
+            width: 160px;
+            vertical-align: top;
         }
         
         .body-value {
-            display: inline;
+            display: inline-block;
+            width: calc(100% - 170px);
+            vertical-align: top;
         }
         
         /* Terbilang */
         .terbilang-box {
-            margin: 15px 0;
+            margin: 20px 0 30px 0;
+            padding: 10px 0;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
         }
         
         .terbilang-box .label {
@@ -121,19 +179,6 @@
         
         .terbilang-box .value {
             font-size: 12px;
-        }
-        
-        .nominal-box {
-            margin: 10px 0;
-        }
-        
-        .nominal-box .label {
-            font-weight: bold;
-            font-size: 12px;
-        }
-        
-        .nominal-box .value {
-            font-size: 14px;
             font-weight: bold;
         }
         
@@ -141,59 +186,46 @@
         .ttd-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 30px;
+            margin-top: 20px;
+            margin-bottom: 20px;
             font-size: 11px;
             text-align: center;
         }
         
         .ttd-table td {
-            padding: 20px 10px;
+            width: 33.33%;
+            padding: 15px 10px;
             vertical-align: top;
         }
         
         .ttd-table .ttd-title {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            line-height: 1.4;
         }
         
         .ttd-table .ttd-name {
             font-weight: bold;
-            margin-top: 40px;
+            margin-top: 45px;
+            margin-bottom: 3px;
             text-decoration: underline;
+            font-size: 12px;
         }
         
         .ttd-table .ttd-nip {
             font-size: 10px;
-        }
-        
-        /* Border untuk kwitansi */
-        .kwitansi-border {
-            border: 1px solid #000;
-            padding: 15px;
-        }
-        
-        /* Garis pembatas */
-        .garis-bawah {
-            border-bottom: 1px solid #000;
-            margin: 10px 0;
-        }
-        
-        /* Footer */
-        .footer {
-            margin-top: 20px;
-            font-size: 9px;
-            text-align: center;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+            margin-top: 3px;
         }
         
         @media print {
             body {
                 padding: 0;
                 margin: 0;
+                background: white;
             }
             .kwitansi-container {
                 padding: 10px;
+                box-shadow: none;
             }
             .no-print {
                 display: none;
@@ -222,30 +254,40 @@
 </head>
 <body>
     <div class="kwitansi-container">
-        <!-- KOP SURAT -->
+        <!-- KOP SURAT DENGAN LOGO -->
         <div class="kop-surat">
-            <h2>PEMERINTAH KABUPATEN TANAH LAUT</h2>
-            <h1>DINAS PENANAMAN MODAL DAN PTSP</h1>
-            <p>Jalan H. Boejasin, Pelaihari, Kab. Tanah Laut, Kalimantan Selatan 70814</p>
-            <p class="website">Laman https://dpmpts.p.tanahlautkab.go.id Pos-el dpmpts.ptanahlautkab@gmail.com</p>
+            <table class="kop-table">
+                <tr>
+                    <td class="logo-cell">
+                        <div class="logo">
+                            <img src="{{ public_path('image/Logo_Tala-removebg-preview (2).png') }}" alt="Logo Kabupaten Tanah Laut">
+                        </div>
+                    </td>
+                    <td class="header-text">
+                        <div class="pemkab">PEMERINTAH KABUPATEN TANAH LAUT</div>
+                        <div class="dinas">DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU</div>
+                        <div class="alamat">Jalan H. Boejasin, Pelaihari, Kab. Tanah Laut, Kalimantan Selatan 70814</div>
+                        <div class="kontak">Laman https://dpmptsp.tanahlautkab.go.id | Pos-el dpmptsptanahlautkab@gmail.com</div>
+                    </td>
+                </tr>
+            </table>
         </div>
+        <div class="garis-kop"></div>
 
-        <!-- TABEL INFORMASI -->
+        <!-- TABEL INFORMASI - DATA DARI DATABASE -->
         <table class="info-table">
             <tr>
                 <td>TAHUN ANGGARAN</td>
                 <td>:</td>
-                <td>{{ $kwitansi->tahun_anggaran ?? '2025' }}</td>
-                <td style="width: 50px;"></td>
+                <td>{{ $kwitansi->tahun_anggaran ?? '' }}</td>
                 <td>NO. BUKU KAS UMUM</td>
                 <td>:</td>
-                <td>{{ $kwitansi->no_bku ?? '...../SRJ/GU-/2025' }}</td>
+                <td>{{ $kwitansi->no_bku ?? '' }}</td>
             </tr>
             <tr>
                 <td>KODE REKENING</td>
                 <td>:</td>
-                <td>{{ $kwitansi->kode_rekening ?? '5.1.02.04.01.0001' }}</td>
-                <td></td>
+                <td>{{ $kwitansi->kode_rekening ?? '' }}</td>
                 <td>NO. BRPP</td>
                 <td>:</td>
                 <td>{{ $kwitansi->no_brpp ?? '' }}</td>
@@ -253,12 +295,12 @@
             <tr>
                 <td>Sub Kegiatan</td>
                 <td>:</td>
-                <td colspan="5">{{ $kwitansi->sub_kegiatan ?? 'Penyelenggaraan Rapat Koordinasi dan Konsultasi SKPD' }}</td>
+                <td colspan="4">{{ $kwitansi->sub_kegiatan ?? '' }}</td>
             </tr>
             <tr>
                 <td></td>
                 <td></td>
-                <td colspan="5">Asli - I - II - II - IV</td>
+                <td colspan="4">Asli - I - II - III - IV</td>
             </tr>
         </table>
 
@@ -267,7 +309,7 @@
             <h1>KWITANSI</h1>
         </div>
 
-        <!-- BODY KWITANSI -->
+        <!-- BODY KWITANSI - DATA DARI DATABASE -->
         <div class="body-kwitansi">
             <div class="body-row">
                 <span class="body-label">SUDAH TERIMA DARI :</span>
@@ -275,49 +317,49 @@
             </div>
             <div class="body-row">
                 <span class="body-label">UANG SEBANYAK :</span>
-                <span class="body-value">{{ $kwitansi->terbilang ?? 'Enam Ratus Ribu Rupiah' }}</span>
+                <span class="body-value">{{ $kwitansi->terbilang }}</span>
             </div>
             <div class="body-row">
                 <span class="body-label">UNTUK PEMBAYARAN :</span>
-                <span class="body-value">{{ $kwitansi->untuk_pembayaran ?? 'Biaya perjalanan dinas ke Kota Banjarbaru pada tanggal 14 Oktober 2025 Dalam rangka Mengikuti Kegiatan Peningkatan Kapabilitas Verifikator dan PPK (Sekretaris) SKPD an. LIDIA MIRANTI MAYASARI, SE, NIK 6301035708840013 Rek Bank Kalsel 2001337508 Alamat Jl. Bougenvil No. 25 Blok. A Raya Kel. Pabahanan, SPT dan SPD terlampir' }}</span>
+                <span class="body-value">{{ $kwitansi->untuk_pembayaran }}</span>
             </div>
         </div>
 
-        <!-- TERBILANG DAN NOMINAL -->
+        <!-- TERBILANG -->
         <div class="terbilang-box">
             <span class="label">Terbilang Rp. :</span>
-            <span class="value">Rp {{ number_format($kwitansi->nominal ?? 600000, 0, ',', '.') }}</span>
+            <span class="value">Rp {{ number_format($kwitansi->nominal, 0, ',', '.') }}</span>
         </div>
 
-        <!-- TABEL TANDA TANGAN -->
+        <!-- TABEL TANDA TANGAN - 3 KOLOM SEJAJAR -->
         <table class="ttd-table">
             <tr>
                 <td>
                     <div class="ttd-title">Setuju dibayar</div>
                     <div class="ttd-title">Pengguna Anggaran</div>
-                    <div class="ttd-name">{{ $kwitansi->pengguna_anggaran ?? 'BUDI ANDRIAN SUTANTO, S. Sos., MM' }}</div>
-                    <div class="ttd-nip">NIP. {{ $kwitansi->nip_pengguna_anggaran ?? '19760218 200701 1 006' }}</div>
+                    <div class="ttd-name">{{ $kwitansi->pengguna_anggaran ?: '-' }}</div>
+                    <div class="ttd-nip">NIP. {{ $kwitansi->nip_pengguna_anggaran ?: '-' }}</div>
                 </td>
                 <td>
                     <div class="ttd-title">Telah dibayar lunas pada tanggal</div>
-                    <div class="ttd-title">Bendahara Pengeluaran</div>
-                    <div class="ttd-name">{{ $kwitansi->bendahara_pengeluaran ?? 'NURLITA FEBRANA PRATWI, A.Md' }}</div>
-                    <div class="ttd-nip">NIP. {{ $kwitansi->nip_bendahara ?? '19980208 202012 2 007' }}</div>
+                    <div class="ttd-title">{{ $kwitansi->tanggal_kwitansi ? \Carbon\Carbon::parse($kwitansi->tanggal_kwitansi)->format('d F Y') : '-' }}</div>
+                    <div class="ttd-title" style="margin-top: 15px;">Bendahara Pengeluaran</div>
+                    <div class="ttd-name">{{ $kwitansi->bendahara_pengeluaran ?: '-' }}</div>
+                    <div class="ttd-nip">NIP. {{ $kwitansi->nip_bendahara ?: '-' }}</div>
                 </td>
                 <td>
-                    <div class="ttd-title">Pelaihari, {{ $kwitansi->tanggal_kwitansi ? \Carbon\Carbon::parse($kwitansi->tanggal_kwitansi)->format('d F Y') : '...... 2025' }}</div>
-                    <div class="ttd-title">Yang menerima,</div>
-                    <div class="ttd-name">{{ $kwitansi->penerima ?? 'LIDIA MIRANTI MAYASARI, SE' }}</div>
-                    <div class="ttd-nip">NIP. {{ $kwitansi->nip_penerima ?? '19840817 200903 2 022' }}</div>
+                    <div class="ttd-title">Pelaihari,</div>
+                    <div class="ttd-title">{{ $kwitansi->tanggal_kwitansi ? \Carbon\Carbon::parse($kwitansi->tanggal_kwitansi)->format('d F Y') : '-' }}</div>
+                    <div class="ttd-title" style="margin-top: 15px;">Yang menerima,</div>
+                    <div class="ttd-name">{{ $kwitansi->penerima ?: '-' }}</div>
+                    <div class="ttd-nip">NIP. {{ $kwitansi->nip_penerima ?: '-' }}</div>
                 </td>
             </tr>
         </table>
     </div>
 
-    <button onclick="window.print()" class="no-print">🖨️ Cetak Kwitansi</button>
-
     <script>
-        // Auto print when page loads (optional)
+        // Script untuk cetak otomatis jika diperlukan
         // window.print();
     </script>
 </body>

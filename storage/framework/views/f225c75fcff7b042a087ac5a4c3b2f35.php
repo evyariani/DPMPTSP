@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Daftar Kwitansi Perjalanan Dinas'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -12,36 +10,40 @@
             <h2 class="text-xl font-semibold text-gray-800">Daftar Kwitansi</h2>
             <p class="text-sm text-gray-500 mt-1">Kelola semua kwitansi perjalanan dinas</p>
         </div>
-        <a href="<?php echo e(route('kwitansi.create')); ?>" 
-           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition duration-200">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Tambah Kwitansi
-        </a>
+        <div class="flex gap-2">
+            <a href="<?php echo e(route('kwitansi.syncAll')); ?>" 
+               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition duration-200"
+               onclick="return confirm('Sync semua kwitansi dari SPD? Ini akan memperbarui semua kwitansi berdasarkan data SPD dan Rincian Bidang terbaru.')">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Sync All
+            </a>
+        </div>
     </div>
 
     <!-- SEARCH & FILTER SECTION -->
     <div class="p-4 border-b border-gray-200 bg-gray-50">
-        <div class="flex flex-wrap gap-3 items-center justify-between">
-            <div class="relative">
+        <form method="GET" action="<?php echo e(route('kwitansi.index')); ?>" class="flex flex-wrap gap-3 items-center justify-between">
+            <div class="relative flex-1 max-w-md">
                 <input type="text" 
-                       id="searchInput"
-                       placeholder="Cari tahun anggaran atau kode rekening..." 
-                       class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                       name="search"
+                       value="<?php echo e(request('search')); ?>"
+                       placeholder="Cari no BKU, kode rekening, atau penerima..." 
+                       class="pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
             </div>
             <div class="flex gap-2">
-                <button onclick="window.location.reload()" class="px-3 py-2 text-gray-600 hover:text-gray-800 text-sm rounded-lg hover:bg-gray-100">
-                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                    Refresh
+                <button type="submit" class="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                    Cari
                 </button>
+                <a href="<?php echo e(route('kwitansi.index')); ?>" class="px-3 py-2 text-gray-600 hover:text-gray-800 text-sm rounded-lg hover:bg-gray-100">
+                    Reset
+                </a>
             </div>
-        </div>
+        </form>
     </div>
 
     <!-- ALERT SUCCESS -->
@@ -57,6 +59,7 @@
         </div>
     <?php endif; ?>
 
+    <!-- ALERT ERROR -->
     <?php if(session('error')): ?>
         <div class="mx-4 mt-4 bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-lg">
             <div class="flex items-center">
@@ -69,32 +72,87 @@
         </div>
     <?php endif; ?>
 
+    <!-- ALERT INFO -->
+    <?php if(session('info')): ?>
+        <div class="mx-4 mt-4 bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-3 rounded-lg">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <?php echo e(session('info')); ?>
+
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- ALERT WARNING -->
+    <?php if(session('warning')): ?>
+        <div class="mx-4 mt-4 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded-lg">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <?php echo e(session('warning')); ?>
+
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- TABLE SECTION -->
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">NO</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">TAHUN ANGGARAN</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">KODE REKENING</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SUB KEGIATAN</th>
-                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">NOMINAL</th>
-                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">TANGGAL</th>
-                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">AKSI</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">No</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">No. BKU</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tahun Anggaran</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kode Rekening</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Penerima</th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Nominal</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
                 <?php $__empty_1 = true; $__currentLoopData = $kwitansi; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr class="hover:bg-gray-50 transition duration-150">
                     <td class="px-4 py-3 text-sm text-gray-500"><?php echo e($kwitansi->firstItem() + $key); ?></td>
-                    <td class="px-4 py-3 text-sm font-medium text-gray-800"><?php echo e($item->tahun_anggaran); ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600 font-mono"><?php echo e($item->kode_rekening); ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600 max-w-xs truncate"><?php echo e($item->sub_kegiatan); ?></td>
-                    <td class="px-4 py-3 text-sm text-right font-semibold text-gray-800">Rp <?php echo e(number_format($item->nominal, 0, ',', '.')); ?></td>
-                    <td class="px-4 py-3 text-sm text-gray-600"><?php echo e(\Carbon\Carbon::parse($item->tanggal_kwitansi)->format('d/m/Y')); ?></td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-800">
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-xs font-mono">
+                            <?php echo e($item->no_bku ?? '-'); ?>
+
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        <span class="bg-gray-100 px-2 py-1 rounded-md text-xs">
+                            <?php echo e($item->tahun_anggaran ?? '-'); ?>
+
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600 font-mono">
+                        <?php echo e($item->kode_rekening ?? '-'); ?>
+
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        <div class="font-medium text-gray-800"><?php echo e($item->penerima ?? '-'); ?></div>
+                        <div class="text-xs text-gray-400">NIP: <?php echo e($item->nip_penerima ?? '-'); ?></div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-right font-semibold">
+                        <div class="text-blue-600">
+                            Rp <?php echo e(number_format($item->nominal, 0, ',', '.')); ?>
+
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            <?php echo e($item->terbilang ? substr($item->terbilang, 0, 30) . '...' : '-'); ?>
+
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                        <?php echo e($item->tanggal_kwitansi ? \Carbon\Carbon::parse($item->tanggal_kwitansi)->format('d/m/Y') : '-'); ?>
+
+                    </td>
                     <td class="px-4 py-3 text-center">
                         <div class="flex items-center justify-center gap-1">
-                            <!-- Detail -->
                             <a href="<?php echo e(route('kwitansi.show', $item->id)); ?>" 
                                class="p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition" 
                                title="Detail">
@@ -103,8 +161,14 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
                             </a>
-                            
-                            <!-- Edit -->
+                            <a href="<?php echo e(route('kwitansi.cetak', $item->id)); ?>" 
+                               class="p-1.5 text-green-500 hover:bg-green-50 rounded-lg transition" 
+                               title="Cetak PDF"
+                               target="_blank">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                </svg>
+                            </a>
                             <a href="<?php echo e(route('kwitansi.edit', $item->id)); ?>" 
                                class="p-1.5 text-yellow-500 hover:bg-yellow-50 rounded-lg transition" 
                                title="Edit">
@@ -112,9 +176,9 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                 </svg>
                             </a>
-                            
-                            <!-- Hapus -->
-                            <form action="<?php echo e(route('kwitansi.destroy', $item->id)); ?>" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus kwitansi ini?')">
+                            </a>
+                            <form action="<?php echo e(route('kwitansi.destroy', $item->id)); ?>" method="POST" class="inline" 
+                                  onsubmit="return confirm('Yakin ingin menghapus kwitansi ini? Data akan dihapus permanen.')">
                                 <?php echo csrf_field(); ?>
                                 <?php echo method_field('DELETE'); ?>
                                 <button type="submit" 
@@ -130,12 +194,14 @@
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
-                    <td colspan="7" class="px-4 py-12 text-center text-gray-400">
+                    <td colspan="8" class="px-4 py-12 text-center text-gray-400">
                         <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                         <p>Belum ada data kwitansi</p>
-                        <a href="<?php echo e(route('kwitansi.create')); ?>" class="text-blue-500 text-sm mt-2 inline-block">Tambah kwitansi pertama</a>
+                        <div class="mt-3 flex gap-2 justify-center">
+                            <a href="<?php echo e(route('kwitansi.syncAll')); ?>" class="text-green-500 text-sm hover:underline">Sync dari SPD</a>
+                        </div>
                     </td>
                 </tr>
                 <?php endif; ?>
@@ -152,50 +218,12 @@
                 dari <span class="font-medium"><?php echo e($kwitansi->total()); ?></span> data
             </div>
             <div>
-                <?php echo e($kwitansi->links()); ?>
+                <?php echo e($kwitansi->appends(request()->query())->links()); ?>
 
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    // Simple search functionality
-    document.getElementById('searchInput')?.addEventListener('keyup', function() {
-        let searchText = this.value.toLowerCase();
-        let rows = document.querySelectorAll('tbody tr');
-        let hasResults = false;
-        
-        rows.forEach(row => {
-            if (row.querySelector('td')) {
-                let tahunAnggaran = row.cells[1]?.textContent.toLowerCase() || '';
-                let kodeRekening = row.cells[2]?.textContent.toLowerCase() || '';
-                let subKegiatan = row.cells[3]?.textContent.toLowerCase() || '';
-                
-                if (tahunAnggaran.includes(searchText) || kodeRekening.includes(searchText) || subKegiatan.includes(searchText)) {
-                    row.style.display = '';
-                    hasResults = true;
-                } else {
-                    row.style.display = 'none';
-                }
-            }
-        });
-        
-        // Show message if no results
-        let noResultRow = document.querySelector('#noResultRow');
-        if (!hasResults) {
-            if (!noResultRow) {
-                let tbody = document.querySelector('tbody');
-                let tr = document.createElement('tr');
-                tr.id = 'noResultRow';
-                tr.innerHTML = '<td colspan="7" class="px-4 py-12 text-center text-gray-400">Tidak ada data yang ditemukan</td>';
-                tbody.appendChild(tr);
-            }
-        } else if (noResultRow) {
-            noResultRow.remove();
-        }
-    });
-</script>
 
 <style>
     /* Custom pagination style */

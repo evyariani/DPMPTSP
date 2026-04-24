@@ -7,14 +7,10 @@ use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\UangHarianController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SPTController;
-<<<<<<< HEAD
 use App\Http\Controllers\RincianBidangController;
 use App\Http\Controllers\KwitansiController;
-=======
 use App\Http\Controllers\SPDController;
 use App\Http\Controllers\LhpdController;
-use App\Http\Controllers\RincianBidangController;
->>>>>>> db0c50f6a0cf3864408bbf4a141a91bc52fa8d2b
 
 /*
 |--------------------------------------------------------------------------
@@ -52,6 +48,7 @@ Route::get('/dashboard', function () {
         return redirect('/user');
     }
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -133,17 +130,26 @@ Route::middleware(['role:admin|kadis|pegawai'])->group(function () {
 
     // KWITANSI - SEMUA USER BISA AKSES
     Route::prefix('kwitansi')->group(function () {
-        Route::get('/', [KwitansiController::class, 'index'])->name('kwitansi.index');
+    // 🔥 PERTAMA: Route statis (tanpa parameter)
         Route::get('/create', [KwitansiController::class, 'create'])->name('kwitansi.create');
         Route::post('/', [KwitansiController::class, 'store'])->name('kwitansi.store');
-        Route::get('/{id}', [KwitansiController::class, 'show'])->name('kwitansi.show');
+        Route::get('/sync-all', [KwitansiController::class, 'syncAll'])->name('kwitansi.syncAll');
+        Route::get('/get-by-spd/{spdId}', [KwitansiController::class, 'getBySpd'])->name('kwitansi.getBySpd');
+        Route::get('/terbilang/{nominal}', [KwitansiController::class, 'getTerbilang'])->name('kwitansi.terbilang');
+    
+    // 🔥 KEDUA: Route dengan parameter yang spesifik
+        Route::get('/cetak/{id}', [KwitansiController::class, 'cetak'])->name('kwitansi.cetak');
+        Route::get('/preview/{id}', [KwitansiController::class, 'previewPdf'])->name('kwitansi.preview');
+    
+    // 🔥 KETIGA: Route dengan parameter wildcard (paling akhir)
         Route::get('/{id}/edit', [KwitansiController::class, 'edit'])->name('kwitansi.edit');
         Route::put('/{id}', [KwitansiController::class, 'update'])->name('kwitansi.update');
         Route::delete('/{id}', [KwitansiController::class, 'destroy'])->name('kwitansi.destroy');
-        Route::get('/cetak/{id}', [KwitansiController::class, 'cetak'])->name('kwitansi.cetak');
-        Route::get('/print/{id}', [KwitansiController::class, 'print'])->name('kwitansi.print');
-        Route::get('/preview/{id}', [KwitansiController::class, 'previewPdf'])->name('kwitansi.preview');
-});
+        Route::get('/{id}', [KwitansiController::class, 'show'])->name('kwitansi.show');
+    
+    // 🔥 TERAKHIR: Route utama
+        Route::get('/', [KwitansiController::class, 'index'])->name('kwitansi.index');
+    });
     
     // SPD MANAGEMENT - SEMUA USER BISA AKSES (PEGAWAI, ADMIN, KADIS)
     Route::prefix('spd')->group(function () {

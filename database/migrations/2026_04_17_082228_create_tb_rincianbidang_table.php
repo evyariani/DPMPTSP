@@ -25,8 +25,13 @@ return new class extends Migration
             $table->unsignedBigInteger('tempat_tujuan_id')->nullable()->comment('ID daerah tujuan dari spd.tempat_tujuan');
             $table->string('tempat_tujuan')->nullable()->comment('Nama tempat tujuan (denormalisasi)');
             
-            // ========== BENDARAHA PENGELUARAN (relasi ke tb_pegawai) ==========
+            // ========== BENDAHARA PENGELUARAN (relasi ke tb_pegawai) ==========
             $table->unsignedBigInteger('bendahara_pengeluaran_id')->nullable()->comment('Bendahara pengeluaran (referensi ke tb_pegawai)');
+            
+            // ========== SNAPSHOT BENDAHARA (agar tidak berubah jika data master berubah) ==========
+            $table->string('bendahara_nama', 150)->nullable()->comment('Nama bendahara pengeluaran (snapshot)');
+            $table->string('bendahara_nip', 50)->nullable()->comment('NIP bendahara pengeluaran (snapshot)');
+            $table->string('bendahara_jabatan', 150)->nullable()->comment('Jabatan bendahara pengeluaran (snapshot)');
             
             // ========== DATA UANG HARIAN (dari tb_uang_harian) ==========
             $table->unsignedBigInteger('uang_harian_id')->nullable()->comment('ID dari tb_uang_harian');

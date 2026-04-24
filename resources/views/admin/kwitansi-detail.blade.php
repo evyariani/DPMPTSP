@@ -6,187 +6,141 @@
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200">
     
-    <!-- HEADER SECTION -->
+    <!-- HEADER SECTION - TANPA TOMBOL -->
     <div class="flex justify-between items-center p-6 border-b border-gray-200">
         <div>
             <h2 class="text-xl font-semibold text-gray-800">Detail Kwitansi</h2>
-            <p class="text-sm text-gray-500 mt-1">Detail lengkap kwitansi perjalanan dinas</p>
+            <p class="text-sm text-gray-500 mt-1">Lihat detail kwitansi perjalanan dinas</p>
         </div>
-        <div class="flex gap-2">
-            <!-- Tombol Cetak PDF -->
-            <a href="{{ route('kwitansi.cetak', $kwitansi->id) }}" 
-               target="_blank"
-               class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                </svg>
-                Cetak PDF
-            </a>
-            <!-- Tombol Kembali -->
-            <a href="{{ route('kwitansi.index') }}" 
-               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Kembali
-            </a>
+        <!-- ❌ TOMBOL DI HEADER DIHAPUS SEMUA -->
+    </div>
+
+    <div class="p-6 space-y-6">
+        <!-- INFORMASI DASAR KWITANSI -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">No. BKU</label>
+                <p class="text-gray-800 font-medium">{{ $kwitansi->no_bku ?? '-' }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Tahun Anggaran</label>
+                <p class="text-gray-800 font-medium">{{ $kwitansi->tahun_anggaran ?? '-' }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Kode Rekening</label>
+                <p class="text-gray-800 font-mono">{{ $kwitansi->kode_rekening ?? '-' }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">No. BRPP</label>
+                <p class="text-gray-800 font-medium">{{ $kwitansi->no_brpp ?? '-' }}</p>
+            </div>
+            <div class="md:col-span-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Sub Kegiatan</label>
+                <p class="text-gray-800">{{ $kwitansi->sub_kegiatan ?? '-' }}</p>
+            </div>
+        </div>
+
+        <!-- UNTUK PEMBAYARAN -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Untuk Pembayaran</label>
+            <p class="text-gray-800">{{ $kwitansi->untuk_pembayaran ?? '-' }}</p>
+        </div>
+
+        <!-- DATA PEJABAT -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- PENGGUNA ANGGARAN -->
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Pengguna Anggaran</label>
+                <p class="text-gray-800 font-medium">{{ $kwitansi->pengguna_anggaran ?? '-' }}</p>
+                <p class="text-sm text-gray-500 mt-1">NIP: {{ $kwitansi->nip_pengguna_anggaran ?? '-' }}</p>
+            </div>
+
+            <!-- BENDAHARA PENGELUARAN -->
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Bendahara Pengeluaran</label>
+                <p class="text-gray-800 font-medium">{{ $kwitansi->bendahara_pengeluaran ?? '-' }}</p>
+                <p class="text-sm text-gray-500 mt-1">NIP: {{ $kwitansi->nip_bendahara ?? '-' }}</p>
+            </div>
+        </div>
+
+        <!-- DATA PENERIMA -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Penerima Kwitansi</label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div>
+                    <p class="text-sm text-gray-500">Nama Penerima</p>
+                    <p class="text-gray-800 font-medium">{{ $kwitansi->penerima ?? '-' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">NIP Penerima</p>
+                    <p class="text-gray-800 font-mono">{{ $kwitansi->nip_penerima ?? '-' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RINGKASAN NOMINAL -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h3 class="font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-200">Ringkasan Nominal</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="bg-white rounded-lg p-3 border border-gray-200">
+                    <div class="text-xs text-gray-500">Tanggal Kwitansi</div>
+                    <div class="text-xl font-bold text-blue-600">{{ \Carbon\Carbon::parse($kwitansi->tanggal_kwitansi)->format('d F Y') }}</div>
+                    <div class="text-xs text-gray-400">tanggal diterbitkan</div>
+                </div>
+                <div class="bg-white rounded-lg p-3 border border-gray-200">
+                    <div class="text-xs text-gray-500">Nominal</div>
+                    <div class="text-xl font-bold text-green-600">Rp {{ number_format($kwitansi->nominal, 0, ',', '.') }}</div>
+                    <div class="text-xs text-gray-400">total pembayaran</div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="text-sm font-semibold text-blue-800">TERBILANG</div>
+                        <div class="text-xs text-blue-600">dalam huruf</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-blue-800 italic">{{ $kwitansi->terbilang ?? 'Nol Rupiah' }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ALERT SUCCESS/ERROR -->
-    @if(session('success'))
-        <div class="mx-6 mt-4 bg-green-50 border-l-4 border-green-500 text-green-700 p-3 rounded-lg">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ session('success') }}
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mx-6 mt-4 bg-red-50 border-l-4 border-red-500 text-red-700 p-3 rounded-lg">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {{ session('error') }}
-            </div>
-        </div>
-    @endif
-
-    <!-- FORM DETAIL (READ-ONLY) -->
-    <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <!-- Kiri -->
-            <div class="space-y-4">
-                <!-- TAHUN ANGGARAN -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Anggaran</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->tahun_anggaran }}
-                    </div>
-                </div>
-
-                <!-- KODE REKENING -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode Rekening</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800 font-mono">
-                        {{ $kwitansi->kode_rekening }}
-                    </div>
-                </div>
-
-                <!-- SUB KEGIATAN -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Sub Kegiatan</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->sub_kegiatan }}
-                    </div>
-                </div>
-
-                <!-- NO BUKU KAS UMUM -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">No. Buku Kas Umum</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->no_bku }}
-                    </div>
-                </div>
-
-                <!-- NO BRPP -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">No. BRPP</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->no_brpp ?? '-' }}
-                    </div>
-                </div>
-
-                <!-- NOMINAL -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nominal (Rp)</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800 font-semibold">
-                        Rp {{ number_format($kwitansi->nominal, 0, ',', '.') }}
-                    </div>
-                </div>
-
-                <!-- TERBILANG -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Terbilang</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->terbilang }}
-                    </div>
-                </div>
-
-                <!-- TANGGAL KWITANSI -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kwitansi</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ \Carbon\Carbon::parse($kwitansi->tanggal_kwitansi)->format('d/m/Y') }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kanan -->
-            <div class="space-y-4">
-                <!-- UNTUK PEMBAYARAN -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Untuk Pembayaran</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800 min-h-[100px]">
-                        {{ $kwitansi->untuk_pembayaran }}
-                    </div>
-                </div>
-
-                <!-- PENGGUNA ANGGARAN (KEPALA DINAS) -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Pengguna Anggaran (Kepala Dinas)</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->pengguna_anggaran }}
-                    </div>
-                </div>
-
-                <!-- NIP PENGGUNA ANGGARAN -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NIP Pengguna Anggaran</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800 font-mono">
-                        {{ $kwitansi->nip_pengguna_anggaran }}
-                    </div>
-                </div>
-
-                <!-- BENDAHARA PENGELUARAN -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Bendahara Pengeluaran</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->bendahara_pengeluaran }}
-                    </div>
-                </div>
-
-                <!-- NIP BENDAHARA -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NIP Bendahara</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800 font-mono">
-                        {{ $kwitansi->nip_bendahara }}
-                    </div>
-                </div>
-
-                <!-- PENERIMA -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Penerima</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800">
-                        {{ $kwitansi->penerima }}
-                    </div>
-                </div>
-
-                <!-- NIP PENERIMA -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NIP Penerima</label>
-                    <div class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-800 font-mono">
-                        {{ $kwitansi->nip_penerima }}
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- BUTTON ACTION - HANYA EDIT DAN KEMBALI -->
+    <div class="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+        <a href="{{ route('kwitansi.edit', $kwitansi->id) }}" 
+           class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Edit Kwitansi
+        </a>
+        <a href="{{ route('kwitansi.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">
+            Kembali ke Daftar
+        </a>
     </div>
 </div>
+
+<style>
+    @media print {
+        .bg-white {
+            box-shadow: none;
+            border: none;
+            padding: 0;
+        }
+        .flex.justify-end.gap-3 {
+            display: none;
+        }
+        .bg-gray-50, .bg-gray-100 {
+            background-color: white !important;
+        }
+        .border, .border-b, .border-t {
+            border-color: #000 !important;
+        }
+    }
+</style>
 
 @endsection

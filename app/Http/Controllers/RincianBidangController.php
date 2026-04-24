@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\RincianBidang;
 use App\Models\SPD;
 use App\Models\Pegawai;
+use App\Models\Kwitansi;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -51,6 +52,14 @@ class RincianBidangController extends Controller
             'transport' => $request->transport ?? 0,
         ]);
 
+        // ⬇️⬇️⬇️ TAMBAHKAN INI - SYNC KWITANSI OTOMATIS ⬇️⬇️⬇️
+        try {
+            Kwitansi::syncFromSpd($spd);
+            \Illuminate\Support\Facades\Log::info('Kwitansi auto-synced untuk SPD ID: ' . $spd->id_spd);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal sync Kwitansi: ' . $e->getMessage());
+        }
+
         return redirect()->route('rincian.index')->with('success', 'Berhasil tambah rincian biaya dari SPD');
     }
 
@@ -92,6 +101,14 @@ class RincianBidangController extends Controller
             'bendahara_pengeluaran_id' => $request->bendahara_pengeluaran_id,
             'transport' => $request->transport ?? 0,
         ]);
+
+        // ⬇️⬇️⬇️ TAMBAHKAN INI - SYNC KWITANSI OTOMATIS ⬇️⬇️⬇️
+        try {
+            Kwitansi::syncFromSpd($spd);
+            \Illuminate\Support\Facades\Log::info('Kwitansi auto-synced untuk SPD ID: ' . $spd->id_spd);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal sync Kwitansi: ' . $e->getMessage());
+        }
 
         return redirect()->route('rincian.index')->with('success', 'Berhasil update rincian biaya');
     }

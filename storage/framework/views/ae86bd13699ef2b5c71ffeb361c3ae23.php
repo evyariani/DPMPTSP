@@ -183,8 +183,16 @@
 
     <!-- LAMPIRAN SPPD NOMOR & TANGGAL -->
     <table class="info-table">
-        <tr><td class="bold">Lampiran SPPD Nomor</td><td>:</td><td class="bold"><?php echo e($nomorSppd); ?></td></tr>
-        <tr><td>Tanggal</td><td>:</td><td><?php echo e($tanggalFormat); ?></td></tr>
+        <tr>
+            <td class="bold" style="width:200px;">Lampiran SPPD Nomor</td>
+            <td>:</td>
+            <td class="bold"><?php echo e($nomorSppd); ?></td>
+        </tr>
+        <tr>
+            <td class="bold">Tanggal</td>
+            <td>:</td>
+            <td><?php echo e($tanggalFormat); ?></td>
+        </tr>
     </table>
 
     <!-- TABEL RINCIAN BIAYA (PERSIS SEPERTI GAMBAR) -->
