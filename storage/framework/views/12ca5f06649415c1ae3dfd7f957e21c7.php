@@ -403,4 +403,4 @@
     <?php echo $__env->yieldContent('scripts'); ?>
 </body>
 </html>
-<?php /**PATH C:\PKL POLITALA\dpmptsp\resources\views/layouts/admin.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/layouts/admin.blade.php ENDPATH**/ ?>

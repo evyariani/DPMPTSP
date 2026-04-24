@@ -80,12 +80,8 @@
 
 /* Loading spinner untuk export */
 @keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .btn-loading {
@@ -97,59 +93,49 @@
     animation: spin 1s linear infinite;
 }
 
-/* Wrapping untuk teks panjang */
-.text-wrap-cell {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal !important;
+/* Badge untuk LHPD */
+.lhpd-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: monospace;
+    background-color: #e0e7ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
 }
 
 /* Fixed width untuk kolom */
-.fixed-col-tujuan {
-    min-width: 200px;
-    max-width: 300px;
-}
-
-.fixed-col-tanggal {
-    min-width: 130px;
-    max-width: 160px;
-}
-
-.fixed-col-daerah {
-    min-width: 150px;
-    max-width: 200px;
-}
-
-.fixed-col-hasil {
-    min-width: 200px;
-    max-width: 350px;
-}
-
-.fixed-col-tempat {
-    min-width: 150px;
-    max-width: 200px;
-}
-
 .fixed-col-dasar {
     min-width: 180px;
     max-width: 250px;
 }
 
-/* Badge status */
-.status-badge {
-    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+.fixed-col-tujuan {
+    min-width: 200px;
+    max-width: 280px;
 }
 
-.status-complete {
-    @apply bg-green-100 text-green-800;
+.fixed-col-tanggal {
+    min-width: 100px;
+    max-width: 120px;
 }
 
-.status-incomplete {
-    @apply bg-yellow-100 text-yellow-800;
+.fixed-col-daerah {
+    min-width: 140px;
+    max-width: 180px;
 }
 
-.status-empty {
-    @apply bg-gray-100 text-gray-800;
+.fixed-col-hasil {
+    min-width: 200px;
+    max-width: 280px;
+}
+
+.fixed-col-tempat {
+    min-width: 120px;
+    max-width: 150px;
 }
 
 /* Tooltip */
@@ -182,59 +168,12 @@
     opacity: 1;
 }
 
-/* Button styling */
-.btn {
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn-primary {
-    background-color: #2563eb;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #1d4ed8;
-}
-
-.btn-secondary {
-    background-color: #9ca3af;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #6b7280;
-}
-
-.btn-danger {
-    background-color: #dc2626;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #b91c1c;
-}
-
-/* Image preview */
-.image-preview {
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-.image-preview:hover {
-    transform: scale(1.05);
-}
-
-/* Modal image */
-.modal-image {
-    max-width: 90%;
-    max-height: 90%;
-    object-fit: contain;
+/* Line clamp */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* Galeri foto */
@@ -246,25 +185,21 @@
 }
 
 .gallery-thumb img {
-    width: 100%;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     object-fit: cover;
-    transition: transform 0.3s;
-}
-
-.gallery-thumb:hover img {
-    transform: scale(1.1);
+    border-radius: 0.5rem;
 }
 
 .gallery-thumb .badge-count {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
+    bottom: 2px;
+    right: 2px;
     background: rgba(0,0,0,0.7);
     color: white;
     border-radius: 20px;
-    padding: 2px 8px;
-    font-size: 11px;
+    padding: 2px 6px;
+    font-size: 10px;
     font-weight: bold;
 }
 
@@ -287,52 +222,19 @@
     height: 200px;
     object-fit: cover;
     cursor: pointer;
-    transition: transform 0.3s;
-}
-
-.foto-item img:hover {
-    transform: scale(1.05);
-}
-
-/* Snapshot badge */
-.snapshot-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.65rem;
-    color: #3b82f6;
-    cursor: help;
-}
-
-/* Dasar list styling */
-.dasar-list {
-    max-height: 80px;
-    overflow-y: auto;
-    font-size: 0.75rem;
-    line-height: 1.4;
-}
-
-.dasar-list ul {
-    margin: 0;
-    padding-left: 1.25rem;
-}
-
-.dasar-list li {
-    margin-bottom: 0.125rem;
-    color: #4b5563;
-}
-
-.dasar-list .no-data {
-    color: #9ca3af;
-    font-style: italic;
 }
 </style>
 
 <div class="mb-6">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center flex-wrap gap-4">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Laporan Hasil Perjalanan Dinas (LHPD)</h2>
             <p class="text-gray-500">Kelola data Laporan Hasil Perjalanan Dinas</p>
+        </div>
+        <div class="flex gap-2">
+            <button type="button" onclick="exportData()" id="btn-export" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition">
+                <i class="fas fa-file-excel mr-2"></i> Export Excel
+            </button>
         </div>
     </div>
 </div>
@@ -342,20 +244,14 @@
 <div id="success-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <i class="fas fa-check-circle text-green-500 text-xl"></i>
-            </div>
-            <div class="ml-3 flex-1">
+            <i class="fas fa-check-circle text-green-500 text-xl mr-3 mt-0.5"></i>
+            <div class="flex-1">
                 <p class="font-medium">Berhasil!</p>
-                <p class="text-sm mt-1">{{ session('success') }}</p>
+                <p class="text-sm">{{ session('success') }}</p>
             </div>
-            <button type="button" onclick="hideNotification('success')" class="ml-4 text-green-600 hover:text-green-800">
-                <i class="fas fa-times"></i>
-            </button>
+            <button onclick="hideNotification('success')" class="text-green-600"><i class="fas fa-times"></i></button>
         </div>
-        <div class="mt-2 w-full bg-green-200 rounded-full h-1">
-            <div id="success-progress" class="bg-green-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
-        </div>
+        <div class="mt-2 w-full bg-green-200 rounded-full h-1"><div class="bg-green-500 h-1 rounded-full progress-bar" style="width: 100%"></div></div>
     </div>
 </div>
 @endif
@@ -364,20 +260,14 @@
 <div id="error-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
-            </div>
-            <div class="ml-3 flex-1">
+            <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3 mt-0.5"></i>
+            <div class="flex-1">
                 <p class="font-medium">Terjadi Kesalahan!</p>
-                <p class="text-sm mt-1">{{ session('error') }}</p>
+                <p class="text-sm">{{ session('error') }}</p>
             </div>
-            <button type="button" onclick="hideNotification('error')" class="ml-4 text-red-600 hover:text-red-800">
-                <i class="fas fa-times"></i>
-            </button>
+            <button onclick="hideNotification('error')" class="text-red-600"><i class="fas fa-times"></i></button>
         </div>
-        <div class="mt-2 w-full bg-red-200 rounded-full h-1">
-            <div id="error-progress" class="bg-red-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
-        </div>
+        <div class="mt-2 w-full bg-red-200 rounded-full h-1"><div class="bg-red-500 h-1 rounded-full progress-bar" style="width: 100%"></div></div>
     </div>
 </div>
 @endif
@@ -386,20 +276,14 @@
 <div id="delete-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <i class="fas fa-trash-restore text-blue-500 text-xl"></i>
-            </div>
-            <div class="ml-3 flex-1">
+            <i class="fas fa-trash-restore text-blue-500 text-xl mr-3 mt-0.5"></i>
+            <div class="flex-1">
                 <p class="font-medium">Data Dihapus!</p>
-                <p id="delete-message" class="text-sm mt-1"></p>
+                <p id="delete-message" class="text-sm"></p>
             </div>
-            <button type="button" onclick="hideNotification('delete')" class="ml-4 text-blue-600 hover:text-blue-800">
-                <i class="fas fa-times"></i>
-            </button>
+            <button onclick="hideNotification('delete')" class="text-blue-600"><i class="fas fa-times"></i></button>
         </div>
-        <div class="mt-2 w-full bg-blue-200 rounded-full h-1">
-            <div id="delete-progress" class="bg-blue-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
-        </div>
+        <div class="mt-2 w-full bg-blue-200 rounded-full h-1"><div class="bg-blue-500 h-1 rounded-full progress-bar" style="width: 100%"></div></div>
     </div>
 </div>
 
@@ -408,39 +292,26 @@
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
             <div class="p-6 text-center">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                <div class="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
                     <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
                 <div class="mb-6 text-left">
                     <p class="text-gray-600 mb-3">Anda akan menghapus data LHPD:</p>
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                    <div class="bg-gray-50 border rounded-lg p-4 mb-4">
                         <p class="font-semibold text-gray-800 text-lg" id="delete-tujuan"></p>
                         <p class="text-gray-600 text-sm mt-1" id="delete-tanggal"></p>
                     </div>
                     <div class="bg-red-50 border-l-4 border-red-400 p-3 rounded">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-red-700">
-                                    Data yang dihapus <span class="font-semibold">tidak dapat dikembalikan</span>.
-                                </p>
-                            </div>
-                        </div>
+                        <p class="text-sm text-red-700">Data yang dihapus <span class="font-semibold">tidak dapat dikembalikan</span>.</p>
                     </div>
                 </div>
-                <div class="flex justify-center space-x-4">
-                    <button type="button" onclick="hideDeleteModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
-                        <i class="fas fa-times mr-2"></i> Batal
-                    </button>
+                <div class="flex justify-center gap-4">
+                    <button onclick="hideDeleteModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 rounded-lg">Batal</button>
                     <form id="delete-form" method="POST" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
-                            <i class="fas fa-trash mr-2"></i> Hapus
-                        </button>
+                        <button type="submit" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg">Hapus</button>
                     </form>
                 </div>
             </div>
@@ -449,43 +320,24 @@
 </div>
 
 <!-- Modal Preview Foto -->
-<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-90 overflow-y-auto h-full w-full z-50 hidden">
+<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden">
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="relative bg-transparent max-w-5xl mx-auto">
-            <button type="button" onclick="hideImageModal()" class="absolute -top-12 right-0 text-white hover:text-gray-300 text-3xl z-10">
-                <i class="fas fa-times"></i>
-            </button>
-            <div class="relative">
-                <img id="modal-image" src="" alt="Preview" class="max-w-full max-h-[90vh] mx-auto rounded-lg shadow-2xl">
-                <div id="image-navigation" class="absolute inset-y-0 left-0 right-0 flex justify-between items-center px-4">
-                    <button onclick="prevImage()" class="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition">
-                        <i class="fas fa-chevron-left text-2xl"></i>
-                    </button>
-                    <button onclick="nextImage()" class="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition">
-                        <i class="fas fa-chevron-right text-2xl"></i>
-                    </button>
-                </div>
-                <div id="image-counter" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                    1 / 1
-                </div>
-            </div>
+            <button onclick="hideImageModal()" class="absolute -top-12 right-0 text-white text-3xl"><i class="fas fa-times"></i></button>
+            <img id="modal-image" src="" class="max-w-full max-h-[90vh] mx-auto rounded-lg shadow-2xl">
         </div>
     </div>
 </div>
 
 <!-- Modal Galeri Foto -->
-<div id="gallery-modal" class="fixed inset-0 bg-black bg-opacity-90 overflow-y-auto h-full w-full z-50 hidden">
+<div id="gallery-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden">
     <div class="relative min-h-screen p-4">
         <div class="sticky top-0 z-10 flex justify-end mb-4">
-            <button type="button" onclick="hideGalleryModal()" class="text-white hover:text-gray-300 bg-black bg-opacity-50 rounded-full p-2">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
+            <button onclick="hideGalleryModal()" class="text-white bg-black bg-opacity-50 rounded-full p-2"><i class="fas fa-times text-2xl"></i></button>
         </div>
         <div class="container mx-auto">
             <h3 class="text-white text-xl font-semibold mb-4 text-center">Galeri Foto LHPD</h3>
-            <div id="gallery-container" class="foto-grid">
-                <!-- Dynamic gallery content -->
-            </div>
+            <div id="gallery-container" class="foto-grid"></div>
         </div>
     </div>
 </div>
@@ -493,60 +345,35 @@
 <!-- Filter dan Search -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
     <form method="GET" action="{{ route('lhpd.index') }}" id="filter-form">
-        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
             <div class="flex-1">
                 <input type="text" name="search" placeholder="Cari tujuan, dasar, hasil LHPD, atau daerah..."
-                       value="{{ request('search') }}"
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                       value="{{ request('search') }}" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex flex-wrap gap-2">
-                <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <select name="bulan" class="px-4 py-2 border rounded-lg">
                     <option value="">Semua Bulan</option>
-                    <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
-                    <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
-                    <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
-                    <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
-                    <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
-                    <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
-                    <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
-                    <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
-                    <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
-                    <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
-                    <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
-                    <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
-                </select>
-
-                <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Semua Tahun</option>
-                    @for($year = date('Y'); $year >= date('Y')-5; $year--)
-                        <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                    @endfor
-                </select>
-
-                <select name="id_daerah" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Semua Daerah Tujuan</option>
-                    @foreach($daerahList ?? [] as $daerah)
-                        <option value="{{ $daerah->id }}" {{ request('id_daerah') == $daerah->id ? 'selected' : '' }}>
-                            {{ $daerah->nama }}
-                        </option>
+                    @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $i => $b)
+                        <option value="{{ $i+1 }}" {{ request('bulan') == $i+1 ? 'selected' : '' }}>{{ $b }}</option>
                     @endforeach
                 </select>
-
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                    <i class="fas fa-search mr-2"></i> Cari
-                </button>
-
+                <select name="tahun" class="px-4 py-2 border rounded-lg">
+                    <option value="">Semua Tahun</option>
+                    @for($y = date('Y'); $y >= date('Y')-5; $y--)
+                        <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
+                </select>
+                <select name="id_daerah" class="px-4 py-2 border rounded-lg">
+                    <option value="">Semua Daerah Tujuan</option>
+                    @foreach($daerahList ?? [] as $daerah)
+                        <option value="{{ $daerah->id }}" {{ request('id_daerah') == $daerah->id ? 'selected' : '' }}>{{ $daerah->nama }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"><i class="fas fa-search mr-2"></i>Cari</button>
                 @if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('id_daerah'))
-                    <a href="{{ route('lhpd.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
-                        <i class="fas fa-redo mr-2"></i> Reset
-                    </a>
+                    <a href="{{ route('lhpd.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg"><i class="fas fa-redo mr-2"></i>Reset</a>
                 @endif
-                
-                <!-- Tombol Export Excel -->
-                <button type="button" 
-                        onclick="exportData()"
-                        id="btn-export"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+                <button type="button" onclick="exportData()" id="btn-export" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
                     <i class="fas fa-file-excel mr-2"></i> Export Excel
                 </button>
             </div>
@@ -560,215 +387,123 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">No</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-dasar">Dasar Perjalanan</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tujuan">Tujuan Perjalanan</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tanggal">Tanggal Berangkat</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-daerah">Daerah Tujuan</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-hasil">Hasil LHPD</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tempat">Tempat Dikeluarkan</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tanggal">Tanggal LHPD</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Foto</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Aksi</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">No</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase fixed-col-dasar">Dasar</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase fixed-col-tujuan">Tujuan</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase fixed-col-tanggal">Tgl Berangkat</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase fixed-col-daerah">Daerah Tujuan</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase fixed-col-hasil">Hasil LHPD</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase fixed-col-tempat">Tempat Dikeluarkan</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase fixed-col-tanggal">Tgl LHPD</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase w-20">Foto</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase w-32">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($lhpdList as $index => $lhpd)
-                <tr class="hover:bg-gray-50 transition duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                        {{ $lhpdList->firstItem() + $index }}
-                    </td>
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-4 text-sm text-gray-500 text-center">{{ ($lhpdList->currentPage() - 1) * $lhpdList->perPage() + $index + 1 }}</td>
 
-                    <!-- Kolom Dasar Perjalanan (Input Manual) -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-dasar">
-                        @php
+                    <!-- Dasar -->
+                    <td class="px-4 py-4">
+                        @php 
                             $dasarList = $lhpd->dasar_list;
+                            $dasarCount = $dasarList ? (is_array($dasarList) ? count($dasarList) : $dasarList->count()) : 0;
+                            $dasarArray = is_array($dasarList) ? $dasarList : ($dasarList ? $dasarList->toArray() : []);
                         @endphp
-                        @if($dasarList && $dasarList->count() > 0)
-                            <div class="dasar-list">
-                                <ul class="list-disc list-inside">
-                                    @foreach($dasarList->take(3) as $dasar)
-                                        <li title="{{ $dasar }}">{{ Str::limit($dasar, 40) }}</li>
-                                    @endforeach
-                                    @if($dasarList->count() > 3)
-                                        <li class="text-blue-500 tooltip">
-                                            +{{ $dasarList->count() - 3 }} dasar lainnya
-                                            <span class="tooltip-text">
-                                                @foreach($dasarList->skip(3) as $dasar)
-                                                    {{ $dasar }}@if(!$loop->last), @endif
-                                                @endforeach
-                                            </span>
-                                        </li>
-                                    @endif
-                                </ul>
+                        @if($dasarCount > 0)
+                            <div class="flex flex-wrap gap-1">
+                                @foreach(array_slice($dasarArray, 0, 2) as $dasar)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700" title="{{ $dasar }}">
+                                        <i class="fas fa-gavel text-gray-400 mr-1"></i> {{ Str::limit($dasar, 20) }}
+                                    </span>
+                                @endforeach
+                                @if($dasarCount > 2)
+                                    <button onclick="showFullDasar(this, {{ json_encode($dasarArray) }})" class="text-blue-500 text-xs">+{{ $dasarCount - 2 }}</button>
+                                @endif
                             </div>
                         @else
-                            <span class="text-gray-400 text-sm italic">Belum diisi</span>
+                            <span class="text-gray-400 text-sm italic">-</span>
                         @endif
                     </td>
 
-                    <!-- Kolom Tujuan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-tujuan">
-                        <div class="text-sm font-medium text-gray-900" title="{{ $lhpd->tujuan }}">
-                            {{ Str::limit($lhpd->tujuan, 50) }}
-                        </div>
+                    <!-- Tujuan -->
+                    <td class="px-4 py-4">
+                        <div class="text-sm text-gray-700 line-clamp-2" title="{{ $lhpd->tujuan }}">{{ Str::limit($lhpd->tujuan, 50) }}</div>
                     </td>
 
-                    <!-- Kolom Tanggal Berangkat -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-tanggal">
-                        @if($lhpd->tanggal_berangkat)
-                            <div class="text-sm text-gray-900">
-                                {{ \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') }}
-                            </div>
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                    <!-- Tanggal Berangkat -->
+                    <td class="px-4 py-4 text-sm text-gray-600">
+                        {{ $lhpd->tanggal_berangkat ? \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') : '-' }}
                     </td>
 
-                    <!-- Kolom Daerah Tujuan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-daerah">
-                        @php
-                            $daerahTujuan = $lhpd->tempat_tujuan;
-                        @endphp
-                        @if($daerahTujuan && $daerahTujuan != '-')
-                            <div class="text-sm text-gray-900">
-                                {{ $daerahTujuan }}
-                            </div>
-                            @if($lhpd->tempat_tujuan_snapshot)
-                                <span class="snapshot-badge tooltip">
-                                    <i class="fas fa-camera-retro text-xs"></i> snapshot
-                                    <span class="tooltip-text">Data snapshot (tidak berubah)</span>
-                                </span>
-                            @endif
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                    <!-- Daerah Tujuan -->
+                    <td class="px-4 py-4 text-sm text-gray-600">
+                        {{ $lhpd->tempat_tujuan_snapshot ?: '-' }}
                     </td>
 
-                    <!-- Kolom Hasil LHPD -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-hasil">
+                    <!-- Hasil LHPD -->
+                    <td class="px-4 py-4">
                         @if($lhpd->hasil)
-                            <div class="text-sm text-gray-900" title="{{ $lhpd->hasil }}">
-                                {{ Str::limit($lhpd->hasil, 80) }}
-                            </div>
-                            <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium status-complete">
-                                <i class="fas fa-check-circle mr-1 text-xs"></i> Selesai
-                            </span>
+                            <div class="text-sm text-gray-700 line-clamp-2" title="{{ $lhpd->hasil }}">{{ Str::limit($lhpd->hasil, 60) }}</div>
+                            <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">Selesai</span>
                         @else
-                            <span class="text-gray-400 text-sm italic">Belum diisi</span>
-                            <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs font-medium status-incomplete">
-                                <i class="fas fa-clock mr-1 text-xs"></i> Perlu diisi
-                            </span>
+                            <span class="text-gray-400 text-sm italic">Perlu diisi</span>
                         @endif
                     </td>
 
-                    <!-- Kolom Tempat Dikeluarkan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-tempat">
-                        @php
-                            $tempatDikeluarkan = $lhpd->tempat_dikeluarkan_nama;
-                        @endphp
-                        @if($tempatDikeluarkan && $tempatDikeluarkan != '-')
-                            <div class="text-sm text-gray-900">
-                                {{ $tempatDikeluarkan }}
-                            </div>
-                            @if($lhpd->tempat_dikeluarkan_snapshot)
-                                <span class="snapshot-badge tooltip">
-                                    <i class="fas fa-camera-retro text-xs"></i> snapshot
-                                    <span class="tooltip-text">Data snapshot (tidak berubah)</span>
-                                </span>
-                            @endif
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                    <!-- Tempat Dikeluarkan -->
+                    <td class="px-4 py-4 text-sm text-gray-600">
+                        {{ $lhpd->tempat_dikeluarkan_snapshot ?: '-' }}
                     </td>
 
-                    <!-- Kolom Tanggal LHPD -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-tanggal">
-                        @if($lhpd->tanggal_lhpd)
-                            <div class="text-sm text-gray-900">
-                                {{ \Carbon\Carbon::parse($lhpd->tanggal_lhpd)->format('d/m/Y') }}
-                            </div>
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
+                    <!-- Tanggal LHPD -->
+                    <td class="px-4 py-4 text-sm text-gray-600">
+                        {{ $lhpd->tanggal_lhpd ? \Carbon\Carbon::parse($lhpd->tanggal_lhpd)->format('d/m/Y') : '-' }}
                     </td>
 
-                    <!-- Kolom Foto (Multiple) -->
-                    <td class="px-6 py-4 text-center">
-                        @php
-                            $fotoCount = $lhpd->foto_count;
-                        @endphp
+                    <!-- Foto -->
+                    <td class="px-4 py-4 text-center">
+                        @php $fotoCount = $lhpd->foto_count; @endphp
                         @if($fotoCount > 0)
-                            <button type="button" 
-                                    onclick="showGallery({{ $lhpd->id_lhpd }})"
-                                    class="gallery-thumb inline-flex flex-col items-center text-blue-600 hover:text-blue-800">
+                            <button onclick="showGallery({{ $lhpd->id_lhpd }})" class="gallery-thumb">
                                 <div class="relative">
                                     @if($lhpd->first_foto_url)
-                                        <img src="{{ $lhpd->first_foto_url }}" alt="Thumbnail" 
-                                             class="w-12 h-12 object-cover rounded-lg border">
+                                        <img src="{{ $lhpd->first_foto_url }}" alt="Thumbnail" class="w-12 h-12 rounded-lg object-cover border">
                                     @else
-                                        <i class="fas fa-images text-3xl"></i>
+                                        <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center"><i class="fas fa-image text-gray-400"></i></div>
                                     @endif
                                     <span class="badge-count">{{ $fotoCount }}</span>
                                 </div>
-                                <span class="text-xs mt-1">{{ $fotoCount }} foto</span>
                             </button>
                         @else
-                            <span class="text-gray-400">
-                                <i class="fas fa-image text-2xl opacity-50"></i>
-                                <span class="text-xs block">0 foto</span>
-                            </span>
+                            <div class="text-gray-400"><i class="fas fa-image text-xl opacity-50"></i></div>
                         @endif
                     </td>
 
-<!-- Kolom Aksi -->
-<td class="px-6 py-4 whitespace-nowrap text-center">
-    <div class="flex justify-center gap-2">
-        <a href="{{ route('lhpd.edit', $lhpd->id_lhpd) }}"
-           class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition duration-150 tooltip"
-           title="Edit LHPD">
-            <i class="fas fa-edit"></i>
-        </a>
-
-        <!-- Tombol Download PDF - SELALU TAMPIL -->
-        <a href="{{ route('lhpd.print', $lhpd->id_lhpd) }}"
-           target="_blank"
-           class="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition duration-150 tooltip"
-           title="Download PDF">
-            <i class="fas fa-file-pdf"></i>
-        </a>
-
-        <!-- Tombol Preview PDF - SELALU TAMPIL -->
-        <a href="{{ route('lhpd.preview-pdf', $lhpd->id_lhpd) }}"
-           target="_blank"
-           class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition duration-150 tooltip"
-           title="Preview PDF">
-            <i class="fas fa-eye"></i>
-        </a>
-
-        <button type="button"
-                onclick="showDeleteConfirmation(
-                    {{ $lhpd->id_lhpd }},
-                    '{{ addslashes(Str::limit($lhpd->tujuan, 50)) }}',
-                    '{{ addslashes($lhpd->tanggal_berangkat ? \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') : '-') }}'
-                )"
-                class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition duration-150 tooltip"
-                title="Hapus LHPD">
-            <i class="fas fa-trash"></i>
-        </button>
-    </div>
-</td>
+                    <!-- Aksi -->
+                    <td class="px-4 py-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ route('lhpd.edit', $lhpd->id_lhpd) }}" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 tooltip" title="Edit LHPD">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ route('lhpd.preview-pdf', $lhpd->id_lhpd) }}" target="_blank" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 tooltip" title="Preview PDF">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            <button onclick="showDeleteConfirmation({{ $lhpd->id_lhpd }}, '{{ addslashes(Str::limit($lhpd->tujuan, 50)) }}', '{{ addslashes($lhpd->tanggal_berangkat ? \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') : '-') }}')" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 tooltip" title="Hapus LHPD">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
-                              @empty
+                @empty
                 <tr>
-                    <td colspan="10" class="px-6 py-12 text-center text-gray-500">
-                        <div class="flex flex-col items-center justify-center">
+                    <td colspan="10" class="px-4 py-12 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
                             <i class="fas fa-file-alt text-gray-300 text-5xl mb-3"></i>
                             <p class="text-lg">Tidak ada data LHPD</p>
                             <p class="text-sm mt-1">LHPD akan dibuat otomatis saat membuat SPT/SPD</p>
-                            <a href="{{ route('spt.index') }}" class="mt-3 btn-primary btn">
-                                <i class="fas fa-plus"></i> Buat SPT
-                            </a>
+                            <a href="{{ route('spt.index') }}" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Buat SPT</a>
                         </div>
                     </td>
                 </tr>
@@ -778,322 +513,228 @@
     </div>
 </div>
 
-<!-- Pagination -->
-@if($lhpdList->hasPages())
+<!-- PAGINATION - SAMA PERSIS DENGAN RINCIAN BIAYA -->
+@if($lhpdList->count() > 0)
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
-        Menampilkan
-        <span class="font-medium">{{ $lhpdList->firstItem() ?: 0 }}</span>
-        sampai
-        <span class="font-medium">{{ $lhpdList->lastItem() ?: 0 }}</span>
-        dari
-        <span class="font-medium">{{ $lhpdList->total() }}</span>
-        Laporan Hasil Perjalanan Dinas
+        Menampilkan 
+        <span class="font-medium">{{ $lhpdList->firstItem() ?: 0 }}</span> 
+        sampai 
+        <span class="font-medium">{{ $lhpdList->lastItem() ?: 0 }}</span> 
+        dari 
+        <span class="font-medium">{{ $lhpdList->total() }}</span> 
+        LHPD
     </div>
-
+    
     <div class="flex items-center space-x-1">
+        {{-- Previous Page Link --}}
         @if ($lhpdList->onFirstPage())
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed bg-gray-100">
                 <i class="fas fa-chevron-left text-xs"></i>
             </span>
         @else
-            <a href="{{ $lhpdList->previousPageUrl() }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
+            <a href="{{ $lhpdList->previousPageUrl() }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-left text-xs"></i>
             </a>
         @endif
-
+        
+        {{-- Pagination Elements dengan Range dan Ellipsis --}}
         @php
             $current = $lhpdList->currentPage();
             $last = $lhpdList->lastPage();
             $start = max($current - 2, 1);
             $end = min($current + 2, $last);
         @endphp
-
+        
+        {{-- Tombol ke halaman 1 jika tidak dimulai dari 1 --}}
         @if($start > 1)
-            <a href="{{ $lhpdList->url(1) }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
+            <a href="{{ $lhpdList->url(1) }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
             @if($start > 2)
                 <span class="px-3 py-1.5 text-gray-500">...</span>
             @endif
         @endif
-
+        
+        {{-- Tombol halaman dalam range --}}
         @for ($page = $start; $page <= $end; $page++)
             @if ($page == $current)
                 <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
             @else
-                <a href="{{ $lhpdList->url($page) }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
+                <a href="{{ $lhpdList->url($page) }}" 
+                   class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $page }}</a>
             @endif
         @endfor
-
+        
+        {{-- Tombol ke halaman terakhir jika tidak sampai akhir --}}
         @if($end < $last)
             @if($end < $last - 1)
                 <span class="px-3 py-1.5 text-gray-500">...</span>
             @endif
-            <a href="{{ $lhpdList->url($last) }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
+            <a href="{{ $lhpdList->url($last) }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">{{ $last }}</a>
         @endif
-
+        
+        {{-- Next Page Link --}}
         @if ($lhpdList->hasMorePages())
-            <a href="{{ $lhpdList->nextPageUrl() }}" class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
+            <a href="{{ $lhpdList->nextPageUrl() }}" 
+               class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
         @else
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed bg-gray-100">
                 <i class="fas fa-chevron-right text-xs"></i>
             </span>
         @endif
     </div>
 </div>
 @endif
+
+<!-- Modal Full Dasar -->
+<div id="full-dasar-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Dasar Perjalanan</h3>
+                    <button onclick="hideFullDasarModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <div class="bg-gray-50 border rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <ul id="full-dasar-list" class="list-disc list-inside space-y-2"></ul>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="hideFullDasarModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
 <script>
-// Variabel global untuk galeri
 let currentGalleryImages = [];
 let currentImageIndex = 0;
 
 // ========== EXPORT FUNCTION ==========
 function exportData() {
     const btn = document.getElementById('btn-export');
-    const originalHtml = btn.innerHTML;
-    
+    const original = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
-    btn.classList.add('btn-loading');
     btn.disabled = true;
-    
     const form = document.getElementById('filter-form');
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    
-    for (let [key, value] of formData.entries()) {
-        if (value && value !== '') {
-            params.append(key, value);
-        }
-    }
-    
-    const exportUrl = "{{ route('lhpd.export') }}?" + params.toString();
-    window.location.href = exportUrl;
-    
-    setTimeout(() => {
-        btn.innerHTML = originalHtml;
-        btn.classList.remove('btn-loading');
-        btn.disabled = false;
-    }, 2000);
+    const params = new URLSearchParams(new FormData(form));
+    window.location.href = "{{ route('lhpd.export') }}?" + params.toString();
+    setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 2000);
 }
 
-// ========== NOTIFICATION FUNCTIONS ==========
+// ========== NOTIFICATION ==========
 function hideNotification(type) {
-    const notification = document.getElementById(`${type}-notification`);
-    if (notification) {
-        notification.classList.remove('animate-slide-in-bottom');
-        notification.classList.add('animate-slide-out-bottom');
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 300);
+    const el = document.getElementById(`${type}-notification`);
+    if (el) {
+        el.classList.remove('animate-slide-in-bottom');
+        el.classList.add('animate-slide-out-bottom');
+        setTimeout(() => { el.style.display = 'none'; }, 300);
     }
 }
+setTimeout(() => { 
+    ['success', 'error'].forEach(t => hideNotification(t)); 
+}, 5000);
 
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        const successNotif = document.getElementById('success-notification');
-        const errorNotif = document.getElementById('error-notification');
-        if (successNotif) hideNotification('success');
-        if (errorNotif) hideNotification('error');
-    }, 5000);
-});
-
-// ========== DELETE CONFIRMATION FUNCTIONS ==========
-let currentDeleteId = null;
-
+// ========== DELETE ==========
+let deleteId = null;
 function showDeleteConfirmation(id, tujuan, tanggal) {
-    currentDeleteId = id;
+    deleteId = id;
     document.getElementById('delete-tujuan').textContent = tujuan;
-    document.getElementById('delete-tanggal').textContent = `Tanggal Berangkat: ${tanggal}`;
-    const form = document.getElementById('delete-form');
-    form.action = `/lhpd/${id}`;
-    const modal = document.getElementById('delete-confirm-modal');
-    modal.classList.remove('hidden');
-    modal.style.display = 'block';
+    document.getElementById('delete-tanggal').textContent = `Berangkat: ${tanggal}`;
+    document.getElementById('delete-form').action = `/lhpd/${id}`;
+    document.getElementById('delete-confirm-modal').classList.remove('hidden');
 }
-
-function hideDeleteModal() {
+function hideDeleteModal() { 
     const modal = document.getElementById('delete-confirm-modal');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
+    const modalContent = modal.querySelector('.bg-white');
+    modalContent.classList.add('animate-fade-out');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modalContent.classList.remove('animate-fade-out');
+    }, 300);
 }
 
 document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
-    const form = this;
-    const formData = new FormData(form);
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
-    submitBtn.disabled = true;
-    
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    fetch(this.action, { 
+        method: 'POST', 
+        body: new FormData(this), 
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } 
     })
-    .then(response => response.json())
+    .then(res => res.json())
     .then(data => {
         if (data.success) {
-            showDeleteSuccess(currentDeleteId);
+            document.getElementById('delete-message').textContent = 'Data LHPD berhasil dihapus.';
+            document.getElementById('delete-notification').classList.remove('hidden');
             hideDeleteModal();
-            setTimeout(() => { window.location.reload(); }, 2000);
-        } else {
-            throw new Error(data.message || 'Gagal menghapus data');
-        }
+            setTimeout(() => location.reload(), 2000);
+        } else throw new Error(data.message);
     })
-    .catch(error => {
-        alert('Terjadi kesalahan saat menghapus data: ' + error.message);
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
+    .catch(err => alert('Gagal: ' + err.message));
 });
 
-function showDeleteSuccess(id) {
-    const notification = document.getElementById('delete-notification');
-    const message = document.getElementById('delete-message');
-    message.textContent = `Data LHPD berhasil dihapus.`;
-    notification.classList.remove('hidden');
-    notification.style.display = 'block';
-    setTimeout(() => { hideNotification('delete'); }, 5000);
-}
-
-// ========== GALERI FOTO FUNCTIONS ==========
-async function showGallery(lhpdId) {
+// ========== GALLERY ==========
+async function showGallery(id) {
     try {
-        const response = await fetch(`/lhpd/api/get-fotos/${lhpdId}`);
-        const data = await response.json();
-        
-        if (data.success && data.fotos.length > 0) {
+        const res = await fetch(`/lhpd/api/get-fotos/${id}`);
+        const data = await res.json();
+        if (data.success && data.fotos.length) {
             currentGalleryImages = data.fotos;
-            renderGallery();
-            showGalleryModal();
-        } else {
-            alert('Tidak ada foto untuk ditampilkan');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('Gagal memuat foto');
-    }
+            const container = document.getElementById('gallery-container');
+            container.innerHTML = '';
+            currentGalleryImages.forEach((f, i) => {
+                const div = document.createElement('div');
+                div.className = 'foto-item';
+                div.innerHTML = `<img src="${f.url}" onclick="openImageViewer(${i})">`;
+                container.appendChild(div);
+            });
+            document.getElementById('gallery-modal').classList.remove('hidden');
+        } else alert('Tidak ada foto');
+    } catch(e) { alert('Gagal memuat foto'); }
 }
+function hideGalleryModal() { document.getElementById('gallery-modal').classList.add('hidden'); }
 
-function renderGallery() {
-    const container = document.getElementById('gallery-container');
-    container.innerHTML = '';
-    
-    currentGalleryImages.forEach((foto, index) => {
-        const fotoItem = document.createElement('div');
-        fotoItem.className = 'foto-item';
-        fotoItem.innerHTML = `
-            <img src="${foto.url}" alt="Foto ${index + 1}" 
-                 onclick="openImageViewer(${index})">
-        `;
-        container.appendChild(fotoItem);
-    });
-}
-
-function showGalleryModal() {
-    const modal = document.getElementById('gallery-modal');
-    modal.classList.remove('hidden');
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-function hideGalleryModal() {
-    const modal = document.getElementById('gallery-modal');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// ========== IMAGE VIEWER FUNCTIONS ==========
+// ========== IMAGE VIEWER ==========
 function openImageViewer(index) {
     currentImageIndex = index;
     const modal = document.getElementById('image-modal');
-    const modalImage = document.getElementById('modal-image');
-    const counter = document.getElementById('image-counter');
-    const nav = document.getElementById('image-navigation');
-    
-    modalImage.src = currentGalleryImages[currentImageIndex].url;
-    counter.textContent = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
-    
-    // Tampilkan navigasi jika lebih dari 1 foto
-    if (currentGalleryImages.length > 1) {
-        nav.style.display = 'flex';
-    } else {
-        nav.style.display = 'none';
-    }
-    
+    document.getElementById('modal-image').src = currentGalleryImages[currentImageIndex].url;
     modal.classList.remove('hidden');
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-    
-    // Sembunyikan galeri modal
     hideGalleryModal();
 }
+function hideImageModal() { document.getElementById('image-modal').classList.add('hidden'); }
+function prevImage() { if (currentImageIndex > 0) { currentImageIndex--; document.getElementById('modal-image').src = currentGalleryImages[currentImageIndex].url; } }
+function nextImage() { if (currentImageIndex < currentGalleryImages.length - 1) { currentImageIndex++; document.getElementById('modal-image').src = currentGalleryImages[currentImageIndex].url; } }
 
-function hideImageModal() {
-    const modal = document.getElementById('image-modal');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
+// ========== FULL DASAR ==========
+function showFullDasar(el, list) {
+    const container = document.getElementById('full-dasar-list');
+    container.innerHTML = '';
+    list.forEach(d => { let li = document.createElement('li'); li.className = 'text-sm text-gray-700'; li.textContent = d; container.appendChild(li); });
+    document.getElementById('full-dasar-modal').classList.remove('hidden');
 }
+function hideFullDasarModal() { document.getElementById('full-dasar-modal').classList.add('hidden'); }
 
-function prevImage() {
-    if (currentImageIndex > 0) {
-        currentImageIndex--;
-        const modalImage = document.getElementById('modal-image');
-        const counter = document.getElementById('image-counter');
-        modalImage.src = currentGalleryImages[currentImageIndex].url;
-        counter.textContent = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
-    }
-}
-
-function nextImage() {
-    if (currentImageIndex < currentGalleryImages.length - 1) {
-        currentImageIndex++;
-        const modalImage = document.getElementById('modal-image');
-        const counter = document.getElementById('image-counter');
-        modalImage.src = currentGalleryImages[currentImageIndex].url;
-        counter.textContent = `${currentImageIndex + 1} / ${currentGalleryImages.length}`;
-    }
-}
-
-// Close modals with Escape key
-document.addEventListener('keydown', function(e) {
+// ========== CLOSE MODALS ==========
+document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-        hideDeleteModal();
-        hideImageModal();
-        hideGalleryModal();
+        hideDeleteModal(); hideImageModal(); hideGalleryModal(); hideFullDasarModal();
     }
-    
-    // Navigasi kiri/kanan untuk image viewer
-    if (e.key === 'ArrowLeft' && document.getElementById('image-modal').style.display === 'block') {
-        prevImage();
-    }
-    if (e.key === 'ArrowRight' && document.getElementById('image-modal').style.display === 'block') {
-        nextImage();
-    }
+    if (e.key === 'ArrowLeft') prevImage();
+    if (e.key === 'ArrowRight') nextImage();
 });
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const deleteModal = document.getElementById('delete-confirm-modal');
-    const imageModal = document.getElementById('image-modal');
-    const galleryModal = document.getElementById('gallery-modal');
-    
-    if (event.target === deleteModal) {
-        hideDeleteModal();
-    }
-    if (event.target === imageModal) {
-        hideImageModal();
-    }
-    if (event.target === galleryModal) {
-        hideGalleryModal();
-    }
+window.onclick = e => {
+    if (e.target === document.getElementById('delete-confirm-modal')) hideDeleteModal();
+    if (e.target === document.getElementById('image-modal')) hideImageModal();
+    if (e.target === document.getElementById('gallery-modal')) hideGalleryModal();
+    if (e.target === document.getElementById('full-dasar-modal')) hideFullDasarModal();
 }
 </script>
 @endsection

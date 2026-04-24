@@ -78,7 +78,13 @@
 
 /* Custom badge untuk SPPD */
 .sppd-badge {
-    @apply px-2 py-1 rounded-md text-xs font-mono font-medium;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: monospace;
     background-color: #e0e7ff;
     color: #3730a3;
     border: 1px solid #c7d2fe;
@@ -91,15 +97,40 @@
     white-space: normal !important;
 }
 
-/* Fixed width untuk kolom */
-.fixed-col-nomor {
-    min-width: 150px;
-    max-width: 200px;
+/* Loading spinner untuk export */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-.fixed-col-tujuan {
-    min-width: 180px;
-    max-width: 250px;
+/* Tooltip */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: #1f2937;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
 
 /* Hover effect untuk sel tabel */
@@ -124,7 +155,7 @@
     </div>
 </div>
 
-<!-- Notifikasi Toast - POSISI DI BAWAH -->
+<!-- Notifikasi Toast -->
 <?php if(session('success')): ?>
 <div id="success-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg">
@@ -191,7 +222,7 @@
 </div>
 <?php endif; ?>
 
-<!-- Notifikasi Hapus - POSISI DI BAWAH -->
+<!-- Notifikasi Hapus -->
 <div id="delete-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -217,15 +248,12 @@
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
             <div class="p-6 text-center">
-                <!-- Icon Warning -->
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
                     <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                 </div>
                 
-                <!-- Title -->
                 <h3 class="text-xl font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
                 
-                <!-- Message -->
                 <div class="mb-6 text-left">
                     <p class="text-gray-600 mb-3">Anda akan menghapus data rincian biaya:</p>
                     
@@ -248,11 +276,10 @@
                     </div>
                 </div>
                 
-                <!-- Action Buttons -->
                 <div class="flex justify-center space-x-4">
                     <button type="button" 
                             onclick="hideDeleteModal()"
-                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200">
                         <i class="fas fa-times mr-2"></i> Batal
                     </button>
                     
@@ -260,7 +287,7 @@
                         <?php echo csrf_field(); ?>
                         <?php echo method_field('DELETE'); ?>
                         <button type="submit" 
-                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200">
                             <i class="fas fa-trash mr-2"></i> Hapus
                         </button>
                     </form>
@@ -270,24 +297,66 @@
     </div>
 </div>
 
+<!-- Modal Full Text -->
+<div id="full-text-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold" id="full-text-title"></h3>
+                    <button onclick="hideFullTextModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="bg-gray-50 border rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <pre class="text-sm text-gray-700 whitespace-pre-wrap" id="full-text-content"></pre>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="hideFullTextModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg transition duration-200">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Filter dan Search -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
-    <form method="GET" action="<?php echo e(route('rincian.index')); ?>" class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-        <div class="flex-1">
-            <input type="text" name="search" placeholder="Cari nomor SPPD, tujuan, atau pegawai..." 
-                   value="<?php echo e(request('search')); ?>"
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+    <form method="GET" action="<?php echo e(route('rincian.index')); ?>" id="filter-form">
+        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div class="flex-1">
+                <input type="text" name="search" placeholder="Cari nomor SPPD, tujuan, atau pegawai..." 
+                       value="<?php echo e(request('search')); ?>"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                    <i class="fas fa-search mr-2"></i> Cari
+                </button>
+                <?php if(request()->has('search')): ?>
+                    <a href="<?php echo e(route('rincian.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                        <i class="fas fa-redo mr-2"></i> Reset
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
-        <div class="flex flex-wrap gap-2">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
-                <i class="fas fa-search mr-2"></i> Cari
-            </button>
-            <?php if(request()->has('search')): ?>
-                <a href="<?php echo e(route('rincian.index')); ?>" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
-                    <i class="fas fa-redo mr-2"></i> Reset
-                </a>
-            <?php endif; ?>
+
+        <!-- ACTIVE FILTERS -->
+        <?php if(request()->has('search')): ?>
+        <div class="mt-4 pt-3 border-t border-gray-200">
+            <div class="flex items-center flex-wrap gap-2">
+                <span class="text-sm text-gray-600">Filter aktif:</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <i class="fas fa-search mr-1"></i> <?php echo e(request('search')); ?>
+
+                    <a href="<?php echo e(route('rincian.index')); ?>" class="ml-2 text-blue-600 hover:text-blue-800">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </span>
+            </div>
         </div>
+        <?php endif; ?>
     </form>
 </div>
 
@@ -297,45 +366,53 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-nomor">Nomor SPPD</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Berangkat</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kembali</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lama</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tujuan">Tujuan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pegawai</th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Uang Harian</th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">No</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor SPPD</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Berangkat</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Kembali</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lama</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tujuan</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pegawai</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Uang Harian</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                <?php $__empty_1 = true; $__currentLoopData = $rincian; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php $__empty_1 = true; $__currentLoopData = $rincian; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
+                    $pegawaiList = is_array($item->pegawai) ? $item->pegawai : [];
+                    $displayPegawai = array_slice($pegawaiList, 0, 3);
+                ?>
                 <tr class="hover:bg-gray-50 transition duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <?php echo e($rincian->firstItem() + $key); ?>
+                    <!-- No - menggunakan perhitungan manual seperti menu lain -->
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                        <?php echo e(($rincian->currentPage() - 1) * $rincian->perPage() + $index + 1); ?>
 
                     </td>
                     
                     <!-- Kolom Nomor SPPD -->
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="sppd-badge">
-                            <i class="fas fa-file-alt mr-1 text-xs"></i> <?php echo e($item->nomor_sppd ?? '-'); ?>
+                            <i class="fas fa-file-alt mr-1 text-xs"></i> <?php echo e(Str::limit($item->nomor_sppd ?? '-', 25)); ?>
 
                         </span>
+                        <?php if(strlen($item->nomor_sppd ?? '') > 25): ?>
+                            <button onclick="showFullText(this, '<?php echo e(addslashes($item->nomor_sppd)); ?>', 'Nomor SPPD')" class="text-blue-500 text-xs mt-1 block hover:underline">Lihat selengkapnya</button>
+                        <?php endif; ?>
                     </td>
                     
                     <!-- Kolom Tanggal Berangkat -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         <i class="fas fa-calendar-alt text-gray-400 mr-1 text-xs"></i>
-                        <?php echo e($item->tanggal_berangkat ? $item->tanggal_berangkat->format('d/m/Y') : '-'); ?>
+                        <?php echo e($item->tanggal_berangkat ? \Carbon\Carbon::parse($item->tanggal_berangkat)->format('d/m/Y') : '-'); ?>
 
                     </td>
                     
                     <!-- Kolom Tanggal Kembali -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         <i class="fas fa-calendar-alt text-gray-400 mr-1 text-xs"></i>
-                        <?php echo e($item->tanggal_kembali ? $item->tanggal_kembali->format('d/m/Y') : '-'); ?>
+                        <?php echo e($item->tanggal_kembali ? \Carbon\Carbon::parse($item->tanggal_kembali)->format('d/m/Y') : '-'); ?>
 
                     </td>
                     
@@ -347,16 +424,16 @@
                     </td>
                     
                     <!-- Kolom Tujuan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-tujuan table-cell-hover">
-                        <div class="text-sm text-gray-900" title="<?php echo e($item->tempat_tujuan ?? '-'); ?>">
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-700 line-clamp-2 tooltip" title="<?php echo e($item->tempat_tujuan ?? '-'); ?>">
                             <i class="fas fa-map-marker-alt text-gray-400 mr-1 text-xs"></i>
                             <?php echo e(Str::limit($item->tempat_tujuan ?? '-', 50)); ?>
 
                         </div>
-                        <?php if($item->spd && $item->spd->tempatTujuan && strlen($item->spd->tempatTujuan->nama) > 50): ?>
+                        <?php if(strlen($item->tempat_tujuan ?? '') > 50): ?>
                             <button type="button" 
-                                    onclick="showFullText(this, '<?php echo e(addslashes($item->spd->tempatTujuan->nama)); ?>', 'Tujuan Perjalanan')"
-                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                                    onclick="showFullText(this, '<?php echo e(addslashes($item->tempat_tujuan)); ?>', 'Tujuan Perjalanan')"
+                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800 hover:underline">
                                 Lihat selengkapnya
                             </button>
                         <?php endif; ?>
@@ -364,99 +441,95 @@
                     
                     <!-- Kolom Pegawai -->
                     <td class="px-6 py-4">
-                        <div class="flex -space-x-2">
-                            <?php
-                                $pegawaiList = is_array($item->pegawai) ? $item->pegawai : [];
-                                $displayPegawai = array_slice($pegawaiList, 0, 3);
-                            ?>
-                            <?php $__currentLoopData = $displayPegawai; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $peg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <div class="w-8 h-8 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-medium text-indigo-600" 
-                                     title="<?php echo e($peg['nama'] ?? ''); ?> - <?php echo e($peg['nip'] ?? ''); ?>">
-                                    <?php echo e(strtoupper(substr($peg['nama'] ?? '?', 0, 1))); ?>
+                        <div class="flex items-center gap-1">
+                            <div class="flex -space-x-2">
+                                <?php $__currentLoopData = $displayPegawai; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $peg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <div class="w-7 h-7 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-medium text-indigo-600 tooltip" 
+                                         title="<?php echo e($peg['nama'] ?? ''); ?> - <?php echo e($peg['nip'] ?? ''); ?>">
+                                        <?php echo e(strtoupper(substr($peg['nama'] ?? '?', 0, 1))); ?>
 
-                                </div>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            <?php if(count($pegawaiList) > 3): ?>
-                                <div class="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600" 
-                                     title="<?php echo e(count($pegawaiList) - 3); ?> pegawai lainnya">
-                                    +<?php echo e(count($pegawaiList) - 3); ?>
+                                    </div>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php if(count($pegawaiList) > 3): ?>
+                                    <div class="w-7 h-7 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs font-medium text-gray-600 tooltip" 
+                                         title="<?php echo e(count($pegawaiList) - 3); ?> pegawai lainnya">
+                                        +<?php echo e(count($pegawaiList) - 3); ?>
 
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-users mr-1"></i> <?php echo e(count($pegawaiList)); ?> orang
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <span class="text-xs text-gray-500 ml-1"><?php echo e(count($pegawaiList)); ?> orang</span>
                         </div>
                     </td>
                     
-                    <!-- Kolom Uang Harian -->
+                    <!-- Kolom Uang Harian per orang per hari -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right">
                         <div class="font-medium text-gray-800">
                             Rp <?php echo e(number_format($item->uang_harian ?? 0, 0, ',', '.')); ?>
 
                         </div>
                         <div class="text-xs text-gray-400">
-                            per orang/hari
+                            /org/hari
                         </div>
                     </td>
                     
-                    <!-- Kolom Total -->
+                    <!-- Kolom Total Keseluruhan -->
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold">
                         <div class="text-blue-600">
-                            Rp <?php echo e(number_format($item->total_keseluruhan ?? $item->total, 0, ',', '.')); ?>
+                            Rp <?php echo e(number_format($item->total_keseluruhan ?? $item->total ?? 0, 0, ',', '.')); ?>
 
                         </div>
                         <div class="text-xs text-gray-400">
-                            <?php echo e($item->lama_perjadin ?? 0); ?> hari × <?php echo e(count($pegawaiList)); ?> orang
-                        </div>
-                        <div class="text-xs text-green-500 mt-0.5">
-                            *transport di kwitansi terpisah
+                            <?php echo e($item->lama_perjadin ?? 0); ?> hari × <?php echo e(count($pegawaiList)); ?> org
                         </div>
                     </td>
                     
                     <!-- Kolom Aksi -->
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex space-x-2">
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-2">
                             <a href="<?php echo e(route('rincian.show', $item->id)); ?>" 
-                               class="text-blue-600 hover:text-blue-900 px-3 py-1 rounded hover:bg-blue-50 transition duration-150"
+                               class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition duration-150 tooltip" 
                                title="Lihat Detail">
-                                <i class="fas fa-eye mr-1"></i> Detail
+                                <i class="fas fa-eye"></i>
+                                <span class="tooltip-text">Lihat Detail</span>
                             </a>
                             <a href="<?php echo e(route('rincian.cetak', $item->id)); ?>" 
-                               class="text-green-600 hover:text-green-900 px-3 py-1 rounded hover:bg-green-50 transition duration-150"
+                               class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition duration-150 tooltip" 
                                title="Cetak PDF"
                                target="_blank">
-                                <i class="fas fa-print mr-1"></i> Cetak
+                                <i class="fas fa-print"></i>
+                                <span class="tooltip-text">Cetak PDF</span>
                             </a>
                             <a href="<?php echo e(route('rincian.edit', $item->id)); ?>" 
-                               class="text-yellow-600 hover:text-yellow-900 px-3 py-1 rounded hover:bg-yellow-50 transition duration-150"
+                               class="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50 transition duration-150 tooltip" 
                                title="Edit">
-                                <i class="fas fa-edit mr-1"></i> Edit
+                                <i class="fas fa-edit"></i>
+                                <span class="tooltip-text">Edit</span>
                             </a>
                             
-                            <!-- Tombol Hapus dengan Modal -->
                             <button type="button" 
                                     onclick="showDeleteConfirmation(
                                         <?php echo e($item->id); ?>, 
                                         '<?php echo e(addslashes($item->nomor_sppd ?? 'Rincian Biaya')); ?>', 
                                         '<?php echo e(addslashes($item->tempat_tujuan ?? '-')); ?>'
                                     )"
-                                    class="text-red-600 hover:text-red-900 px-3 py-1 rounded hover:bg-red-50 transition duration-150"
+                                    class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition duration-150 tooltip" 
                                     title="Hapus">
-                                <i class="fas fa-trash mr-1"></i> Hapus
+                                <i class="fas fa-trash"></i>
+                                <span class="tooltip-text">Hapus</span>
                             </button>
                         </div>
                     </td>
                 </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
-                    <td colspan="10" class="px-6 py-8 text-center text-gray-500">
-                        <div class="flex flex-col items-center justify-center">
-                            <i class="fas fa-receipt text-gray-300 text-4xl mb-3"></i>
+                    <td colspan="10" class="px-6 py-12 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-receipt text-gray-300 text-5xl mb-3"></i>
                             <p class="text-lg">Belum ada data rincian biaya</p>
                             <p class="text-sm mt-1">Sync dari SPD atau tambah rincian manual</p>
                             <div class="mt-3 flex gap-2">
-                                <a href="<?php echo e(route('rincian.sync-all')); ?>" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center text-sm">
+                                <a href="<?php echo e(route('rincian.sync-all')); ?>" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg inline-flex items-center transition duration-200">
                                     <i class="fas fa-sync-alt mr-2"></i> Sync dari SPD
                                 </a>
                             </div>
@@ -469,8 +542,8 @@
     </div>
 </div>
 
-<!-- Pagination -->
-<?php if($rincian->hasPages()): ?>
+<!-- PAGINATION - SAMA PERSIS DENGAN MENU LAIN -->
+<?php if($rincian->count() > 0): ?>
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
@@ -485,7 +558,7 @@
     <div class="flex items-center space-x-1">
         
         <?php if($rincian->onFirstPage()): ?>
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed bg-gray-100">
                 <i class="fas fa-chevron-left text-xs"></i>
             </span>
         <?php else: ?>
@@ -503,6 +576,7 @@
             $end = min($current + 2, $last);
         ?>
         
+        
         <?php if($start > 1): ?>
             <a href="<?php echo e($rincian->url(1)); ?>" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
@@ -510,6 +584,7 @@
                 <span class="px-3 py-1.5 text-gray-500">...</span>
             <?php endif; ?>
         <?php endif; ?>
+        
         
         <?php for($page = $start; $page <= $end; $page++): ?>
             <?php if($page == $current): ?>
@@ -519,6 +594,7 @@
                    class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150"><?php echo e($page); ?></a>
             <?php endif; ?>
         <?php endfor; ?>
+        
         
         <?php if($end < $last): ?>
             <?php if($end < $last - 1): ?>
@@ -535,7 +611,7 @@
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
         <?php else: ?>
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed bg-gray-100">
                 <i class="fas fa-chevron-right text-xs"></i>
             </span>
         <?php endif; ?>
@@ -543,16 +619,7 @@
 </div>
 <?php endif; ?>
 
-<!-- INFO NOTE -->
-<div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-    <div class="flex items-start gap-2">
-        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-        <div class="text-sm text-blue-700">
-            <span class="font-semibold">Informasi:</span> Rincian di atas hanya untuk <strong>Uang Harian</strong>. 
-            Biaya <strong>Transportasi</strong> akan dikwitansi secara terpisah sesuai ketentuan yang berlaku.
-        </div>
-    </div>
-</div>
+
 
 <?php $__env->stopSection(); ?>
 
@@ -572,7 +639,6 @@ function hideNotification(type) {
 
 // Auto-hide notifications after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto hide success/error/warning notifications
     setTimeout(() => {
         const successNotif = document.getElementById('success-notification');
         const errorNotif = document.getElementById('error-notification');
@@ -592,20 +658,16 @@ function showDeleteConfirmation(id, nomor, tujuan) {
     currentDeleteId = id;
     currentDeleteNomor = nomor;
     
-    // Update modal content
     document.getElementById('delete-nomor').textContent = nomor;
     document.getElementById('delete-tujuan').innerHTML = tujuan ? `<i class="fas fa-map-marker-alt mr-1"></i> ${tujuan}` : 'Tanpa tujuan';
     
-    // Update form action
     const form = document.getElementById('delete-form');
     form.action = `/rincian/${id}`;
     
-    // Show modal with animation
     const modal = document.getElementById('delete-confirm-modal');
     modal.classList.remove('hidden');
     modal.style.display = 'block';
     
-    // Add animation class to modal content
     const modalContent = modal.querySelector('.bg-white');
     modalContent.classList.add('animate-fade-in');
 }
@@ -614,11 +676,9 @@ function hideDeleteModal() {
     const modal = document.getElementById('delete-confirm-modal');
     const modalContent = modal.querySelector('.bg-white');
     
-    // Add fade out animation
     modalContent.classList.remove('animate-fade-in');
     modalContent.classList.add('animate-fade-out');
     
-    // Hide modal after animation
     setTimeout(() => {
         modal.classList.add('hidden');
         modal.style.display = 'none';
@@ -628,20 +688,17 @@ function hideDeleteModal() {
     }, 300);
 }
 
-// Handle form submission dengan AJAX untuk notifikasi lebih baik
 document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     
     const form = this;
     const formData = new FormData(form);
     
-    // Tampilkan loading
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
     submitBtn.disabled = true;
     
-    // Kirim request DELETE
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -653,11 +710,8 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Tampilkan notifikasi hapus sukses
             showDeleteSuccess(currentDeleteNomor);
-            // Sembunyikan modal
             hideDeleteModal();
-            // Refresh halaman setelah 2 detik
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -667,34 +721,28 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        // Jika error, tampilkan alert biasa
         alert('Terjadi kesalahan saat menghapus data: ' + error.message);
-        // Reset tombol
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
 });
 
-// Tampilkan notifikasi hapus sukses
 function showDeleteSuccess(nomor) {
     const notification = document.getElementById('delete-notification');
     const message = document.getElementById('delete-message');
     
     message.textContent = `Rincian biaya dengan nomor SPPD "${nomor}" berhasil dihapus.`;
     
-    // Reset progress bar
     const progress = document.getElementById('delete-progress');
     progress.style.width = '100%';
     progress.style.animation = 'none';
-    void progress.offsetWidth; // Trigger reflow
+    void progress.offsetWidth;
     progress.style.animation = 'progressBar 5s linear forwards';
     
-    // Show notification dengan animasi bawah
     notification.classList.remove('hidden');
     notification.style.display = 'block';
     notification.classList.add('animate-slide-in-bottom');
     
-    // Auto hide after 5 seconds
     setTimeout(() => {
         hideNotification('delete');
     }, 5000);
@@ -702,79 +750,35 @@ function showDeleteSuccess(nomor) {
 
 // ========== FULL TEXT MODAL ==========
 function showFullText(element, text, title) {
-    // Buat modal untuk menampilkan teks lengkap
-    const modalId = 'full-text-modal';
-    let modal = document.getElementById(modalId);
-    
-    if (!modal) {
-        // Buat modal jika belum ada
-        modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden';
-        modal.innerHTML = `
-            <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto animate-fade-in">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900" id="full-text-title"></h3>
-                            <button type="button" onclick="hideFullTextModal()" class="text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-times text-xl"></i>
-                            </button>
-                        </div>
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <pre class="text-sm text-gray-700 whitespace-pre-wrap max-h-96 overflow-y-auto" id="full-text-content"></pre>
-                        </div>
-                        <div class="mt-4 flex justify-end">
-                            <button type="button" onclick="hideFullTextModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200">
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    
-    // Isi konten modal
     document.getElementById('full-text-title').textContent = title;
     document.getElementById('full-text-content').textContent = text;
-    
-    // Tampilkan modal
-    modal.classList.remove('hidden');
-    modal.style.display = 'block';
+    document.getElementById('full-text-modal').classList.remove('hidden');
 }
 
 function hideFullTextModal() {
-    const modal = document.getElementById('full-text-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
+    document.getElementById('full-text-modal').classList.add('hidden');
 }
 
-// Close modal when clicking outside
+// ========== CLOSE MODALS ==========
 document.getElementById('delete-confirm-modal')?.addEventListener('click', function(e) {
     if (e.target === this) {
         hideDeleteModal();
     }
 });
 
-// Close full text modal when clicking outside
-document.addEventListener('click', function(e) {
-    const fullTextModal = document.getElementById('full-text-modal');
-    if (fullTextModal && e.target === fullTextModal) {
-        hideFullTextModal();
-    }
-});
-
-// Close modals with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideDeleteModal();
         hideFullTextModal();
     }
 });
+
+window.onclick = function(event) {
+    const fullTextModal = document.getElementById('full-text-modal');
+    if (event.target === fullTextModal) {
+        hideFullTextModal();
+    }
+}
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/rincian-bidang.blade.php ENDPATH**/ ?>
