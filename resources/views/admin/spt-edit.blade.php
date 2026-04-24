@@ -197,11 +197,20 @@
                 </label>
                 <div id="pegawai-container" class="space-y-3">
                     @php
-                        $pegawaiList = old('pegawai', is_array($spt->pegawai) ? $spt->pegawai : (json_decode($spt->pegawai ?? '[]', true) ?: ['']));
-                        if (!is_array($pegawaiList)) {
-                            $pegawaiList = ['']; // Fallback jika bukan array
-                        }
-                    @endphp
+    // Ambil ID pegawai dari snapshot (karena snapshot selalu ada untuk data lama)
+    $pegawaiIds = [];
+    if ($spt->pegawai_snapshot && count($spt->pegawai_snapshot) > 0) {
+        $pegawaiIds = array_column($spt->pegawai_snapshot, 'id_pegawai');
+    } elseif ($spt->pegawai) {
+        $pegawaiIds = is_array($spt->pegawai) ? $spt->pegawai : json_decode($spt->pegawai ?? '[]', true);
+    }
+    
+    if (empty($pegawaiIds)) {
+        $pegawaiIds = [''];
+    }
+    
+    $pegawaiList = old('pegawai', $pegawaiIds);
+@endphp
                     @foreach($pegawaiList as $index => $value)
                     <div class="flex items-start space-x-2 pegawai-item">
                         <div class="flex-grow">

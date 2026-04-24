@@ -11,9 +11,7 @@ class RincianBidang extends Model
 {
     use HasFactory;
 
-    // Nama tabel di database
     protected $table = 'tb_rincianbidang';
-
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
@@ -27,10 +25,11 @@ class RincianBidang extends Model
         'tempat_tujuan_id',
         'tempat_tujuan',
         'bendahara_pengeluaran_id',
+        'bendahara_nama',
+        'bendahara_nip',
+        'bendahara_jabatan',
         'uang_harian_id',
         'uang_harian',
-        'uang_transport',
-        'transport',
         'total',
         'terbilang',
         'pegawai'
@@ -68,23 +67,22 @@ class RincianBidang extends Model
 
     // ========== ACCESSORS ==========
     
+    /**
+     * Total uang harian untuk semua pegawai
+     * Rumus: uang_harian * lama_perjadin * jumlah_pegawai
+     */
     public function getTotalUangHarianKeseluruhanAttribute()
     {
         $jumlahPegawai = is_array($this->pegawai) ? count($this->pegawai) : 0;
         return ($this->uang_harian ?? 0) * ($this->lama_perjadin ?? 0) * $jumlahPegawai;
     }
     
-    public function getTotalUangTransportKeseluruhanAttribute()
-    {
-        $jumlahPegawai = is_array($this->pegawai) ? count($this->pegawai) : 0;
-        return ($this->uang_transport ?? 0) * $jumlahPegawai;
-    }
-
+    /**
+     * Total keseluruhan (hanya uang harian, karena transport terpisah)
+     */
     public function getTotalKeseluruhanAttribute()
     {
-        return $this->total_uang_harian_keseluruhan + 
-               $this->total_uang_transport_keseluruhan + 
-               ($this->transport ?? 0);
+        return $this->total_uang_harian_keseluruhan;
     }
 
     public function getDaftarNamaPegawaiAttribute()
@@ -110,6 +108,21 @@ class RincianBidang extends Model
             ];
         }
         return $result;
+    }
+
+    /**
+     * Mendapatkan data bendahara dari snapshot (data saat RincianBidang dibuat)
+     */
+    public function getBendaharaSnapshotAttribute()
+    {
+        if ($this->bendahara_nama) {
+            return (object) [
+                'nama' => $this->bendahara_nama,
+                'nip' => $this->bendahara_nip,
+                'jabatan' => $this->bendahara_jabatan,
+            ];
+        }
+        return $this->bendaharaPengeluaran;
     }
 
     public function getTanggalBerangkatIndonesiaAttribute()
@@ -177,9 +190,6 @@ class RincianBidang extends Model
 
     // ========== HELPER METHODS ==========
     
-    /**
-     * Get default bendahara pengeluaran (pegawai dengan jabatan Bendahara Pengeluaran)
-     */
     public static function getDefaultBendahara()
     {
         return Pegawai::where('jabatan', 'like', '%Bendahara%Pengeluaran%')
@@ -188,13 +198,14 @@ class RincianBidang extends Model
             ->first();
     }
     
+    /**
+     * Hitung total biaya (HANYA uang harian)
+     * Uang transport TIDAK termasuk, akan dikwitansi terpisah
+     */
     public function hitungTotal(): float
     {
         $jumlahPegawai = is_array($this->pegawai) ? count($this->pegawai) : 0;
-        $totalUangHarian = ($this->uang_harian ?? 0) * ($this->lama_perjadin ?? 0) * $jumlahPegawai;
-        $totalUangTransport = ($this->uang_transport ?? 0) * $jumlahPegawai;
-        
-        return $totalUangHarian + $totalUangTransport + ($this->transport ?? 0);
+        return ($this->uang_harian ?? 0) * ($this->lama_perjadin ?? 0) * $jumlahPegawai;
     }
     
     public function updateTotal(): self
@@ -203,30 +214,18 @@ class RincianBidang extends Model
         return $this;
     }
     
-    /**
-     * Generate terbilang dari total
-     */
     public function generateTerbilang(): string
     {
-        // Pastikan total adalah integer
         $total = (int) $this->total;
         return $this->terbilang($total);
     }
     
-    /**
-     * Fungsi terbilang (angka ke kata) - DIPERBAIKI
-     * 
-     * @param int|string $angka
-     * @return string
-     */
     private function terbilang($angka): string
     {
-        // Jika parameter adalah array, return default
         if (is_array($angka)) {
             $angka = 0;
         }
         
-        // Konversi ke integer
         $angka = (int) $angka;
         
         if ($angka == 0) {
@@ -235,7 +234,6 @@ class RincianBidang extends Model
         
         $satuan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan'];
         
-        // Fungsi rekursif untuk konversi
         $konversi = function($n) use ($satuan, &$konversi) {
             if ($n < 10) {
                 return $satuan[$n];
@@ -299,9 +297,6 @@ class RincianBidang extends Model
         return ucfirst($hasil) . ' Rupiah';
     }
 
-    /**
-     * Sync dari data SPD - DIPERBAIKI dengan default bendahara
-     */
     public static function syncFromSpd(SPD $spd, array $additionalData = [])
     {
         \Illuminate\Support\Facades\Log::info('=== SYNC FROM SPD ===', [
@@ -310,10 +305,8 @@ class RincianBidang extends Model
             'lama_perjadin' => $spd->lama_perjadin,
         ]);
         
-        // Cari atau buat RincianBidang berdasarkan spd_id
         $rincianBidang = self::firstOrNew(['spd_id' => $spd->id_spd]);
         
-        // Data dasar dari SPD
         $rincianBidang->spd_id = $spd->id_spd;
         $rincianBidang->nomor_sppd = $spd->nomor_surat;
         $rincianBidang->tanggal_berangkat = $spd->tanggal_berangkat;
@@ -321,28 +314,23 @@ class RincianBidang extends Model
         $rincianBidang->lama_perjadin = $spd->lama_perjadin ?? 1;
         $rincianBidang->tempat_tujuan_id = $spd->tempat_tujuan;
         
-        // Ambil nama tempat tujuan
         if ($spd->tempatTujuan) {
             $rincianBidang->tempat_tujuan = $spd->tempatTujuan->nama;
         }
         
-        // Ambil data uang harian berdasarkan daerah tujuan
         $uangHarianData = null;
         if ($spd->tempat_tujuan) {
             $uangHarianData = UangHarian::where('daerah_id', $spd->tempat_tujuan)->first();
             if ($uangHarianData) {
                 $rincianBidang->uang_harian_id = $uangHarianData->id_uang_harian;
                 $rincianBidang->uang_harian = $uangHarianData->uang_harian;
-                $rincianBidang->uang_transport = $uangHarianData->uang_transport;
+                // TIDAK mengambil uang_transport karena akan dikwitansi terpisah
             } else {
-                // Reset ke 0 jika tidak ditemukan
                 $rincianBidang->uang_harian_id = null;
                 $rincianBidang->uang_harian = 0;
-                $rincianBidang->uang_transport = 0;
             }
         }
         
-        // Ambil data pegawai dari spd_pelaksana
         $pegawaiList = [];
         $pelaksana = $spd->pelaksanaPerjadin()->get();
         
@@ -360,49 +348,51 @@ class RincianBidang extends Model
         
         $rincianBidang->pegawai = $pegawaiList;
         
-        // ========== SET BENDAHARA PENGELUARAN ==========
-        // Prioritas:
-        // 1. Dari parameter $additionalData
-        // 2. Cari pegawai dengan jabatan "Bendahara Pengeluaran"
-        // 3. Pegawai pertama dari daftar pelaksana
-        // 4. Null
+        // ========== SET BENDAHARA PENGELUARAN DENGAN SNAPSHOT ==========
+        $bendaharaData = null;
         
         if (isset($additionalData['bendahara_pengeluaran_id']) && !empty($additionalData['bendahara_pengeluaran_id'])) {
-            $rincianBidang->bendahara_pengeluaran_id = $additionalData['bendahara_pengeluaran_id'];
+            $bendahara = Pegawai::find($additionalData['bendahara_pengeluaran_id']);
+            if ($bendahara) {
+                $bendaharaData = $bendahara;
+                $rincianBidang->bendahara_pengeluaran_id = $bendahara->id_pegawai;
+            }
         } else {
-            // Cari bendahara default dari database
             $defaultBendahara = self::getDefaultBendahara();
-            
             if ($defaultBendahara) {
+                $bendaharaData = $defaultBendahara;
                 $rincianBidang->bendahara_pengeluaran_id = $defaultBendahara->id_pegawai;
-                \Illuminate\Support\Facades\Log::info('Menggunakan bendahara default', [
-                    'id' => $defaultBendahara->id_pegawai,
-                    'nama' => $defaultBendahara->nama,
-                    'jabatan' => $defaultBendahara->jabatan,
-                ]);
             } elseif (!empty($pegawaiList)) {
-                $rincianBidang->bendahara_pengeluaran_id = $pegawaiList[0]['id_pegawai'];
-                \Illuminate\Support\Facades\Log::info('Menggunakan pegawai pertama sebagai bendahara', [
-                    'id' => $pegawaiList[0]['id_pegawai'],
-                    'nama' => $pegawaiList[0]['nama'],
-                ]);
+                $pegawaiFirst = Pegawai::find($pegawaiList[0]['id_pegawai']);
+                if ($pegawaiFirst) {
+                    $bendaharaData = $pegawaiFirst;
+                    $rincianBidang->bendahara_pengeluaran_id = $pegawaiList[0]['id_pegawai'];
+                }
             } else {
                 $rincianBidang->bendahara_pengeluaran_id = null;
-                \Illuminate\Support\Facades\Log::warning('Tidak ada bendahara yang dipilih');
             }
         }
         
-        // Set transport
-        $rincianBidang->transport = $additionalData['transport'] ?? 0;
+        // Simpan snapshot bendahara
+        if ($bendaharaData) {
+            $rincianBidang->bendahara_nama = $bendaharaData->nama;
+            $rincianBidang->bendahara_nip = $bendaharaData->nip;
+            $rincianBidang->bendahara_jabatan = $bendaharaData->jabatan;
+        } else {
+            $rincianBidang->bendahara_nama = null;
+            $rincianBidang->bendahara_nip = null;
+            $rincianBidang->bendahara_jabatan = null;
+        }
         
-        // Hitung total
+        // TIDAK mengambil transport dari additionalData
         $rincianBidang->total = $rincianBidang->hitungTotal();
-        
-        // Generate terbilang
         $rincianBidang->terbilang = $rincianBidang->generateTerbilang();
         
-        // Merge additional data
+        // Proses additionalData (kecuali transport yang sudah dihapus)
         foreach ($additionalData as $key => $value) {
+            // Skip 'transport' karena tidak ada di fillable lagi
+            if ($key === 'transport') continue;
+            
             if (in_array($key, $rincianBidang->fillable) && $key !== 'spd_id') {
                 $rincianBidang->$key = $value;
             }

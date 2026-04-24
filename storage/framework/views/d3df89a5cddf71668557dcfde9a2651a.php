@@ -652,4 +652,8 @@ document.getElementById('formSPT').addEventListener('submit', function(e) {
 });
 </script>
 <?php $__env->stopSection(); ?>
+<<<<<<<< HEAD:storage/framework/views/d3df89a5cddf71668557dcfde9a2651a.php
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\DPMPTSP\DPMPTSP\resources\views/admin/spt-create.blade.php ENDPATH**/ ?>
+========
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/spt-create.blade.php ENDPATH**/ ?>
+>>>>>>>> 1f6d5892f27f21c66f85cde1faf6f091fce20555:storage/framework/views/480b2e3ebcc0bef9d00bc917ea9113e9.php

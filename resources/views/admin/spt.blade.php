@@ -78,89 +78,18 @@
     animation: progressBar 5s linear forwards;
 }
 
-/* Custom untuk SPT */
+/* Badge untuk SPT */
 .spt-badge {
-    @apply px-2 py-1 rounded-full text-xs font-medium;
-}
-
-.spt-badge-dinas {
-    @apply bg-blue-100 text-blue-800 border border-blue-200;
-}
-
-.spt-badge-pribadi {
-    @apply bg-green-100 text-green-800 border border-green-200;
-}
-
-/* Wrapping untuk teks panjang */
-.text-wrap-cell {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal !important;
-}
-
-/* Fixed width untuk kolom */
-.fixed-col-nomor {
-    min-width: 150px;
-    max-width: 200px;
-}
-
-.fixed-col-tujuan {
-    min-width: 250px;
-    max-width: 350px;
-}
-
-.fixed-col-tanggal {
-    min-width: 120px;
-    max-width: 150px;
-}
-
-.fixed-col-lokasi {
-    min-width: 150px;
-    max-width: 200px;
-}
-
-.fixed-col-pegawai {
-    min-width: 200px;
-    max-width: 300px;
-}
-
-.fixed-col-dasar {
-    min-width: 200px;
-    max-width: 300px;
-}
-
-.fixed-col-penandatangan {
-    min-width: 180px;
-    max-width: 250px;
-}
-
-/* Hover effect untuk sel tabel */
-.table-cell-hover:hover {
-    background-color: #f9fafb;
-}
-
-/* Badge untuk jumlah pegawai */
-.pegawai-count-badge {
-    @apply ml-2 bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded;
-}
-
-/* Loading spinner untuk export */
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.btn-loading {
-    opacity: 0.7;
-    cursor: wait;
-}
-
-.btn-loading i {
-    animation: spin 1s linear infinite;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: monospace;
+    background-color: #e0e7ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
 }
 
 /* Tooltip */
@@ -192,24 +121,42 @@
     visibility: visible;
     opacity: 1;
 }
+
+/* Loading spinner untuk export */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.btn-loading {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.btn-loading i {
+    animation: spin 1s linear infinite;
+}
+
+/* Line clamp untuk teks panjang */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 </style>
 
+<!-- HEADER -->
 <div class="mb-6">
     <div class="flex justify-between items-center flex-wrap gap-4">
         <div>
             <h2 class="text-lg font-semibold text-gray-700">Surat Perintah Tugas (SPT)</h2>
             <p class="text-gray-500">Kelola data Surat Perintah Tugas</p>
         </div>
-        <div class="flex space-x-2">
-            <!-- SATU TOMBOL EXPORT - akan mengambil semua filter yang aktif -->
-            <button type="button" 
-                    onclick="exportData()"
-                    id="btn-export"
-                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
+        <div class="flex gap-2">
+            <button type="button" onclick="exportData()" id="btn-export" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-file-excel mr-2"></i> Export Excel
             </button>
-            
-            <!-- Tombol Tambah SPT -->
             <a href="{{ route('spt.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-plus mr-2"></i> Tambah SPT
             </a>
@@ -217,7 +164,7 @@
     </div>
 </div>
 
-<!-- Notifikasi Toast - POSISI DI BAWAH -->
+<!-- NOTIFIKASI TOAST -->
 @if(session('success'))
 <div id="success-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-lg">
@@ -262,29 +209,7 @@
 </div>
 @endif
 
-@if(session('warning'))
-<div id="warning-notification" class="fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
-    <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg shadow-lg">
-        <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>
-            </div>
-            <div class="ml-3 flex-1">
-                <p class="font-medium">Perhatian!</p>
-                <p class="text-sm mt-1">{{ session('warning') }}</p>
-            </div>
-            <button type="button" onclick="hideNotification('warning')" class="ml-4 text-yellow-600 hover:text-yellow-800">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="mt-2 w-full bg-yellow-200 rounded-full h-1">
-            <div id="warning-progress" class="bg-yellow-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
-        </div>
-    </div>
-</div>
-@endif
-
-<!-- Notifikasi Hapus - POSISI DI BAWAH -->
+<!-- NOTIFIKASI HAPUS -->
 <div id="delete-notification" class="hidden fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom">
     <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg shadow-lg">
         <div class="flex items-start">
@@ -305,20 +230,17 @@
     </div>
 </div>
 
-<!-- Modal Konfirmasi Hapus -->
+<!-- MODAL KONFIRMASI HAPUS -->
 <div id="delete-confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto animate-fade-in">
             <div class="p-6 text-center">
-                <!-- Icon Warning -->
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
                     <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                 </div>
                 
-                <!-- Title -->
                 <h3 class="text-xl font-semibold text-gray-900 mb-4">Konfirmasi Hapus</h3>
                 
-                <!-- Message -->
                 <div class="mb-6 text-left">
                     <p class="text-gray-600 mb-3">Anda akan menghapus data SPT:</p>
                     
@@ -341,11 +263,10 @@
                     </div>
                 </div>
                 
-                <!-- Action Buttons -->
                 <div class="flex justify-center space-x-4">
                     <button type="button" 
                             onclick="hideDeleteModal()"
-                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                            class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200">
                         <i class="fas fa-times mr-2"></i> Batal
                     </button>
                     
@@ -353,7 +274,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" 
-                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200 flex items-center justify-center min-w-[120px]">
+                                class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition duration-200">
                             <i class="fas fa-trash mr-2"></i> Hapus
                         </button>
                     </form>
@@ -363,54 +284,87 @@
     </div>
 </div>
 
-<!-- Filter dan Search -->
+<!-- MODAL FULL TEXT -->
+<div id="full-text-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold" id="full-text-title"></h3>
+                    <button onclick="hideFullTextModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="bg-gray-50 border rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <pre class="text-sm text-gray-700 whitespace-pre-wrap" id="full-text-content"></pre>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="hideFullTextModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg transition duration-200">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL FULL DASAR -->
+<div id="full-dasar-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Dasar SPT</h3>
+                    <button onclick="hideFullDasarModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="bg-gray-50 border rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <ul id="full-dasar-list" class="list-disc list-inside space-y-2"></ul>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="hideFullDasarModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg transition duration-200">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FILTER DAN SEARCH -->
 <div class="bg-white rounded-lg shadow p-4 mb-6">
     <form method="GET" action="{{ route('spt.index') }}" id="filter-form">
-        <div class="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
             <div class="flex-1">
-                <input type="text" name="search" placeholder="Cari nomor surat, tujuan, lokasi, atau nama pegawai..." 
-                       value="{{ request('search') }}"
+                <input type="text" name="search" placeholder="Cari nomor surat, tujuan, lokasi, atau penanda tangan..." 
+                       value="{{ request('search') }}" 
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             </div>
             <div class="flex flex-wrap gap-2">
-                <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <select name="bulan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Semua Bulan</option>
-                    <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
-                    <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
-                    <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
-                    <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
-                    <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
-                    <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
-                    <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
-                    <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
-                    <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
-                    <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
-                    <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
-                    <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
-                </select>
-                
-                <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Semua Tahun</option>
-                    @for($year = date('Y'); $year >= date('Y')-5; $year--)
-                        <option value="{{ $year }}" {{ request('tahun') == $year ? 'selected' : '' }}>{{ $year }}</option>
-                    @endfor
-                </select>
-                
-                <select name="penanda_tangan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Semua Penanda Tangan</option>
-                    @foreach($pegawais ?? [] as $pegawai)
-                        <option value="{{ $pegawai->id_pegawai }}" {{ request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : '' }}>
-                            {{ $pegawai->nama }}
-                        </option>
+                    @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $i => $b)
+                        <option value="{{ $i+1 }}" {{ request('bulan') == $i+1 ? 'selected' : '' }}>{{ $b }}</option>
                     @endforeach
                 </select>
-                
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                <select name="tahun" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Tahun</option>
+                    @for($y = date('Y'); $y >= date('Y')-5; $y--)
+                        <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
+                </select>
+                <select name="penanda_tangan" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Penanda Tangan</option>
+                    @foreach($pegawais ?? [] as $pegawai)
+                        <option value="{{ $pegawai->id_pegawai }}" {{ request('penanda_tangan') == $pegawai->id_pegawai ? 'selected' : '' }}>{{ $pegawai->nama }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
                     <i class="fas fa-search mr-2"></i> Cari
                 </button>
-                
-                @if(request()->has('search') || request()->has('bulan') || request()->has('tahun') || request()->has('penanda_tangan'))
-                    <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200">
+                @if(request()->hasAny(['search', 'bulan', 'tahun', 'penanda_tangan']))
+                    <a href="{{ route('spt.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg transition duration-200 flex items-center">
                         <i class="fas fa-redo mr-2"></i> Reset
                     </a>
                 @endif
@@ -419,247 +373,148 @@
     </form>
 </div>
 
-<!-- Tabel SPT -->
+<!-- TABEL SPT -->
 <div class="bg-white rounded-lg shadow overflow-hidden">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-nomor">Nomor Surat</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-dasar">Dasar</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-pegawai">Pegawai</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tujuan">Tujuan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-tanggal">Tanggal</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-lokasi">Lokasi</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider fixed-col-penandatangan">Penanda Tangan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">No</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Surat</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dasar</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pegawai</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tujuan</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penanda Tangan</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Aksi</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-                @php
-                    // Pastikan $spts selalu ada dan bisa di-loop
-                    $spts = $spts ?? collect([]);
-                    $isPaginated = method_exists($spts, 'currentPage');
-                @endphp
-                
                 @forelse($spts as $index => $spt)
                 <tr class="hover:bg-gray-50 transition duration-150">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        @if($isPaginated)
-                            {{ ($spts->currentPage() - 1) * $spts->perPage() + $index + 1 }}
-                        @else
-                            {{ $index + 1 }}
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                        {{ ($spts->currentPage() - 1) * $spts->perPage() + $index + 1 }}
+                    </td>
+
+                    <!-- Nomor Surat -->
+                    <td class="px-4 py-4">
+                        <span class="spt-badge"><i class="fas fa-file-alt mr-1 text-xs"></i> {{ Str::limit($spt->nomor_surat, 25) }}</span>
+                        @if(strlen($spt->nomor_surat) > 25)
+                            <button onclick="showFullText(this, '{{ addslashes($spt->nomor_surat) }}', 'Nomor Surat')" class="text-blue-500 text-xs mt-1 block">Lihat selengkapnya</button>
                         @endif
                     </td>
-                    
-                    <!-- Kolom Nomor Surat -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-nomor table-cell-hover">
-                        <div class="text-sm font-medium text-gray-900" title="{{ $spt->nomor_surat }}">
-                            {{ Str::limit($spt->nomor_surat, 30) }}
-                        </div>
-                        @if(strlen($spt->nomor_surat) > 30)
-                            <button type="button" 
-                                    onclick="showFullText(this, '{{ addslashes($spt->nomor_surat) }}', 'Nomor Surat')"
-                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800">
-                                Lihat selengkapnya
-                            </button>
-                        @endif
-                    </td>
-                    
-                    <!-- Kolom Dasar -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-dasar table-cell-hover">
-                        @if(!empty($spt->dasar))
-                            @php $dasarList = $spt->dasar_list; @endphp
-                            @if(count($dasarList) > 1)
-                                <div class="space-y-1">
-                                    @foreach(array_slice($dasarList, 0, 2) as $dasar)
-                                        <div class="text-sm text-gray-700">• {{ Str::limit($dasar, 30) }}</div>
-                                    @endforeach
-                                    @if(count($dasarList) > 2)
-                                        <button type="button" 
-                                                onclick="showFullDasar(this, {{ json_encode($dasarList) }})"
-                                                class="mt-1 text-xs text-blue-600 hover:text-blue-800">
-                                            + {{ count($dasarList) - 2 }} dasar lainnya
-                                        </button>
-                                    @endif
-                                </div>
-                            @else
-                                <div class="text-sm text-gray-700">{{ Str::limit($dasarList[0] ?? '', 50) }}</div>
-                                @if(strlen($dasarList[0] ?? '') > 50)
-                                    <button type="button" 
-                                            onclick="showFullText(this, '{{ addslashes($dasarList[0]) }}', 'Dasar')"
-                                            class="mt-1 text-xs text-blue-600 hover:text-blue-800">
-                                        Lihat selengkapnya
-                                    </button>
-                                @endif
-                            @endif
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
-                    </td>
-                    
-                    <!-- Kolom Pegawai -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-pegawai table-cell-hover">
-                        @if(!empty($spt->pegawai))
-                            @php $pegawaiList = $spt->pegawai_list; @endphp
-                            <div class="space-y-2">
-                                @foreach($pegawaiList as $pegawai)
-                                    <div class="flex items-center tooltip">
-                                        <div class="flex-shrink-0 h-6 w-6 mr-2">
-                                            <div class="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center">
-                                                <span class="text-indigo-600 font-semibold text-xs">
-                                                    {{ strtoupper(substr($pegawai->nama, 0, 1)) }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="text-sm text-gray-900" title="{{ $pegawai->nama }}">
-                                            {{ Str::limit($pegawai->nama, 25) }}
-                                        </div>
-                                        <span class="tooltip-text">
-                                            {{ $pegawai->nama }}<br>
-                                            NIP: {{ $pegawai->nip ?? '-' }}<br>
-                                            Jabatan: {{ $pegawai->jabatan ?? '-' }}
-                                        </span>
-                                    </div>
+
+                    <!-- Dasar -->
+                    <td class="px-4 py-4">
+                        @php 
+                            $dasarList = $spt->dasar_list;
+                            $dasarCount = is_array($dasarList) ? count($dasarList) : ($dasarList ? $dasarList->count() : 0);
+                            $dasarArray = is_array($dasarList) ? $dasarList : ($dasarList ? $dasarList->toArray() : []);
+                        @endphp
+                        @if($dasarCount > 0)
+                            <div class="flex flex-wrap gap-1">
+                                @foreach(array_slice($dasarArray, 0, 2) as $dasar)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700" title="{{ $dasar }}">
+                                        <i class="fas fa-gavel text-gray-400 mr-1"></i> {{ Str::limit($dasar, 20) }}
+                                    </span>
                                 @endforeach
+                                @if($dasarCount > 2)
+                                    <button onclick="showFullDasar(this, {{ json_encode($dasarArray) }})" class="text-blue-500 text-xs hover:underline">+{{ $dasarCount - 2 }} lainnya</button>
+                                @endif
                             </div>
-                        @else
+                        @else 
                             <span class="text-gray-400 text-sm">-</span>
                         @endif
                     </td>
-                    
-                    <!-- Kolom Tujuan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-tujuan table-cell-hover">
-                        <div class="text-sm text-gray-900" title="{{ $spt->tujuan }}">
-                            {{ Str::limit($spt->tujuan, 80) }}
-                        </div>
-                        @if(strlen($spt->tujuan) > 80)
-                            <button type="button" 
-                                    onclick="showFullText(this, '{{ addslashes($spt->tujuan) }}', 'Tujuan')"
-                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800">
-                                Lihat selengkapnya
-                            </button>
-                        @endif
-                    </td>
-                    
-                    <!-- Kolom Tanggal -->
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 fixed-col-tanggal">
-                        @if($spt->tanggal)
-                            <div class="font-medium">{{ $spt->tanggal->format('d/m/Y') }}</div>
-                            <div class="text-xs text-gray-500">{{ $spt->tanggal->format('l') }}</div>
-                        @else
-                            <span class="text-gray-400 text-sm">-</span>
-                        @endif
-                    </td>
-                    
-                    <!-- Kolom Lokasi -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-lokasi table-cell-hover">
-                        <div class="text-sm text-gray-900" title="{{ $spt->lokasi }}">
-                            {{ Str::limit($spt->lokasi, 30) }}
-                        </div>
-                        @if(strlen($spt->lokasi) > 30)
-                            <button type="button" 
-                                    onclick="showFullText(this, '{{ addslashes($spt->lokasi) }}', 'Lokasi')"
-                                    class="mt-1 text-xs text-blue-600 hover:text-blue-800">
-                                Lihat selengkapnya
-                            </button>
-                        @endif
-                    </td>
-                    
-                    <!-- Kolom Penanda Tangan -->
-                    <td class="px-6 py-4 text-wrap-cell fixed-col-penandatangan table-cell-hover">
-                        @if($spt->penandaTangan)
-                            <div class="flex items-center tooltip">
-                                <div class="flex-shrink-0 h-8 w-8 mr-3">
-                                    <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                                        <span class="text-green-600 font-semibold text-sm">
-                                            {{ strtoupper(substr($spt->penandaTangan->nama, 0, 1)) }}
-                                        </span>
-                                    </div>
+
+                    <!-- Pegawai -->
+                    <td class="px-4 py-4">
+                        @php 
+                            $pegawaiList = $spt->pegawai_list_from_snapshot;
+                            $pegawaiCount = $pegawaiList ? $pegawaiList->count() : 0;
+                        @endphp
+                        @if($pegawaiCount > 0)
+                            <div class="flex items-center gap-1">
+                                <div class="flex -space-x-2">
+                                    @foreach($pegawaiList->take(3) as $peg)
+                                        <div class="w-7 h-7 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center text-xs font-medium text-indigo-600 tooltip" title="{{ $peg->nama }} - {{ $peg->nip ?? '' }}">
+                                            {{ strtoupper(substr($peg->nama ?? '?', 0, 1)) }}
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900" title="{{ $spt->penandaTangan->nama }}">
-                                        {{ Str::limit($spt->penandaTangan->nama, 30) }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">{{ $spt->penandaTangan->jabatan ?? '-' }}</div>
-                                </div>
-                                <span class="tooltip-text">
-                                    {{ $spt->penandaTangan->nama }}<br>
-                                    NIP: {{ $spt->penandaTangan->nip ?? '-' }}<br>
-                                    Jabatan: {{ $spt->penandaTangan->jabatan ?? '-' }}
-                                </span>
+                                <span class="text-xs text-gray-500 ml-1">{{ $pegawaiCount }} orang</span>
                             </div>
-                        @else
+                        @else 
                             <span class="text-gray-400 text-sm">-</span>
                         @endif
                     </td>
-                    
-                    <!-- Kolom Aksi -->
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex flex-wrap gap-2">
-                            @if(isset($spt->id_spt))
-                            <!-- Tombol Edit -->
-                            <a href="{{ route('spt.edit', $spt->id_spt) }}" 
-                               class="text-green-600 hover:text-green-900 px-2 py-1 rounded hover:bg-green-50 transition duration-150 tooltip"
-                               title="Edit SPT">
+
+                    <!-- Tujuan -->
+                    <td class="px-4 py-4">
+                        <div class="text-sm text-gray-700 line-clamp-2" title="{{ $spt->tujuan }}">{{ Str::limit($spt->tujuan, 60) }}</div>
+                        @if(strlen($spt->tujuan) > 60)
+                            <button onclick="showFullText(this, '{{ addslashes($spt->tujuan) }}', 'Tujuan Perjalanan')" class="text-blue-500 text-xs mt-1 hover:underline">Lihat selengkapnya</button>
+                        @endif
+                    </td>
+
+                    <!-- Tanggal -->
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        @if($spt->tanggal) 
+                            {{ $spt->tanggal->format('d/m/Y') }}
+                        @else 
+                            -
+                        @endif
+                    </td>
+
+                    <!-- Lokasi -->
+                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {{ Str::limit($spt->lokasi, 20) }}
+                    </td>
+
+                    <!-- Penanda Tangan -->
+                    <td class="px-4 py-4">
+                        @if($spt->penanda_tangan_nama)
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                    <span class="text-green-600 font-semibold text-xs">{{ strtoupper(substr($spt->penanda_tangan_nama, 0, 1)) }}</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-medium text-gray-900" title="{{ $spt->penanda_tangan_nama }}">{{ Str::limit($spt->penanda_tangan_nama, 18) }}</div>
+                                    <div class="text-xs text-gray-500" title="{{ $spt->penanda_tangan_jabatan ?? '-' }}">{{ Str::limit($spt->penanda_tangan_jabatan ?? '-', 15) }}</div>
+                                </div>
+                            </div>
+                        @else 
+                            <span class="text-gray-400 text-sm">-</span>
+                        @endif
+                    </td>
+
+                    <!-- Aksi -->
+                    <td class="px-4 py-4 text-center whitespace-nowrap">
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{{ route('spt.edit', $spt->id_spt) }}" class="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition duration-150 tooltip" title="Edit SPT">
                                 <i class="fas fa-edit"></i>
                                 <span class="tooltip-text">Edit SPT</span>
                             </a>
-                            
-                            <!-- Tombol Buat SPD dari SPT -->
-                            <a href="{{ route('spd.create-from-spt', $spt->id_spt) }}" 
-                               class="text-blue-600 hover:text-blue-900 px-2 py-1 rounded hover:bg-blue-50 transition duration-150 tooltip"
-                               title="Buat SPD dari SPT ini"
-                               onclick="return confirmCreateSpd('{{ addslashes($spt->nomor_surat) }}')">
-                                <i class="fas fa-file-signature"></i>
-                                <span class="tooltip-text">Buat SPD dari SPT ini</span>
+                            <a href="{{ route('spt.preview-pdf', $spt->id_spt) }}" target="_blank" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition duration-150 tooltip" title="Preview PDF">
+                                <i class="fas fa-print"></i>
+                                <span class="tooltip-text">Preview PDF</span>
                             </a>
-                            
-                            <!-- Tombol Print PDF -->
-                            {{-- <a href="{{ route('spt.print', $spt->id_spt) }}" 
-                               target="_blank"
-                               class="text-purple-600 hover:text-purple-900 px-2 py-1 rounded hover:bg-purple-50 transition duration-150 tooltip"
-                               title="Download PDF SPT">
-                                <i class="fas fa-download"></i>
-                                <span class="tooltip-text">Download PDF SPT</span>
-                            </a> --}}
-
-                            <!-- Tombol Preview PDF -->
-                            <a href="{{ route('spt.preview-pdf', $spt->id_spt) }}" 
-                               target="_blank"
-                               class="text-indigo-600 hover:text-indigo-900 px-2 py-1 rounded hover:bg-indigo-50 transition duration-150 tooltip"
-                               title="Preview PDF SPT">
-                                <i class="fas fa-eye"></i>
-                                <span class="tooltip-text">Preview PDF SPT</span>
-                            </a>
-                            
-                            <!-- Tombol Hapus dengan Modal -->
-                            <button type="button" 
-                                    onclick="showDeleteConfirmation(
-                                        {{ $spt->id_spt }}, 
-                                        '{{ addslashes(Str::limit($spt->nomor_surat, 30)) }}', 
-                                        '{{ addslashes(Str::limit($spt->tujuan, 50)) }}'
-                                    )"
-                                    class="text-red-600 hover:text-red-900 px-2 py-1 rounded hover:bg-red-50 transition duration-150 tooltip"
-                                    title="Hapus SPT">
+                            <button onclick="showDeleteConfirmation({{ $spt->id_spt }}, '{{ addslashes(Str::limit($spt->nomor_surat, 30)) }}', '{{ addslashes(Str::limit($spt->tujuan, 50)) }}')" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition duration-150 tooltip" title="Hapus SPT">
                                 <i class="fas fa-trash"></i>
                                 <span class="tooltip-text">Hapus SPT</span>
                             </button>
-                            @else
-                            <span class="text-gray-400 px-2 py-1">-</span>
-                            @endif
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="px-6 py-8 text-center text-gray-500">
-                        <div class="flex flex-col items-center justify-center">
-                            <i class="fas fa-file-alt text-gray-300 text-4xl mb-3"></i>
+                    <td colspan="9" class="px-4 py-12 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-file-alt text-gray-300 text-5xl mb-3"></i>
                             <p class="text-lg">Tidak ada data SPT</p>
                             <p class="text-sm mt-1">Mulai dengan menambahkan Surat Perintah Tugas baru</p>
-                            <a href="{{ route('spt.create') }}" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                            <a href="{{ route('spt.create') }}" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center transition duration-200">
                                 <i class="fas fa-plus mr-2"></i> Tambah SPT Pertama
                             </a>
                         </div>
@@ -671,16 +526,8 @@
     </div>
 </div>
 
-<!-- Pagination -->
-@php
-    // Cek apakah $spts ada dan memiliki method hasPages
-    $showPagination = false;
-    if (isset($spts) && method_exists($spts, 'hasPages') && $spts->hasPages()) {
-        $showPagination = true;
-    }
-@endphp
-
-@if($showPagination && $spts->count() > 0)
+<!-- PAGINATION - SAMA PERSIS DENGAN MENU USER -->
+@if($spts->count() > 0)
 <div class="mt-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
     <div class="text-sm text-gray-700">
         Menampilkan 
@@ -695,7 +542,7 @@
     <div class="flex items-center space-x-1">
         {{-- Previous Page Link --}}
         @if ($spts->onFirstPage())
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed bg-gray-100">
                 <i class="fas fa-chevron-left text-xs"></i>
             </span>
         @else
@@ -705,7 +552,7 @@
             </a>
         @endif
         
-        {{-- Pagination Elements --}}
+        {{-- Pagination Elements dengan Range dan Ellipsis --}}
         @php
             $current = $spts->currentPage();
             $last = $spts->lastPage();
@@ -713,6 +560,7 @@
             $end = min($current + 2, $last);
         @endphp
         
+        {{-- Tombol ke halaman 1 jika tidak dimulai dari 1 --}}
         @if($start > 1)
             <a href="{{ $spts->url(1) }}" 
                class="px-3 py-1.5 border rounded hover:bg-gray-100 transition duration-150">1</a>
@@ -721,6 +569,7 @@
             @endif
         @endif
         
+        {{-- Tombol halaman dalam range --}}
         @for ($page = $start; $page <= $end; $page++)
             @if ($page == $current)
                 <span class="px-3 py-1.5 border rounded bg-blue-600 text-white">{{ $page }}</span>
@@ -730,6 +579,7 @@
             @endif
         @endfor
         
+        {{-- Tombol ke halaman terakhir jika tidak sampai akhir --}}
         @if($end < $last)
             @if($end < $last - 1)
                 <span class="px-3 py-1.5 text-gray-500">...</span>
@@ -745,55 +595,18 @@
                 <i class="fas fa-chevron-right text-xs"></i>
             </a>
         @else
-            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed">
+            <span class="px-3 py-1.5 border rounded text-gray-400 cursor-not-allowed bg-gray-100">
                 <i class="fas fa-chevron-right text-xs"></i>
             </span>
         @endif
     </div>
 </div>
 @endif
+
 @endsection
 
 @section('scripts')
 <script>
-// ========== CONFIRM CREATE SPD FROM SPT ==========
-function confirmCreateSpd(nomorSurat) {
-    return confirm(`Apakah Anda yakin ingin membuat SPD dari SPT dengan nomor "${nomorSurat}"?\n\nData SPD akan dibuat otomatis berdasarkan data SPT ini.`);
-}
-
-// ========== EXPORT FUNCTION (SATU UNTUK SEMUA FILTER) ==========
-function exportData() {
-    const btn = document.getElementById('btn-export');
-    const originalHtml = btn.innerHTML;
-    
-    // Show loading state
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
-    btn.classList.add('btn-loading');
-    btn.disabled = true;
-    
-    // Get all filter values from the form
-    const form = document.getElementById('filter-form');
-    const formData = new FormData(form);
-    const params = new URLSearchParams();
-    
-    for (let [key, value] of formData.entries()) {
-        if (value && value !== '') {
-            params.append(key, value);
-        }
-    }
-    
-    // Redirect to export URL with filters (gunakan route spt.export)
-    const exportUrl = "{{ route('spt.export') }}?" + params.toString();
-    window.location.href = exportUrl;
-    
-    // Reset button after 2 seconds
-    setTimeout(() => {
-        btn.innerHTML = originalHtml;
-        btn.classList.remove('btn-loading');
-        btn.disabled = false;
-    }, 2000);
-}
-
 // ========== NOTIFICATION FUNCTIONS ==========
 function hideNotification(type) {
     const notification = document.getElementById(`${type}-notification`);
@@ -802,26 +615,48 @@ function hideNotification(type) {
         notification.classList.add('animate-slide-out-bottom');
         setTimeout(() => {
             notification.style.display = 'none';
-            notification.classList.add('hidden');
         }, 300);
     }
 }
 
-// Auto-hide notifications after 5 seconds
+// Auto hide notifications after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto hide success/error notifications
     setTimeout(() => {
         const successNotif = document.getElementById('success-notification');
         const errorNotif = document.getElementById('error-notification');
-        const warningNotif = document.getElementById('warning-notification');
         
         if (successNotif) hideNotification('success');
         if (errorNotif) hideNotification('error');
-        if (warningNotif) hideNotification('warning');
     }, 5000);
 });
 
-// ========== DELETE CONFIRMATION FUNCTIONS ==========
+// ========== EXPORT FUNCTION ==========
+function exportData() {
+    const btn = document.getElementById('btn-export');
+    const originalHtml = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    
+    const form = document.getElementById('filter-form');
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (value && value !== '') params.append(key, value);
+    }
+    
+    window.location.href = "{{ route('spt.export') }}?" + params.toString();
+    
+    setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+    }, 2000);
+}
+
+// ========== DELETE FUNCTIONS ==========
 let currentDeleteId = null;
 let currentDeleteNomor = null;
 
@@ -829,20 +664,14 @@ function showDeleteConfirmation(id, nomor, tujuan) {
     currentDeleteId = id;
     currentDeleteNomor = nomor;
     
-    // Update modal content
     document.getElementById('delete-nomor').textContent = nomor;
     document.getElementById('delete-tujuan').textContent = tujuan ? `Tujuan: ${tujuan}` : 'Tanpa Tujuan';
+    document.getElementById('delete-form').action = `/spt/${id}`;
     
-    // Update form action
-    const form = document.getElementById('delete-form');
-    form.action = `/spt/${id}`;
-    
-    // Show modal with animation
     const modal = document.getElementById('delete-confirm-modal');
     modal.classList.remove('hidden');
     modal.style.display = 'block';
     
-    // Add animation class to modal content
     const modalContent = modal.querySelector('.bg-white');
     modalContent.classList.add('animate-fade-in');
 }
@@ -851,11 +680,9 @@ function hideDeleteModal() {
     const modal = document.getElementById('delete-confirm-modal');
     const modalContent = modal.querySelector('.bg-white');
     
-    // Add fade out animation
     modalContent.classList.remove('animate-fade-in');
     modalContent.classList.add('animate-fade-out');
     
-    // Hide modal after animation
     setTimeout(() => {
         modal.classList.add('hidden');
         modal.style.display = 'none';
@@ -865,20 +692,17 @@ function hideDeleteModal() {
     }, 300);
 }
 
-// Handle form submission dengan AJAX untuk notifikasi lebih baik
-document.getElementById('delete-form')?.addEventListener('submit', function(e) {
+document.getElementById('delete-form').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const form = this;
     const formData = new FormData(form);
     
-    // Tampilkan loading
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menghapus...';
     submitBtn.disabled = true;
     
-    // Kirim request DELETE
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -890,11 +714,8 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Tampilkan notifikasi hapus sukses
-            showDeleteSuccess(currentDeleteNomor);
-            // Sembunyikan modal
+            showDeleteSuccess(currentDeleteNomor, data.message);
             hideDeleteModal();
-            // Refresh halaman setelah 2 detik
             setTimeout(() => {
                 window.location.reload();
             }, 2000);
@@ -904,170 +725,106 @@ document.getElementById('delete-form')?.addEventListener('submit', function(e) {
     })
     .catch(error => {
         console.error('Error:', error);
-        // Jika error, tampilkan alert biasa
-        alert('Terjadi kesalahan saat menghapus data: ' + error.message);
-        // Reset tombol
+        showErrorNotification('Terjadi kesalahan saat menghapus data: ' + error.message);
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
 });
 
-// Tampilkan notifikasi hapus sukses
-function showDeleteSuccess(nomor) {
+function showDeleteSuccess(nomor, message) {
     const notification = document.getElementById('delete-notification');
-    const message = document.getElementById('delete-message');
+    const messageEl = document.getElementById('delete-message');
     
-    message.textContent = `Data SPT dengan nomor "${nomor}" berhasil dihapus.`;
+    messageEl.textContent = message || `SPT dengan nomor "${nomor}" berhasil dihapus.`;
     
-    // Reset progress bar
     const progress = document.getElementById('delete-progress');
     progress.style.width = '100%';
     progress.style.animation = 'none';
-    void progress.offsetWidth; // Trigger reflow
+    void progress.offsetWidth;
     progress.style.animation = 'progressBar 5s linear forwards';
     
-    // Show notification dengan animasi bawah
     notification.classList.remove('hidden');
     notification.style.display = 'block';
     notification.classList.add('animate-slide-in-bottom');
     
-    // Auto hide after 5 seconds
     setTimeout(() => {
         hideNotification('delete');
     }, 5000);
 }
 
+function showErrorNotification(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.id = 'temp-error-notification';
+    errorDiv.className = 'fixed bottom-6 right-6 z-50 w-96 animate-slide-in-bottom';
+    errorDiv.innerHTML = `
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-lg">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+                </div>
+                <div class="ml-3 flex-1">
+                    <p class="font-medium">Terjadi Kesalahan!</p>
+                    <p class="text-sm mt-1">${message}</p>
+                </div>
+                <button type="button" onclick="this.closest('#temp-error-notification').remove()" class="ml-4 text-red-600 hover:text-red-800">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mt-2 w-full bg-red-200 rounded-full h-1">
+                <div class="bg-red-500 h-1 rounded-full progress-bar" style="width: 100%"></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+        const notif = document.getElementById('temp-error-notification');
+        if (notif) {
+            notif.classList.remove('animate-slide-in-bottom');
+            notif.classList.add('animate-slide-out-bottom');
+            setTimeout(() => notif.remove(), 300);
+        }
+    }, 5000);
+}
+
 // ========== FULL TEXT MODAL ==========
 function showFullText(element, text, title) {
-    // Buat modal untuk menampilkan teks lengkap
-    const modalId = 'full-text-modal';
-    let modal = document.getElementById(modalId);
-    
-    if (!modal) {
-        // Buat modal jika belum ada
-        modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden';
-        modal.innerHTML = `
-            <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto animate-fade-in">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900" id="full-text-title"></h3>
-                            <button type="button" onclick="hideFullTextModal()" class="text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-times text-xl"></i>
-                            </button>
-                        </div>
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <pre class="text-sm text-gray-700 whitespace-pre-wrap max-h-96 overflow-y-auto" id="full-text-content"></pre>
-                        </div>
-                        <div class="mt-4 flex justify-end">
-                            <button type="button" onclick="hideFullTextModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200">
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    
-    // Isi konten modal
     document.getElementById('full-text-title').textContent = title;
     document.getElementById('full-text-content').textContent = text;
-    
-    // Tampilkan modal
-    modal.classList.remove('hidden');
-    modal.style.display = 'block';
+    document.getElementById('full-text-modal').classList.remove('hidden');
 }
 
 function hideFullTextModal() {
-    const modal = document.getElementById('full-text-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
+    document.getElementById('full-text-modal').classList.add('hidden');
 }
 
 // ========== FULL DASAR MODAL ==========
 function showFullDasar(element, dasarList) {
-    const modalId = 'full-dasar-modal';
-    let modal = document.getElementById(modalId);
-    
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden';
-        modal.innerHTML = `
-            <div class="relative min-h-screen flex items-center justify-center p-4">
-                <div class="relative bg-white rounded-lg shadow-xl w-full max-w-4xl mx-auto animate-fade-in">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Dasar SPT</h3>
-                            <button type="button" onclick="hideFullDasarModal()" class="text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-times text-xl"></i>
-                            </button>
-                        </div>
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <ul class="list-disc list-inside space-y-2" id="full-dasar-list"></ul>
-                        </div>
-                        <div class="mt-4 flex justify-end">
-                            <button type="button" onclick="hideFullDasarModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition duration-200">
-                                Tutup
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
+    const container = document.getElementById('full-dasar-list');
+    container.innerHTML = '';
+    if (dasarList && Array.isArray(dasarList)) {
+        dasarList.forEach(d => {
+            let li = document.createElement('li');
+            li.className = 'text-sm text-gray-700 mb-2';
+            li.innerHTML = '<i class="fas fa-gavel text-gray-400 mr-2"></i> ' + d;
+            container.appendChild(li);
+        });
     }
-    
-    // Isi list dasar
-    const listElement = document.getElementById('full-dasar-list');
-    listElement.innerHTML = '';
-    dasarList.forEach((dasar, index) => {
-        const li = document.createElement('li');
-        li.className = 'text-sm text-gray-700';
-        li.textContent = dasar;
-        listElement.appendChild(li);
-    });
-    
-    // Tampilkan modal
-    modal.classList.remove('hidden');
-    modal.style.display = 'block';
+    document.getElementById('full-dasar-modal').classList.remove('hidden');
 }
 
 function hideFullDasarModal() {
-    const modal = document.getElementById('full-dasar-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    }
+    document.getElementById('full-dasar-modal').classList.add('hidden');
 }
 
-// Close modal when clicking outside
-document.getElementById('delete-confirm-modal')?.addEventListener('click', function(e) {
+// ========== CLOSE MODALS ==========
+document.getElementById('delete-confirm-modal').addEventListener('click', function(e) {
     if (e.target === this) {
         hideDeleteModal();
     }
 });
 
-// Close full text modal when clicking outside
-document.addEventListener('click', function(e) {
-    const fullTextModal = document.getElementById('full-text-modal');
-    if (fullTextModal && e.target === fullTextModal) {
-        hideFullTextModal();
-    }
-    
-    const fullDasarModal = document.getElementById('full-dasar-modal');
-    if (fullDasarModal && e.target === fullDasarModal) {
-        hideFullDasarModal();
-    }
-});
-
-// Close modals with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         hideDeleteModal();

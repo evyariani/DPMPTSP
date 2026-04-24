@@ -314,26 +314,58 @@
             <i class="fas fa-users text-teal-500 mr-2"></i>
             Pelaksana Perjalanan Dinas
         </h3>
-        <span class="info-badge info-badge-blue ml-3">Jumlah: {{ $spd->pelaksanaPerjadin->count() }} orang</span>
+        @php
+            // Gunakan snapshot jika ada, fallback ke relasi
+            $pelaksanaCount = 0;
+            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                $pelaksanaCount = count($spd->pelaksana_snapshot);
+            } elseif ($spd->pelaksanaPerjadin) {
+                $pelaksanaCount = $spd->pelaksanaPerjadin->count();
+            }
+        @endphp
+        <span class="info-badge info-badge-blue ml-3">Jumlah: {{ $pelaksanaCount }} orang</span>
     </div>
     <div class="p-6">
-        @if($spd->pelaksanaPerjadin->count() > 0)
+        @php
+            // Ambil data pelaksana dari snapshot atau relasi
+            $pelaksanaList = [];
+            if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                $pelaksanaList = $spd->pelaksana_snapshot;
+            } elseif ($spd->pelaksanaPerjadin && $spd->pelaksanaPerjadin->count() > 0) {
+                foreach ($spd->pelaksanaPerjadin as $p) {
+                    $pelaksanaList[] = [
+                        'nama' => $p->nama,
+                        'nip' => $p->nip,
+                        'jabatan' => $p->jabatan,
+                    ];
+                }
+            }
+        @endphp
+        
+        @if(count($pelaksanaList) > 0)
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                @foreach($spd->pelaksanaPerjadin as $pelaksana)
+                @foreach($pelaksanaList as $pelaksana)
                     <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-150">
                         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center">
                             <i class="fas fa-user-check text-teal-600 text-sm"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">{{ $pelaksana->nama }}</p>
-                            <p class="text-xs text-gray-500 truncate">NIP: {{ $pelaksana->nip ?? '-' }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ $pelaksana->jabatan ?? '-' }}</p>
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ $pelaksana['nama'] ?? '-' }}</p>
+                            <p class="text-xs text-gray-500 truncate">NIP: {{ $pelaksana['nip'] ?? '-' }}</p>
+                            <p class="text-xs text-gray-500 truncate">{{ $pelaksana['jabatan'] ?? '-' }}</p>
                         </div>
                     </div>
                 @endforeach
             </div>
         @else
             <p class="text-gray-500 text-center py-4">Tidak ada data pelaksana</p>
+        @endif
+        
+        @if($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0)
+            <div class="mt-3 text-xs text-gray-400 text-center">
+                <i class="fas fa-info-circle mr-1"></i> 
+                Data pelaksana diambil dari snapshot saat SPD dibuat
+            </div>
         @endif
     </div>
 </div>
@@ -355,53 +387,53 @@
                     <label for="penanda_tangan_nama" class="block text-sm font-medium text-gray-700 mb-2">
                         Nama Penanda Tangan
                     </label>
-                    <input type="text" 
-                           id="penanda_tangan_nama" 
-                           name="penanda_tangan_nama" 
+                    <input type="text"
+                           id="penanda_tangan_nama"
+                           name="penanda_tangan_nama"
                            value="{{ old('penanda_tangan_nama', $spd->penanda_tangan_nama) }}"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: Dr. H. Ahmad, M.Si">
                     <p class="mt-1 text-xs text-gray-500">Nama pejabat yang menandatangani SPD di tempat tujuan</p>
                 </div>
-                
+
                 <div>
                     <label for="penanda_tangan_nip" class="block text-sm font-medium text-gray-700 mb-2">
                         NIP Penanda Tangan
                     </label>
-                    <input type="text" 
-                           id="penanda_tangan_nip" 
-                           name="penanda_tangan_nip" 
+                    <input type="text"
+                           id="penanda_tangan_nip"
+                           name="penanda_tangan_nip"
                            value="{{ old('penanda_tangan_nip', $spd->penanda_tangan_nip) }}"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: 197501011998031001">
                 </div>
-                
+
                 <div>
                     <label for="penanda_tangan_jabatan" class="block text-sm font-medium text-gray-700 mb-2">
                         Jabatan Penanda Tangan
                     </label>
-                    <input type="text" 
-                           id="penanda_tangan_jabatan" 
-                           name="penanda_tangan_jabatan" 
+                    <input type="text"
+                           id="penanda_tangan_jabatan"
+                           name="penanda_tangan_jabatan"
                            value="{{ old('penanda_tangan_jabatan', $spd->penanda_tangan_jabatan) }}"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: Kepala Dinas">
                 </div>
-                
+
                 <div>
                     <label for="penanda_tangan_instansi" class="block text-sm font-medium text-gray-700 mb-2">
                         Instansi / Lembaga
                     </label>
-                    <input type="text" 
-                           id="penanda_tangan_instansi" 
-                           name="penanda_tangan_instansi" 
+                    <input type="text"
+                           id="penanda_tangan_instansi"
+                           name="penanda_tangan_instansi"
                            value="{{ old('penanda_tangan_instansi', $spd->penanda_tangan_instansi) }}"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                            placeholder="Contoh: Dinas Pendidikan Kab. Bandung">
                     <p class="mt-1 text-xs text-gray-500">Instansi/lembaga tempat penanda tangan bertugas</p>
                 </div>
             </div>
-            
+
             <div class="mt-6 flex justify-end space-x-3">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
                     <i class="fas fa-save mr-2"></i> Simpan Perubahan
@@ -415,12 +447,12 @@
 <div class="info-card">
     <div class="p-6">
         <div class="flex justify-end space-x-3">
-            <a href="{{ route('spd.print-belakang', $spd->id_spd) }}" 
+            <a href="{{ route('spd.print-belakang', $spd->id_spd) }}"
                target="_blank"
                class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-print mr-2"></i> Cetak Halaman Belakang
             </a>
-            <a href="{{ route('spd.preview-belakang', $spd->id_spd) }}" 
+            <a href="{{ route('spd.preview-belakang', $spd->id_spd) }}"
                target="_blank"
                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center transition duration-200">
                 <i class="fas fa-eye mr-2"></i> Preview PDF
@@ -463,7 +495,7 @@ document.getElementById('formPenandaTangan')?.addEventListener('submit', functio
     }
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
-    
+
     // Reset button after 5 seconds if something wrong
     setTimeout(() => {
         submitBtn.disabled = false;

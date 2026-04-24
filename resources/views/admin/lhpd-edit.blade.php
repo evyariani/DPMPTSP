@@ -130,6 +130,15 @@
         background-color: #6b7280;
     }
 
+    .btn-success {
+        background-color: #10b981;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #059669;
+    }
+
     .readonly-field {
         background-color: #f3f4f6;
         cursor: not-allowed;
@@ -157,6 +166,11 @@
     .info-badge-yellow {
         background-color: #fef3c7;
         color: #92400e;
+    }
+
+    .info-badge-purple {
+        background-color: #e9d5ff;
+        color: #6b21a5;
     }
 
     /* Dropzone styling */
@@ -236,6 +250,15 @@
     /* Progress bar */
     .progress-bar {
         animation: progressBar 5s linear forwards;
+    }
+
+    /* Fixed location info */
+    .location-info {
+        background-color: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
     }
 </style>
 
@@ -339,28 +362,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Keperluan
+                        Keperluan / Tujuan
                     </label>
                     <textarea class="form-input readonly-field" rows="2" readonly disabled>{{ $lhpd->tujuan }}</textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Dasar
-                    </label>
-                    <div class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto">
-                        @php
-                            $dasarList = is_array($lhpd->dasar) ? $lhpd->dasar : json_decode($lhpd->dasar, true);
-                        @endphp
-                        @if($dasarList && count($dasarList) > 0)
-                            <ul class="list-disc list-inside text-sm text-gray-700">
-                                @foreach($dasarList as $dasar)
-                                    <li>{{ $dasar }}</li>
-                                @endforeach
-                            </ul>
-                        @else
-                            <p class="text-gray-400 text-sm">-</p>
-                        @endif
-                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -376,7 +380,7 @@
                         Daerah Tujuan
                     </label>
                     <input type="text" 
-                           value="{{ $lhpd->daerahTujuan?->nama ?? '-' }}"
+                           value="{{ $lhpd->tempat_tujuan }}"
                            class="form-input readonly-field"
                            readonly disabled>
                 </div>
@@ -388,7 +392,7 @@
                         @php
                             $pegawaiList = $lhpd->pegawai_list;
                         @endphp
-                        @if($pegawaiList && count($pegawaiList) > 0)
+                        @if($pegawaiList && $pegawaiList->count() > 0)
                             <ul class="list-disc list-inside text-sm text-gray-700">
                                 @foreach($pegawaiList as $pegawai)
                                     <li>{{ $pegawai->nama }} ({{ $pegawai->nip ?? '-' }})</li>
@@ -403,7 +407,52 @@
         </div>
     </div>
 
-    <!-- CARD 2: HASIL LHPD (DAPAT DIUBAH) -->
+    <!-- CARD 2: DASAR PERJALANAN (INPUT MANUAL - BISA LEBIH DARI SATU) -->
+    <div class="info-card">
+        <div class="info-card-header">
+            <h3 class="info-card-title">
+                <i class="fas fa-gavel text-yellow-500 mr-2"></i>
+                Dasar Perjalanan Dinas
+            </h3>
+            <span class="info-badge info-badge-yellow ml-3">Input Manual (bisa lebih dari satu)</span>
+        </div>
+        <div class="p-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+                Dasar / Landasan Perjalanan <span class="text-red-500">*</span>
+            </label>
+            <div id="dasar-container" class="space-y-3">
+                @php
+                    $dasarList = $lhpd->dasar_list;
+                    if ($dasarList->isEmpty()) {
+                        $dasarList = collect(['']);
+                    }
+                @endphp
+                @foreach($dasarList as $index => $dasar)
+                <div class="flex items-start space-x-2 dasar-item">
+                    <div class="flex-grow">
+                        <input type="text" 
+                               name="dasar[]" 
+                               value="{{ $dasar }}"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
+                    </div>
+                    <button type="button" 
+                            class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
+                            title="Hapus dasar"
+                            {{ $loop->first && $dasarList->count() == 1 ? 'disabled style="opacity:0.5;cursor:not-allowed;display:none;"' : '' }}>
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                @endforeach
+            </div>
+            <button type="button" id="tambah-dasar" class="mt-2 text-blue-600 hover:text-blue-800 text-sm flex items-center">
+                <i class="fas fa-plus-circle mr-1"></i> Tambah Dasar Lainnya
+            </button>
+            <p class="mt-2 text-xs text-gray-500">Isi dasar/landasan perjalanan dinas (bisa lebih dari satu, misal: Surat Tugas, Nota Dinas, Peraturan, dll)</p>
+        </div>
+    </div>
+
+    <!-- CARD 3: HASIL LHPD (DAPAT DIUBAH) -->
     <div class="info-card">
         <div class="info-card-header">
             <h3 class="info-card-title">
@@ -426,43 +475,51 @@
         </div>
     </div>
 
-    <!-- CARD 3: TEMPAT & TANGGAL LHPD -->
-    <div class="info-card">
-        <div class="info-card-header">
-            <h3 class="info-card-title">
-                <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
-                Tempat & Tanggal LHPD
-            </h3>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
-                        Tempat LHPD Dikeluarkan
-                    </label>
-                    <input type="text" 
-                           value="Pelaihari" 
-                           class="form-input readonly-field"
-                           readonly
-                           disabled>
-                    <input type="hidden" name="tempat_dikeluarkan" value="94">
-                    <p class="mt-1 text-xs text-gray-500">Kantor DPMPTSP Kabupaten Tanah Laut</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
-                        Tanggal LHPD
-                    </label>
-                    <input type="date" 
-                           name="tanggal_lhpd" 
-                           value="{{ old('tanggal_lhpd', $lhpd->tanggal_lhpd ? $lhpd->tanggal_lhpd->format('Y-m-d') : date('Y-m-d')) }}"
-                           class="form-input"
-                           required>
-                </div>
+ <!-- CARD 4: TEMPAT & TANGGAL LHPD -->
+<div class="info-card">
+    <div class="info-card-header">
+        <h3 class="info-card-title">
+            <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+            Tempat & Tanggal LHPD
+        </h3>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
+                    Tempat LHPD Dikeluarkan
+                </label>
+                <input type="text" 
+                       value="Pelaihari" 
+                       class="form-input readonly-field"
+                       readonly
+                       disabled>
+                <input type="hidden" name="tempat_dikeluarkan" value="{{ $pelaihariId ?? '' }}">
+                @if(isset($pelaihariId) && $pelaihariId)
+                    {{-- <p class="mt-1 text-xs text-green-600">
+                        <i class="fas fa-check-circle"></i> Tempat LHPD ditetapkan di Pelaihari (ID: {{ $pelaihariId }})
+                    </p> --}}
+                @else
+                    <p class="mt-1 text-xs text-yellow-600">
+                        <i class="fas fa-exclamation-triangle"></i> Data Pelaihari sedang disinkronkan. Simpan tetap akan berfungsi.
+                    </p>
+                @endif
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
+                    Tanggal LHPD
+                </label>
+                <input type="date" 
+                       name="tanggal_lhpd" 
+                       value="{{ old('tanggal_lhpd', $lhpd->tanggal_lhpd ? $lhpd->tanggal_lhpd->format('Y-m-d') : date('Y-m-d')) }}"
+                       class="form-input"
+                       required>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- CARD 4: DOKUMENTASI FOTO (MULTIPLE) -->
+    <!-- CARD 5: DOKUMENTASI FOTO (MULTIPLE) -->
     <div class="info-card">
         <div class="info-card-header">
             <h3 class="info-card-title">
@@ -497,7 +554,7 @@
             </div>
             @endif
 
-            <!-- Upload foto baru - TANPA DRAG & DROP -->
+            <!-- Upload foto baru -->
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     Tambah Foto Baru
@@ -505,7 +562,7 @@
                 <div class="dropzone">
                     <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"></i>
                     <p class="text-gray-600">Klik tombol di bawah untuk memilih foto</p>
-                    <p class="text-gray-400 text-sm mt-1">Maksimal 5 foto (JPG, PNG, maks 10MB per foto)</p>
+                    <p class="text-gray-400 text-sm mt-1">Maksimal 10 foto (JPG, PNG, maks 10MB per foto)</p>
                     <input type="file" name="fotos[]" id="fotos-input" class="hidden" multiple accept="image/jpeg,image/png,image/jpg">
                     <button type="button" id="select-foto-btn" 
                             class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
@@ -519,7 +576,7 @@
         </div>
     </div>
 
-    <!-- CARD 5: TOMBOL ACTION -->
+    <!-- CARD 6: TOMBOL ACTION -->
     <div class="info-card">
         <div class="p-6">
             <div class="flex justify-end space-x-3">
@@ -552,6 +609,86 @@
 // Variabel global
 let selectedFiles = [];
 let filesToDelete = [];
+
+// ========== DASAR DYNAMIC FIELDS (KONSISTEN DENGAN SPT) ==========
+function setupDasarFields() {
+    const container = document.getElementById('dasar-container');
+    const tambahBtn = document.getElementById('tambah-dasar');
+    
+    if (!container) return;
+    
+    // Update tombol remove dasar
+    function updateDasarButtons() {
+        const items = document.querySelectorAll('.dasar-item');
+        
+        items.forEach((item, index) => {
+            const removeBtn = item.querySelector('.remove-dasar');
+            if (items.length === 1) {
+                if (removeBtn) {
+                    removeBtn.style.display = 'none';
+                    removeBtn.disabled = true;
+                }
+            } else {
+                if (removeBtn) {
+                    removeBtn.style.display = 'block';
+                    removeBtn.disabled = false;
+                }
+            }
+        });
+        
+        // Event listener untuk remove
+        document.querySelectorAll('.remove-dasar').forEach(btn => {
+            btn.removeEventListener('click', removeDasar);
+            btn.addEventListener('click', removeDasar);
+        });
+    }
+    
+    function removeDasar(e) {
+        const item = e.currentTarget.closest('.dasar-item');
+        const container = document.getElementById('dasar-container');
+        
+        if (container.children.length > 1) {
+            item.remove();
+            updateDasarButtons();
+        }
+    }
+    
+    // Tambah dasar baru
+    if (tambahBtn) {
+        // Hapus event listener lama jika ada
+        const newTambahBtn = tambahBtn.cloneNode(true);
+        tambahBtn.parentNode.replaceChild(newTambahBtn, tambahBtn);
+        
+        newTambahBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const newItem = document.createElement('div');
+            newItem.className = 'flex items-start space-x-2 dasar-item';
+            newItem.innerHTML = `
+                <div class="flex-grow">
+                    <input type="text" 
+                           name="dasar[]" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                           placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
+                </div>
+                <button type="button" 
+                        class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
+                        title="Hapus dasar">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(newItem);
+            
+            // Focus ke input baru
+            newItem.querySelector('input').focus();
+            
+            // Update tombol remove
+            updateDasarButtons();
+        });
+    }
+    
+    // Initial update buttons
+    updateDasarButtons();
+}
 
 // ========== NOTIFICATION FUNCTIONS ==========
 function hideNotification(type) {
@@ -598,7 +735,7 @@ window.onclick = function(event) {
     if (event.target === imageModal) hideImageModal();
 }
 
-// ========== SIMPLE FILE UPLOAD (TANPA DRAG & DROP YANG RUMIT) ==========
+// ========== FILE UPLOAD ==========
 function initializeFileUpload() {
     const selectBtn = document.getElementById('select-foto-btn');
     const fileInput = document.getElementById('fotos-input');
@@ -615,7 +752,6 @@ function initializeFileUpload() {
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             const files = Array.from(e.target.files);
-            console.log('Files selected:', files.length);
             if (files.length > 0) {
                 handleFiles(files);
             }
@@ -627,7 +763,7 @@ function initializeFileUpload() {
 
 function handleFiles(files) {
     const previewContainer = document.getElementById('new-fotos-preview');
-    const maxFiles = 5;
+    const maxFiles = 10;
     const maxSize = 10 * 1024 * 1024; // 10MB
     
     // Hitung existing foto yang belum dihapus
@@ -636,10 +772,6 @@ function handleFiles(files) {
     if (existingContainer) {
         existingCount = existingContainer.querySelectorAll('.foto-item:not(.marked-delete)').length;
     }
-    
-    console.log('Existing count:', existingCount);
-    console.log('Selected files count:', selectedFiles.length);
-    console.log('New files count:', files.length);
     
     if (selectedFiles.length + files.length + existingCount > maxFiles) {
         alert(`Maksimal ${maxFiles} foto! Saat ini sudah ada ${existingCount + selectedFiles.length} foto.`);
@@ -667,7 +799,6 @@ function handleFiles(files) {
         }
         
         selectedFiles.push(file);
-        console.log('File added:', file.name);
         
         // Preview
         const reader = new FileReader();
@@ -690,7 +821,6 @@ function removeNewFile(button, fileName) {
     const index = selectedFiles.findIndex(f => f.name === fileName);
     if (index !== -1) {
         selectedFiles.splice(index, 1);
-        console.log('File removed:', fileName);
     }
     const fotoCard = button.closest('.foto-item');
     if (fotoCard) fotoCard.remove();
@@ -707,7 +837,6 @@ function markForDelete(button, fotoPath) {
         fotoItem.classList.remove('marked-delete');
         const badge = fotoItem.querySelector('.marked-badge');
         if (badge) badge.remove();
-        console.log('Cancel delete:', fotoPath);
     } else {
         // Tandai untuk dihapus
         filesToDelete.push(fotoPath);
@@ -718,7 +847,6 @@ function markForDelete(button, fotoPath) {
         badge.className = 'marked-badge';
         badge.innerHTML = '<i class="fas fa-trash mr-1"></i> Akan dihapus';
         fotoItem.appendChild(badge);
-        console.log('Marked for delete:', fotoPath);
     }
     
     updateDeleteFotosInput();
@@ -728,33 +856,32 @@ function updateDeleteFotosInput() {
     const input = document.getElementById('delete-fotos-input');
     if (input) {
         input.value = JSON.stringify(filesToDelete);
-        console.log('Delete fotos input updated:', filesToDelete);
     }
 }
 
 // ========== FORM SUBMIT ==========
 document.getElementById('formEditLhpd')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
     const form = this;
     const formData = new FormData(form);
     
+    // Hapus existing fotos[] yang kosong
+    formData.delete('fotos[]');
+    
     // Append new files
-    console.log('Submitting files count:', selectedFiles.length);
-    selectedFiles.forEach((file, index) => {
+    selectedFiles.forEach((file) => {
         formData.append('fotos[]', file);
-        console.log(`Appending file ${index + 1}:`, file.name, file.size);
     });
     
     // Append delete_fotos as JSON
     formData.append('delete_fotos', JSON.stringify(filesToDelete));
-    console.log('Delete fotos:', filesToDelete);
     
+    // Tampilkan loading
     const submitBtn = document.getElementById('submit-btn');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
     submitBtn.disabled = true;
     
+    // Submit form dengan FormData
     fetch(form.action, {
         method: 'POST',
         body: formData,
@@ -763,7 +890,6 @@ document.getElementById('formEditLhpd')?.addEventListener('submit', function(e) 
         }
     })
     .then(response => {
-        console.log('Response status:', response.status);
         if (response.redirected) {
             window.location.href = response.url;
         } else {
@@ -781,10 +907,14 @@ document.getElementById('formEditLhpd')?.addEventListener('submit', function(e) 
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
+    
+    e.preventDefault();
+    return false;
 });
 
-// Initialize on page load
+// ========== INITIALIZE ON PAGE LOAD ==========
 document.addEventListener('DOMContentLoaded', function() {
+    setupDasarFields();
     initializeFileUpload();
 });
 </script>

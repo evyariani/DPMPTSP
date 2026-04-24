@@ -252,12 +252,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     Nomor Surat Lengkap
                 </label>
-                <input type="text" 
+                <input type="text"
                        value="{{ $spd->nomor_surat }}"
                        class="form-input readonly-field bg-gray-100 font-mono"
                        readonly
                        disabled>
-                
+
                 <!-- ✅ TAMBAHKAN HIDDEN INPUT UNTUK NOMOR URUT -->
                 @php
                     // Extract nomor urut dari nomor surat
@@ -271,10 +271,10 @@
                     }
                 @endphp
                 <input type="hidden" name="nomor_urut" value="{{ $nomorUrut }}">
-                
+
                 @if($spd->spt_id)
                     <p class="mt-2 text-xs text-gray-500">
-                        <i class="fas fa-link mr-1"></i> 
+                        <i class="fas fa-link mr-1"></i>
                         Berasal dari SPT: <strong>{{ $spd->spt?->nomor_surat ?? '-' }}</strong>
                         ({{ $spd->spt?->tanggal ? \Carbon\Carbon::parse($spd->spt->tanggal)->format('d/m/Y') : '-' }})
                     </p>
@@ -297,13 +297,13 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Pilih Program
                     </label>
-                    <select name="pejabat_teknis_id" 
+                    <select name="pejabat_teknis_id"
                             id="pejabat_teknis_id"
                             class="form-input"
                             required>
                         <option value="">Pilih Program</option>
                         @foreach($programs as $program)
-                            <option value="{{ $program->id_program }}" 
+                            <option value="{{ $program->id_program }}"
                                 data-program="{{ $program->program }}"
                                 data-kegiatan="{{ $program->kegiatan }}"
                                 data-sub-kegiatan="{{ $program->sub_kegiatan }}"
@@ -357,8 +357,8 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                     Kode Rekening
                 </label>
-                <input type="text" 
-                       name="kode_rek" 
+                <input type="text"
+                       name="kode_rek"
                        id="kode_rek_manual"
                        value="{{ old('kode_rek', $spd->kode_rek) }}"
                        class="form-input"
@@ -384,19 +384,20 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                     Maksud Perjalanan Dinas
                 </label>
-                <textarea name="maksud_perjadin" 
+                <textarea name="maksud_perjadin"
                           rows="3"
+                          readonly
                           class="form-input"
                           required>{{ old('maksud_perjadin', $spd->maksud_perjadin) }}</textarea>
                 <p class="mt-1 text-xs text-gray-500">Jelaskan maksud dan tujuan perjalanan dinas secara jelas</p>
             </div>
-            
+
             <!-- Alat Transportasi -->
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                     Alat Transportasi
                 </label>
-                <select name="alat_transportasi" 
+                <select name="alat_transportasi"
                         class="form-input"
                         required>
                     <option value="">Pilih Alat Transportasi</option>
@@ -407,32 +408,32 @@
                     @endforeach
                 </select>
             </div>
-            
+
             <!-- Tempat Berangkat dan Tujuan -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tempat Berangkat
                     </label>
-                    <input type="text" 
-                           name="tempat_berangkat" 
+                    <input type="text"
+                           name="tempat_berangkat"
                            value="{{ old('tempat_berangkat', $spd->tempat_berangkat) }}"
                            class="form-input"
                            placeholder="Contoh: Pelaihari"
                            readonly
                            required>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tempat Tujuan
                     </label>
-                    <select name="tempat_tujuan" 
+                    <select name="tempat_tujuan"
                             class="form-input"
                             required>
                         <option value="">Pilih Tempat Tujuan</option>
                         @foreach($daerahs as $daerah)
-                            <option value="{{ $daerah->id }}" 
+                            <option value="{{ $daerah->id }}"
                                 {{ old('tempat_tujuan', $spd->tempat_tujuan) == $daerah->id ? 'selected' : '' }}>
                                 {{ $daerah->nama }}
                             </option>
@@ -440,39 +441,39 @@
                     </select>
                 </div>
             </div>
-            
+
             <!-- Tanggal Perjalanan -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tanggal Berangkat
                     </label>
-                    <input type="date" 
-                           name="tanggal_berangkat" 
+                    <input type="date"
+                           name="tanggal_berangkat"
                            id="tanggal_berangkat"
                            value="{{ old('tanggal_berangkat', $spd->tanggal_berangkat ? $spd->tanggal_berangkat->format('Y-m-d') : '') }}"
                            class="form-input"
                            required>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
                         Tanggal Kembali
                     </label>
-                    <input type="date" 
-                           name="tanggal_kembali" 
+                    <input type="date"
+                           name="tanggal_kembali"
                            id="tanggal_kembali"
                            value="{{ old('tanggal_kembali', $spd->tanggal_kembali ? $spd->tanggal_kembali->format('Y-m-d') : '') }}"
                            class="form-input"
                            required>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Lama Perjalanan (Hari)
                     </label>
-                    <input type="number" 
-                           name="lama_perjadin" 
+                    <input type="number"
+                           name="lama_perjadin"
                            id="lama_perjadin"
                            value="{{ old('lama_perjadin', $spd->lama_perjadin) }}"
                            class="form-input readonly-field bg-gray-100"
@@ -497,56 +498,56 @@
     <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
         Pengguna Anggaran (Kepala Dinas)
     </label>
-    
+
     @php
         // Cari data Kepala Dinas dari koleksi $semuaPegawai
         // Sesuaikan kondisi pencarian Kadis dengan database Anda
-        $kadis = $semuaPegawai->firstWhere('jabatan', 'Kepala Dinas'); 
+        $kadis = $semuaPegawai->firstWhere('jabatan', 'Kepala Dinas');
         // Atau bisa pakai: $semuaPegawai->where('is_kadis', true)->first();
-        
+
         $idKadis = $kadis->id_pegawai ?? '';
         $namaKadis = $kadis ? $kadis->nama . ' - ' . $kadis->nip . ' (' . $kadis->jabatan . ')' : 'Kepala Dinas tidak ditemukan';
     @endphp
-    
-    <input type="text" 
-           class="form-input bg-gray-100" 
+
+    <input type="text"
+           class="form-input bg-gray-100"
            value="{{ $namaKadis }}"
            readonly
            disabled>
-    
+
     <input type="hidden" name="pengguna_anggaran" value="{{ $idKadis }}">
 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         SKPD
                     </label>
-                    <input type="text" 
-                           name="skpd" 
+                    <input type="text"
+                           name="skpd"
                            value="{{ old('skpd', $spd->skpd) }}"
                            class="form-input"
                            readonly
                            placeholder="Contoh: Dinas Penanaman Modal dan PTSP">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Tempat Dikeluarkan
                     </label>
-                    <input type="text" 
-                           name="tempat_dikeluarkan" 
+                    <input type="text"
+                           name="tempat_dikeluarkan"
                            value="{{ old('tempat_dikeluarkan', $spd->tempat_dikeluarkan) }}"
                            class="form-input"
                            readonly
                            placeholder="Contoh: Pelaihari">
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Tanggal Dikeluarkan
                     </label>
-                    <input type="date" 
-                           name="tanggal_dikeluarkan" 
+                    <input type="date"
+                           name="tanggal_dikeluarkan"
                            value="{{ old('tanggal_dikeluarkan', $spd->tanggal_dikeluarkan ? $spd->tanggal_dikeluarkan->format('Y-m-d') : '') }}"
                            class="form-input"
                            readonly>
@@ -555,64 +556,101 @@
         </div>
     </div>
 
-    <!-- CARD 5: PELAKSANA PERJALANAN DINAS (READONLY - DARI SPT) -->
-    <div class="info-card">
-        <div class="info-card-header">
-            <h3 class="info-card-title">
-                <i class="fas fa-users text-teal-500 mr-2"></i>
-                Pelaksana Perjalanan Dinas
-            </h3>
-        </div>
-        <div class="p-6">
-            @if($spd->spt_id)
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded">
-                    <div class="flex items-start">
-                        <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
-                        <p class="text-sm text-blue-700">
-                            Pelaksana perjalanan dinas diambil dari <strong>SPT asal</strong> dan tidak dapat diubah di sini.
-                            @if($spd->spt_id)
-                                <br>Untuk mengubah pelaksana, silakan edit <strong>SPT Nomor: {{ $spd->spt?->nomor_surat ?? '-' }}</strong>.
-                            @endif
-                        </p>
-                    </div>
-                </div>
-            @endif
-
-            <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-gray-50">
-                @if($selectedPelaksana && count($selectedPelaksana) > 0)
-                    <div class="space-y-2">
-                        @foreach($semuaPegawai as $pegawai)
-                            @if(in_array($pegawai->id_pegawai, $selectedPelaksana))
-                                <div class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200">
-                                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
-                                        <i class="fas fa-user-check text-teal-600 text-sm"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <span class="font-medium text-gray-800">{{ $pegawai->nama }}</span>
-                                        <div class="text-xs text-gray-500">
-                                            NIP: {{ $pegawai->nip ?? '-' }} | Jabatan: {{ $pegawai->jabatan ?? '-' }}
-                                        </div>
-                                    </div>
-                                    <span class="info-badge info-badge-blue text-xs">dari SPT</span>
-                                </div>
-                            @endif
-                        @endforeach
-                    </div>
-                @else
-                    <p class="text-center text-gray-500 py-4">Tidak ada data pelaksana dari SPT</p>
-                @endif
-            </div>
-            
-            <!-- Hidden input untuk menyimpan pelaksana dari SPT (tidak bisa diubah) -->
-            @foreach($selectedPelaksana as $pelaksanaId)
-                <input type="hidden" name="pelaksana_perjadin[]" value="{{ $pelaksanaId }}">
-            @endforeach
-            
-            <p class="mt-3 text-xs text-gray-500 text-center">
-                <i class="fas fa-lock mr-1"></i> Pelaksana perjalanan dinas diambil dari SPT dan tidak dapat diubah
-            </p>
-        </div>
+   <!-- CARD 5: PELAKSANA PERJALANAN DINAS (READONLY - DARI SPT/SPD) -->
+<div class="info-card">
+    <div class="info-card-header">
+        <h3 class="info-card-title">
+            <i class="fas fa-users text-teal-500 mr-2"></i>
+            Pelaksana Perjalanan Dinas
+        </h3>
     </div>
+    <div class="p-6">
+        @if($spd->spt_id)
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-3 mb-4 rounded">
+                <div class="flex items-start">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
+                    <p class="text-sm text-blue-700">
+                        Pelaksana perjalanan dinas diambil dari <strong>SPT asal</strong> dan tidak dapat diubah di sini.
+                        @if($spd->spt_id)
+                            <br>Untuk mengubah pelaksana, silakan edit <strong>SPT Nomor: {{ $spd->spt?->nomor_surat ?? '-' }}</strong>.
+                        @endif
+                    </p>
+                </div>
+            </div>
+        @endif
+
+        <div class="border border-gray-300 rounded-lg p-4 max-h-64 overflow-y-auto bg-gray-50">
+            @php
+                // Gunakan snapshot untuk menampilkan data pelaksana (agar tidak berubah)
+                $pelaksanaList = [];
+                $pelaksanaIds = [];
+
+                if ($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0) {
+                    // Data baru: gunakan snapshot
+                    $pelaksanaList = $spd->pelaksana_snapshot;
+                    foreach ($pelaksanaList as $p) {
+                        $pelaksanaIds[] = $p['id_pegawai'] ?? null;
+                    }
+                } elseif ($selectedPelaksana && count($selectedPelaksana) > 0) {
+                    // Fallback untuk data lama: ambil dari relasi
+                    $pelaksanaIds = $selectedPelaksana;
+                    foreach ($semuaPegawai as $pegawai) {
+                        if (in_array($pegawai->id_pegawai, $selectedPelaksana)) {
+                            $pelaksanaList[] = [
+                                'id_pegawai' => $pegawai->id_pegawai,
+                                'nama' => $pegawai->nama,
+                                'nip' => $pegawai->nip,
+                                'jabatan' => $pegawai->jabatan,
+                            ];
+                        }
+                    }
+                }
+
+                // Filter null values
+                $pelaksanaIds = array_filter($pelaksanaIds);
+            @endphp
+
+            @if(count($pelaksanaList) > 0)
+                <div class="space-y-2">
+                    @foreach($pelaksanaList as $pelaksana)
+                        <div class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200">
+                            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-teal-100 flex items-center justify-center">
+                                <i class="fas fa-user-check text-teal-600 text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <span class="font-medium text-gray-800">{{ $pelaksana['nama'] ?? '-' }}</span>
+                                <div class="text-xs text-gray-500">
+                                    NIP: {{ $pelaksana['nip'] ?? '-' }} | Jabatan: {{ $pelaksana['jabatan'] ?? '-' }}
+                                </div>
+                            </div>
+                            <span class="info-badge info-badge-blue text-xs">
+                                @if($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0)
+                                    dari snapshot
+                                @else
+                                    dari SPT
+                                @endif
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-center text-gray-500 py-4">Tidak ada data pelaksana dari SPT</p>
+            @endif
+        </div>
+
+        <!-- Hidden input untuk menyimpan pelaksana dari SPT (tidak bisa diubah) -->
+        @foreach($pelaksanaIds as $pelaksanaId)
+            <input type="hidden" name="pelaksana_perjadin[]" value="{{ $pelaksanaId }}">
+        @endforeach
+
+        <p class="mt-3 text-xs text-gray-500 text-center">
+            <i class="fas fa-lock mr-1"></i> Pelaksana perjalanan dinas diambil dari data saat SPD dibuat dan tidak dapat diubah di sini.
+            @if($spd->pelaksana_snapshot && count($spd->pelaksana_snapshot) > 0)
+                <br><i class="fas fa-info-circle mr-1"></i> Data pelaksana adalah snapshot saat SPD dibuat.
+            @endif
+        </p>
+    </div>
+</div>
 
     <!-- CARD 6: INFORMASI SPT ASAL -->
     @if($spd->spt_id)
@@ -732,7 +770,7 @@ const kodeRekManual = document.getElementById('kode_rek_manual');
 
 function updateDetailProgram() {
     const selectedOption = programSelect.options[programSelect.selectedIndex];
-    
+
     if (selectedOption && selectedOption.value) {
         document.getElementById('detail_program').textContent = selectedOption.dataset.program || '-';
         document.getElementById('detail_kegiatan').textContent = selectedOption.dataset.kegiatan || '-';
@@ -741,7 +779,7 @@ function updateDetailProgram() {
         document.getElementById('detail_pegawai_nama').textContent = selectedOption.dataset.pegawaiNama || '-';
         document.getElementById('detail_pegawai_nip').textContent = selectedOption.dataset.pegawaiNip ? `NIP: ${selectedOption.dataset.pegawaiNip}` : 'NIP: -';
         document.getElementById('detail_pegawai_jabatan').textContent = selectedOption.dataset.pegawaiJabatan ? `Jabatan: ${selectedOption.dataset.pegawaiJabatan}` : 'Jabatan: -';
-        
+
         // Jika kode rekening manual kosong, isi dengan kode rekening dari program
         if (!kodeRekManual.value) {
             kodeRekManual.value = selectedOption.dataset.kodeRekening || '';
