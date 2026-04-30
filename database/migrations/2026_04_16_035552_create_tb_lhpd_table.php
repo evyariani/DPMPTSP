@@ -15,8 +15,8 @@ return new class extends Migration
             $table->unsignedBigInteger('spt_id')->nullable()->comment('ID SPT asal pembuatan LHPD');
             
             // ========== DATA DARI SPT (SNAPSHOT) ==========
-            // Dasar TIDAK diambil dari SPT, ini inputan biasa di LHPD
-            $table->json('dasar')->nullable()->comment('Dasar perjalanan (input manual LHPD, bisa lebih dari satu)');
+            // Dasar diambil dari SPT (bukan input manual)
+            $table->json('dasar')->nullable()->comment('Dasar perjalanan (diambil dari SPT)');
             
             // Tujuan (dari tb_spt - snapshot)
             $table->text('tujuan')->nullable()->comment('Tujuan perjalanan dari SPT');
@@ -35,7 +35,7 @@ return new class extends Migration
             $table->decimal('total_biaya_snapshot', 15, 0)->default(0);
             
             // ========== DATA LHPD ==========
-            $table->text('hasil')->nullable();
+            $table->json('hasil')->nullable()->comment('Hasil perjalanan dinas (format JSON seperti dasar)');
             $table->unsignedBigInteger('tempat_dikeluarkan')->nullable();
             $table->string('tempat_dikeluarkan_snapshot', 255)->nullable();
             $table->date('tanggal_lhpd')->nullable();

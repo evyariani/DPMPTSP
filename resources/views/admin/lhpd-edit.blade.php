@@ -260,6 +260,20 @@
         padding: 0.75rem;
         margin-top: 0.5rem;
     }
+    
+    /* Hasil item styling */
+    .hasil-item {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        transition: all 0.2s;
+    }
+    
+    .hasil-item:hover {
+        border-color: #cbd5e1;
+        background-color: #ffffff;
+    }
 </style>
 
 <div class="mb-6">
@@ -407,117 +421,124 @@
         </div>
     </div>
 
-    <!-- CARD 2: DASAR PERJALANAN (INPUT MANUAL - BISA LEBIH DARI SATU) -->
+    <!-- CARD 2: DASAR PERJALANAN (READONLY - DARI SPT) -->
     <div class="info-card">
         <div class="info-card-header">
             <h3 class="info-card-title">
                 <i class="fas fa-gavel text-yellow-500 mr-2"></i>
                 Dasar Perjalanan Dinas
             </h3>
-            <span class="info-badge info-badge-yellow ml-3">Input Manual (bisa lebih dari satu)</span>
+            <span class="info-badge info-badge-blue ml-3">Otomatis dari SPT (Tidak dapat diubah)</span>
         </div>
         <div class="p-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-                Dasar / Landasan Perjalanan <span class="text-red-500">*</span>
-            </label>
-            <div id="dasar-container" class="space-y-3">
+            <div class="bg-gray-50 rounded-lg p-4">
                 @php
                     $dasarList = $lhpd->dasar_list;
-                    if ($dasarList->isEmpty()) {
-                        $dasarList = collect(['']);
-                    }
                 @endphp
-                @foreach($dasarList as $index => $dasar)
-                <div class="flex items-start space-x-2 dasar-item">
-                    <div class="flex-grow">
-                        <input type="text" 
-                               name="dasar[]" 
-                               value="{{ $dasar }}"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                               placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
-                    </div>
-                    <button type="button" 
-                            class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
-                            title="Hapus dasar"
-                            {{ $loop->first && $dasarList->count() == 1 ? 'disabled style="opacity:0.5;cursor:not-allowed;display:none;"' : '' }}>
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                @endforeach
+                @if($dasarList && $dasarList->count() > 0)
+                    <ul class="list-disc list-inside text-gray-700 space-y-1">
+                        @foreach($dasarList as $dasar)
+                            <li>{{ $dasar }}</li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="text-gray-400 text-sm">-</p>
+                @endif
             </div>
-            <button type="button" id="tambah-dasar" class="mt-2 text-blue-600 hover:text-blue-800 text-sm flex items-center">
-                <i class="fas fa-plus-circle mr-1"></i> Tambah Dasar Lainnya
-            </button>
-            <p class="mt-2 text-xs text-gray-500">Isi dasar/landasan perjalanan dinas (bisa lebih dari satu, misal: Surat Tugas, Nota Dinas, Peraturan, dll)</p>
+            <p class="mt-2 text-xs text-gray-500 text-blue-600">
+                <i class="fas fa-info-circle"></i> Dasar perjalanan diambil dari SPT dan tidak dapat diubah di LHPD
+            </p>
         </div>
     </div>
 
-    <!-- CARD 3: HASIL LHPD (DAPAT DIUBAH) -->
+    <!-- CARD 3: HASIL LHPD (JSON FORMAT - BISA LEBIH DARI SATU) -->
     <div class="info-card">
         <div class="info-card-header">
             <h3 class="info-card-title">
                 <i class="fas fa-file-alt text-green-500 mr-2"></i>
                 Hasil Laporan
             </h3>
-            <span class="info-badge info-badge-green ml-3">Dapat diubah</span>
+            <span class="info-badge info-badge-green ml-3">Dapat diubah (bisa lebih dari satu)</span>
         </div>
         <div class="p-6">
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
-                    Hasil Perjalanan Dinas
-                </label>
-                <textarea name="hasil" 
-                          rows="5"
-                          class="form-input"
-                          required>{{ old('hasil', $lhpd->hasil) }}</textarea>
-                <p class="mt-1 text-xs text-gray-500">Jelaskan hasil yang dicapai selama perjalanan dinas</p>
+            <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
+                Hasil Perjalanan Dinas
+            </label>
+            <div id="hasil-container" class="space-y-3">
+                @php
+                    $hasilList = $lhpd->hasil_list;
+                    if ($hasilList->isEmpty()) {
+                        $hasilList = collect(['']);
+                    }
+                @endphp
+                @foreach($hasilList as $index => $hasil)
+                <div class="flex items-start space-x-2 hasil-item">
+                    <div class="flex-grow">
+                        <textarea 
+                            name="hasil[]" 
+                            rows="3"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+                            placeholder="Contoh: Rapat koordinasi membahas anggaran tahun 2025...">{{ $hasil }}</textarea>
+                    </div>
+                    <button type="button" 
+                            class="remove-hasil bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
+                            title="Hapus hasil"
+                            {{ $loop->first && $hasilList->count() == 1 ? 'disabled style="opacity:0.5;cursor:not-allowed;display:none;"' : '' }}>
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                @endforeach
             </div>
+            <button type="button" id="tambah-hasil" class="mt-2 text-green-600 hover:text-green-800 text-sm flex items-center">
+                <i class="fas fa-plus-circle mr-1"></i> Tambah Hasil Lainnya
+            </button>
+            <p class="mt-2 text-xs text-gray-500">Isi hasil yang dicapai selama perjalanan dinas (bisa lebih dari satu)</p>
         </div>
     </div>
 
- <!-- CARD 4: TEMPAT & TANGGAL LHPD -->
-<div class="info-card">
-    <div class="info-card-header">
-        <h3 class="info-card-title">
-            <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
-            Tempat & Tanggal LHPD
-        </h3>
-    </div>
-    <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
-                    Tempat LHPD Dikeluarkan
-                </label>
-                <input type="text" 
-                       value="Pelaihari" 
-                       class="form-input readonly-field"
-                       readonly
-                       disabled>
-                <input type="hidden" name="tempat_dikeluarkan" value="{{ $pelaihariId ?? '' }}">
-                @if(isset($pelaihariId) && $pelaihariId)
-                    {{-- <p class="mt-1 text-xs text-green-600">
-                        <i class="fas fa-check-circle"></i> Tempat LHPD ditetapkan di Pelaihari (ID: {{ $pelaihariId }})
-                    </p> --}}
-                @else
-                    <p class="mt-1 text-xs text-yellow-600">
-                        <i class="fas fa-exclamation-triangle"></i> Data Pelaihari sedang disinkronkan. Simpan tetap akan berfungsi.
-                    </p>
-                @endif
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
-                    Tanggal LHPD
-                </label>
-                <input type="date" 
-                       name="tanggal_lhpd" 
-                       value="{{ old('tanggal_lhpd', $lhpd->tanggal_lhpd ? $lhpd->tanggal_lhpd->format('Y-m-d') : date('Y-m-d')) }}"
-                       class="form-input"
-                       required>
+    <!-- CARD 4: TEMPAT & TANGGAL LHPD -->
+    <div class="info-card">
+        <div class="info-card-header">
+            <h3 class="info-card-title">
+                <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+                Tempat & Tanggal LHPD
+            </h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
+                        Tempat LHPD Dikeluarkan
+                    </label>
+                    <input type="text" 
+                           value="Pelaihari" 
+                           class="form-input readonly-field"
+                           readonly
+                           disabled>
+                    <input type="hidden" name="tempat_dikeluarkan" value="{{ $pelaihariId ?? '' }}">
+                    @if(isset($pelaihariId) && $pelaihariId)
+                        {{-- <p class="mt-1 text-xs text-green-600">
+                            <i class="fas fa-check-circle"></i> Tempat LHPD ditetapkan di Pelaihari (ID: {{ $pelaihariId }})
+                        </p> --}}
+                    @else
+                        <p class="mt-1 text-xs text-yellow-600">
+                            <i class="fas fa-exclamation-triangle"></i> Data Pelaihari sedang disinkronkan. Simpan tetap akan berfungsi.
+                        </p>
+                    @endif
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2 required-field">
+                        Tanggal LHPD
+                    </label>
+                    <input type="date" 
+                           name="tanggal_lhpd" 
+                           value="{{ old('tanggal_lhpd', $lhpd->tanggal_lhpd ? $lhpd->tanggal_lhpd->format('Y-m-d') : date('Y-m-d')) }}"
+                           class="form-input"
+                           required>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- CARD 5: DOKUMENTASI FOTO (MULTIPLE) -->
     <div class="info-card">
@@ -610,19 +631,19 @@
 let selectedFiles = [];
 let filesToDelete = [];
 
-// ========== DASAR DYNAMIC FIELDS (KONSISTEN DENGAN SPT) ==========
-function setupDasarFields() {
-    const container = document.getElementById('dasar-container');
-    const tambahBtn = document.getElementById('tambah-dasar');
+// ========== HASIL DYNAMIC FIELDS (JSON ARRAY) ==========
+function setupHasilFields() {
+    const container = document.getElementById('hasil-container');
+    const tambahBtn = document.getElementById('tambah-hasil');
     
     if (!container) return;
     
-    // Update tombol remove dasar
-    function updateDasarButtons() {
-        const items = document.querySelectorAll('.dasar-item');
+    // Update tombol remove hasil
+    function updateHasilButtons() {
+        const items = document.querySelectorAll('.hasil-item');
         
         items.forEach((item, index) => {
-            const removeBtn = item.querySelector('.remove-dasar');
+            const removeBtn = item.querySelector('.remove-hasil');
             if (items.length === 1) {
                 if (removeBtn) {
                     removeBtn.style.display = 'none';
@@ -637,57 +658,57 @@ function setupDasarFields() {
         });
         
         // Event listener untuk remove
-        document.querySelectorAll('.remove-dasar').forEach(btn => {
-            btn.removeEventListener('click', removeDasar);
-            btn.addEventListener('click', removeDasar);
+        document.querySelectorAll('.remove-hasil').forEach(btn => {
+            btn.removeEventListener('click', removeHasil);
+            btn.addEventListener('click', removeHasil);
         });
     }
     
-    function removeDasar(e) {
-        const item = e.currentTarget.closest('.dasar-item');
-        const container = document.getElementById('dasar-container');
+    function removeHasil(e) {
+        const item = e.currentTarget.closest('.hasil-item');
+        const container = document.getElementById('hasil-container');
         
         if (container.children.length > 1) {
             item.remove();
-            updateDasarButtons();
+            updateHasilButtons();
         }
     }
     
-    // Tambah dasar baru
+    // Tambah hasil baru
     if (tambahBtn) {
-        // Hapus event listener lama jika ada
         const newTambahBtn = tambahBtn.cloneNode(true);
         tambahBtn.parentNode.replaceChild(newTambahBtn, tambahBtn);
         
         newTambahBtn.addEventListener('click', function(e) {
             e.preventDefault();
             const newItem = document.createElement('div');
-            newItem.className = 'flex items-start space-x-2 dasar-item';
+            newItem.className = 'flex items-start space-x-2 hasil-item';
             newItem.innerHTML = `
                 <div class="flex-grow">
-                    <input type="text" 
-                           name="dasar[]" 
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                           placeholder="Contoh: Surat dari Sekretariat Daerah Nomor ...">
+                    <textarea 
+                        name="hasil[]" 
+                        rows="3"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+                        placeholder="Contoh: Rapat koordinasi membahas anggaran tahun 2025..."></textarea>
                 </div>
                 <button type="button" 
-                        class="remove-dasar bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
-                        title="Hapus dasar">
+                        class="remove-hasil bg-red-100 text-red-600 hover:bg-red-200 px-3 py-2 rounded-lg transition duration-200"
+                        title="Hapus hasil">
                     <i class="fas fa-times"></i>
                 </button>
             `;
             container.appendChild(newItem);
             
-            // Focus ke input baru
-            newItem.querySelector('input').focus();
+            // Focus ke textarea baru
+            newItem.querySelector('textarea').focus();
             
             // Update tombol remove
-            updateDasarButtons();
+            updateHasilButtons();
         });
     }
     
     // Initial update buttons
-    updateDasarButtons();
+    updateHasilButtons();
 }
 
 // ========== NOTIFICATION FUNCTIONS ==========
@@ -914,7 +935,7 @@ document.getElementById('formEditLhpd')?.addEventListener('submit', function(e) 
 
 // ========== INITIALIZE ON PAGE LOAD ==========
 document.addEventListener('DOMContentLoaded', function() {
-    setupDasarFields();
+    setupHasilFields();  // Ganti dari setupDasarFields ke setupHasilFields
     initializeFileUpload();
 });
 </script>

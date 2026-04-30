@@ -94,6 +94,16 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
+        
+        .hasil-list {
+            margin: 0;
+            padding-left: 20px;
+            text-align: justify;
+        }
+        
+        .hasil-list li {
+            margin-bottom: 4px;
+        }
 
         /* SPACER ANTAR BAGIAN */
         .section-spacer {
@@ -212,26 +222,25 @@
     // DASAR HUKUM (Dasar) - ambil dari SPT snapshot
     $dasarList = [];
     
-    // Coba ambil dari property dasar_list (jika ada)
+    // Coba ambil dari property dasar_list
     if (isset($dasarList) && is_array($dasarList) && count($dasarList) > 0) {
         // sudah ada
+    } elseif (isset($lhpd->dasar_list) && $lhpd->dasar_list instanceof \Illuminate\Support\Collection && $lhpd->dasar_list->count() > 0) {
+        $dasarList = $lhpd->dasar_list->toArray();
     } elseif (isset($lhpd->dasar_list) && is_array($lhpd->dasar_list) && count($lhpd->dasar_list) > 0) {
         $dasarList = $lhpd->dasar_list;
     } elseif (isset($lhpd->dasar)) {
         if (is_array($lhpd->dasar)) {
             $dasarList = $lhpd->dasar;
         } elseif (is_string($lhpd->dasar)) {
-            // Coba parse sebagai JSON
             $decoded = json_decode($lhpd->dasar, true);
             if (is_array($decoded) && count($decoded) > 0) {
                 $dasarList = $decoded;
             } else {
-                // Pisahkan berdasarkan baris
                 $lines = explode("\n", $lhpd->dasar);
                 foreach ($lines as $line) {
                     $line = trim($line);
                     if (!empty($line)) {
-                        // Hapus nomor urut di awal jika ada
                         $cleaned = preg_replace('/^\d+\.\s*/', '', $line);
                         $dasarList[] = $cleaned;
                     }
@@ -240,10 +249,37 @@
         }
     }
     
-    // Fallback jika masih kosong
     if (!is_array($dasarList)) $dasarList = [];
     if (empty($dasarList)) {
         $dasarList = ['Data dasar tidak tersedia'];
+    }
+
+    // ======================== HASIL LHPD (JSON ARRAY) =========================
+    $hasilList = [];
+    
+    if (isset($hasilList) && is_array($hasilList) && count($hasilList) > 0) {
+        // sudah ada
+    } elseif (isset($lhpd->hasil_list) && $lhpd->hasil_list instanceof \Illuminate\Support\Collection && $lhpd->hasil_list->count() > 0) {
+        $hasilList = $lhpd->hasil_list->toArray();
+    } elseif (isset($lhpd->hasil_list) && is_array($lhpd->hasil_list) && count($lhpd->hasil_list) > 0) {
+        $hasilList = $lhpd->hasil_list;
+    } elseif (isset($lhpd->hasil)) {
+        if (is_array($lhpd->hasil)) {
+            $hasilList = $lhpd->hasil;
+        } elseif (is_string($lhpd->hasil)) {
+            $decoded = json_decode($lhpd->hasil, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                $hasilList = $decoded;
+            } else {
+                // Jika bukan JSON, treat sebagai single string
+                $hasilList = [trim($lhpd->hasil)];
+            }
+        }
+    }
+    
+    if (!is_array($hasilList)) $hasilList = [];
+    if (empty($hasilList)) {
+        $hasilList = ['___'];
     }
 
     // Format tanggal Indonesia
@@ -277,9 +313,6 @@
 
     // Keperluan
     $keperluan = isset($lhpd->tujuan) ? $lhpd->tujuan : '';
-    
-    // Hasil
-    $hasilTeks = isset($lhpd->hasil) ? $lhpd->hasil : '';
 
     // Tempat dan tanggal laporan
     $tempat = '';
@@ -348,10 +381,15 @@
     $pegawaiCollection = collect();
     if (isset($pegawaiList) && $pegawaiList instanceof \Illuminate\Support\Collection) {
         $pegawaiCollection = $pegawaiList;
-    } elseif (isset($lhpd->pegawai_list_from_snapshot) && $lhpd->pegawai_list_from_snapshot instanceof \Illuminate\Support\Collection) {
-        $pegawaiCollection = $lhpd->pegawai_list_from_snapshot;
+    } elseif (isset($lhpd->pegawai_list) && $lhpd->pegawai_list instanceof \Illuminate\Support\Collection) {
+        $pegawaiCollection = $lhpd->pegawai_list;
     } elseif (isset($lhpd->pegawai_snapshot) && is_array($lhpd->pegawai_snapshot)) {
         $pegawaiCollection = collect($lhpd->pegawai_snapshot);
+    } elseif (isset($lhpd->pegawai_snapshot) && is_string($lhpd->pegawai_snapshot)) {
+        $decoded = json_decode($lhpd->pegawai_snapshot, true);
+        if (is_array($decoded)) {
+            $pegawaiCollection = collect($decoded);
+        }
     }
 ?>
 
@@ -406,14 +444,22 @@
 
 <div class="section-spacer"></div>
 
-<!-- IV. HASIL -->
+<!-- IV. HASIL (JSON ARRAY FORMAT) -->
 <table class="content-table">
     <tr>
         <td class="label-col">IV.</td>
         <td class="ket-col">Hasil</td>
         <td class="titikdua-col">:</td>
         <td class="content-col" colspan="3">
-            <div class="hasil-text"><?php echo nl2br(e($hasilTeks)) ?: '___'; ?></div>
+            <?php if(count($hasilList) > 1): ?>
+                <ul class="hasil-list">
+                    <?php $__currentLoopData = $hasilList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $hasilItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($hasilItem); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </ul>
+            <?php else: ?>
+                <div class="hasil-text"><?php echo e($hasilList[0] ?: '___'); ?></div>
+            <?php endif; ?>
         </td>
     </tr>
 </table>
@@ -496,4 +542,4 @@
 <div class="clearfix"></div>
 
 </body>
-</html>  <?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/lhpd-pdf.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/lhpd-pdf.blade.php ENDPATH**/ ?>

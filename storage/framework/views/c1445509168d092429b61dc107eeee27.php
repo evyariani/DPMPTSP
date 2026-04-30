@@ -791,9 +791,5 @@ programSelect.addEventListener('change', updateDetailProgram);
 hitungLamaPerjadin();
 </script>
 <?php $__env->stopSection(); ?>
-<<<<<<< HEAD:storage/framework/views/b8dcdfbc120a5642baf3b1fe99cb703c.php
-<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\DPMPTSP\DPMPTSP\resources\views/admin/spd-edit.blade.php ENDPATH**/ ?>
-=======
 
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/spd-edit.blade.php ENDPATH**/ ?>
->>>>>>> 1f6d5892f27f21c66f85cde1faf6f091fce20555:storage/framework/views/c1445509168d092429b61dc107eeee27.php

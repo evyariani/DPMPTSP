@@ -1,8 +1,4 @@
-<<<<<<< HEAD:storage/framework/views/dfd914f962b1f5f983e48e1867e8dc5b.php
-<?php $__env->startSection('title', 'Surat Perintah Dinas (SPD) - Halaman Depan'); ?>
-=======
 <?php $__env->startSection('title', 'Surat Perintah Dinas (SPD)'); ?>
->>>>>>> 1f6d5892f27f21c66f85cde1faf6f091fce20555:storage/framework/views/6ac85d76b0af24c0f65cb6eea9f24d83.php
 
 <?php $__env->startSection('content'); ?>
 <style>
@@ -732,4 +728,4 @@ window.onclick = function(event) {
 }
 </script>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\DPMPTSP\DPMPTSP\resources\views/admin/spd.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\POLITALA\PKL\dpmptsp\resources\views/admin/spd.blade.php ENDPATH**/ ?>

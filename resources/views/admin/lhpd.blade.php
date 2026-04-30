@@ -408,18 +408,17 @@
                     <td class="px-4 py-4">
                         @php 
                             $dasarList = $lhpd->dasar_list;
-                            $dasarCount = $dasarList ? (is_array($dasarList) ? count($dasarList) : $dasarList->count()) : 0;
-                            $dasarArray = is_array($dasarList) ? $dasarList : ($dasarList ? $dasarList->toArray() : []);
+                            $dasarArray = $dasarList ? (is_array($dasarList) ? $dasarList : ($dasarList->toArray() ?? [])) : [];
                         @endphp
-                        @if($dasarCount > 0)
+                        @if(count($dasarArray) > 0)
                             <div class="flex flex-wrap gap-1">
                                 @foreach(array_slice($dasarArray, 0, 2) as $dasar)
                                     <span class="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 text-gray-700" title="{{ $dasar }}">
                                         <i class="fas fa-gavel text-gray-400 mr-1"></i> {{ Str::limit($dasar, 20) }}
                                     </span>
                                 @endforeach
-                                @if($dasarCount > 2)
-                                    <button onclick="showFullDasar(this, {{ json_encode($dasarArray) }})" class="text-blue-500 text-xs">+{{ $dasarCount - 2 }}</button>
+                                @if(count($dasarArray) > 2)
+                                    <button onclick="showFullDasar(this, {{ json_encode($dasarArray) }})" class="text-blue-500 text-xs">+{{ count($dasarArray) - 2 }}</button>
                                 @endif
                             </div>
                         @else
@@ -429,7 +428,7 @@
 
                     <!-- Tujuan -->
                     <td class="px-4 py-4">
-                        <div class="text-sm text-gray-700 line-clamp-2" title="{{ $lhpd->tujuan }}">{{ Str::limit($lhpd->tujuan, 50) }}</div>
+                        <div class="text-sm text-gray-700 line-clamp-2" title="{{ $lhpd->tujuan }}">{{ Str::limit($lhpd->tujuan ?? '-', 50) }}</div>
                     </td>
 
                     <!-- Tanggal Berangkat -->
@@ -442,10 +441,16 @@
                         {{ $lhpd->tempat_tujuan_snapshot ?: '-' }}
                     </td>
 
-                    <!-- Hasil LHPD -->
+                    <!-- Hasil LHPD (dari JSON array) -->
                     <td class="px-4 py-4">
-                        @if($lhpd->hasil)
-                            <div class="text-sm text-gray-700 line-clamp-2" title="{{ $lhpd->hasil }}">{{ Str::limit($lhpd->hasil, 60) }}</div>
+                        @php
+                            $hasilList = $lhpd->hasil_list;
+                            $hasilArray = $hasilList ? (is_array($hasilList) ? $hasilList : ($hasilList->toArray() ?? [])) : [];
+                        @endphp
+                        @if(count($hasilArray) > 0)
+                            <div class="text-sm text-gray-700 line-clamp-2" title="{{ implode('; ', $hasilArray) }}">
+                                {{ Str::limit(implode('; ', $hasilArray), 60) }}
+                            </div>
                             <span class="inline-flex items-center mt-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">Selesai</span>
                         @else
                             <span class="text-gray-400 text-sm italic">Perlu diisi</span>
@@ -490,7 +495,7 @@
                             <a href="{{ route('lhpd.preview-pdf', $lhpd->id_lhpd) }}" target="_blank" class="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 tooltip" title="Preview PDF">
                                 <i class="fas fa-print"></i>
                             </a>
-                            <button onclick="showDeleteConfirmation({{ $lhpd->id_lhpd }}, '{{ addslashes(Str::limit($lhpd->tujuan, 50)) }}', '{{ addslashes($lhpd->tanggal_berangkat ? \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') : '-') }}')" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 tooltip" title="Hapus LHPD">
+                            <button onclick="showDeleteConfirmation({{ $lhpd->id_lhpd }}, '{{ addslashes(Str::limit($lhpd->tujuan ?? '-', 50)) }}', '{{ addslashes($lhpd->tanggal_berangkat ? \Carbon\Carbon::parse($lhpd->tanggal_berangkat)->format('d/m/Y') : '-') }}')" class="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 tooltip" title="Hapus LHPD">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -610,6 +615,26 @@
     </div>
 </div>
 
+<!-- Modal Full Hasil -->
+<div id="full-hasil-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 hidden">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Hasil Perjalanan</h3>
+                    <button onclick="hideFullHasilModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <div class="bg-gray-50 border rounded-lg p-4 max-h-96 overflow-y-auto">
+                    <ul id="full-hasil-list" class="list-disc list-inside space-y-2"></ul>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="hideFullHasilModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
@@ -722,10 +747,19 @@ function showFullDasar(el, list) {
 }
 function hideFullDasarModal() { document.getElementById('full-dasar-modal').classList.add('hidden'); }
 
+// ========== FULL HASIL ==========
+function showFullHasil(el, list) {
+    const container = document.getElementById('full-hasil-list');
+    container.innerHTML = '';
+    list.forEach(h => { let li = document.createElement('li'); li.className = 'text-sm text-gray-700'; li.textContent = h; container.appendChild(li); });
+    document.getElementById('full-hasil-modal').classList.remove('hidden');
+}
+function hideFullHasilModal() { document.getElementById('full-hasil-modal').classList.add('hidden'); }
+
 // ========== CLOSE MODALS ==========
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-        hideDeleteModal(); hideImageModal(); hideGalleryModal(); hideFullDasarModal();
+        hideDeleteModal(); hideImageModal(); hideGalleryModal(); hideFullDasarModal(); hideFullHasilModal();
     }
     if (e.key === 'ArrowLeft') prevImage();
     if (e.key === 'ArrowRight') nextImage();
@@ -735,6 +769,7 @@ window.onclick = e => {
     if (e.target === document.getElementById('image-modal')) hideImageModal();
     if (e.target === document.getElementById('gallery-modal')) hideGalleryModal();
     if (e.target === document.getElementById('full-dasar-modal')) hideFullDasarModal();
+    if (e.target === document.getElementById('full-hasil-modal')) hideFullHasilModal();
 }
 </script>
 @endsection

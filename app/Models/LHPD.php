@@ -16,13 +16,13 @@ class Lhpd extends Model
 
     protected $fillable = [
         'spt_id',
-        'dasar',                    // INPUT MANUAL, bukan dari SPT
+        'dasar',                    // SNAPSHOT DARI SPT (bukan input manual)
         'tujuan',                   // snapshot dari SPT
         'pegawai_snapshot',         // snapshot dari SPT
         'tanggal_berangkat',        // snapshot dari SPD
         'id_daerah',                // referensi daerah tujuan
         'tempat_tujuan_snapshot',   // snapshot nama tempat tujuan
-        'hasil',
+        'hasil',                    // JSON (formatnya seperti dasar)
         'tempat_dikeluarkan',
         'tempat_dikeluarkan_snapshot',
         'tanggal_lhpd',
@@ -33,7 +33,8 @@ class Lhpd extends Model
     ];
 
     protected $casts = [
-        'dasar' => 'array',              // JSON untuk multiple dasar
+        'dasar' => 'array',              // JSON dari SPT (bisa multiple dasar)
+        'hasil' => 'array',              // JSON seperti dasar
         'pegawai_snapshot' => 'array',
         'foto' => 'array',
         'tanggal_berangkat' => 'date',
@@ -68,10 +69,10 @@ class Lhpd extends Model
         return $this->belongsTo(Daerah::class, 'tempat_dikeluarkan', 'id');
     }
 
-    // ========== ACCESSORS - DASAR (INPUT MANUAL) ==========
+    // ========== ACCESSORS - DASAR (DARI SPT) ==========
     
     /**
-     * Mendapatkan daftar dasar perjalanan dari input manual LHPD
+     * Mendapatkan daftar dasar perjalanan (snapshot dari SPT)
      * Gunakan: $lhpd->dasar_list
      */
     public function getDasarListAttribute()
@@ -114,6 +115,59 @@ class Lhpd extends Model
         
         $html = '<ul class="list-disc list-inside">';
         foreach ($dasarList as $item) {
+            $html .= '<li>' . e($item) . '</li>';
+        }
+        $html .= '</ul>';
+        
+        return $html;
+    }
+
+    // ========== ACCESSORS - HASIL (JSON SEPERTI DASAR) ==========
+    
+    /**
+     * Mendapatkan daftar hasil perjalanan
+     * Gunakan: $lhpd->hasil_list
+     */
+    public function getHasilListAttribute()
+    {
+        if (empty($this->hasil)) {
+            return collect();
+        }
+        
+        $hasil = is_array($this->hasil) ? $this->hasil : json_decode($this->hasil, true);
+        
+        return collect($hasil);
+    }
+    
+    /**
+     * Menampilkan hasil sebagai teks dengan pemisah
+     * Gunakan: $lhpd->hasil_text
+     */
+    public function getHasilTextAttribute(): string
+    {
+        $hasilList = $this->getHasilListAttribute();
+        
+        if ($hasilList->isEmpty()) {
+            return '-';
+        }
+        
+        return $hasilList->implode(', ');
+    }
+    
+    /**
+     * Menampilkan hasil sebagai list HTML
+     * Gunakan: {!! $lhpd->hasil_html !!}
+     */
+    public function getHasilHtmlAttribute(): string
+    {
+        $hasilList = $this->getHasilListAttribute();
+        
+        if ($hasilList->isEmpty()) {
+            return '-';
+        }
+        
+        $html = '<ul class="list-disc list-inside">';
+        foreach ($hasilList as $item) {
             $html .= '<li>' . e($item) . '</li>';
         }
         $html .= '</ul>';
@@ -198,7 +252,6 @@ class Lhpd extends Model
         }
         
         return collect($fotos)->map(function ($foto) {
-            // Cek apakah sudah ada storage path atau raw path
             if (str_starts_with($foto, 'http')) {
                 return $foto;
             }
@@ -314,7 +367,7 @@ class Lhpd extends Model
         
         return $query->where(function ($q) use ($search) {
             $q->where('tujuan', 'like', "%{$search}%")
-              ->orWhere('hasil', 'like', "%{$search}%")
+              ->orWhereJsonContains('hasil', $search)  // hasil JSON
               ->orWhere('tempat_tujuan_snapshot', 'like', "%{$search}%")
               ->orWhere('tempat_dikeluarkan_snapshot', 'like', "%{$search}%")
               ->orWhereJsonContains('dasar', $search);
@@ -343,5 +396,22 @@ class Lhpd extends Model
         }
         
         return $this->tanggal_berangkat->diffInDays($this->tanggal_lhpd) + 1;
+    }
+    
+    /**
+     * Buat LHPD dari data SPT (termasuk snapshot dasar)
+     */
+    public static function createFromSpt(SPT $spt, array $additionalData = []): self
+    {
+        $lhpd = new self();
+        $lhpd->spt_id = $spt->id_spt;
+        $lhpd->dasar = $spt->dasar;  // COPY DASAR DARI SPT
+        $lhpd->tujuan = $spt->tujuan;
+        $lhpd->pegawai_snapshot = $spt->pegawai_snapshot;
+        
+        $lhpd->fill($additionalData);
+        $lhpd->save();
+        
+        return $lhpd;
     }
 }

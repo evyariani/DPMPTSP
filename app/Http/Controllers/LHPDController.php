@@ -25,12 +25,10 @@ class LhpdController extends Controller
      */
     private function getPelaihari()
     {
-        // Cari kecamatan Pelaihari di Kabupaten Tanah Laut
         $pelaihari = Daerah::where('nama', 'Pelaihari')
             ->where('tingkat', 'kecamatan')
             ->first();
         
-        // Fallback: coba cari berdasarkan kode
         if (!$pelaihari) {
             $pelaihari = Daerah::where('kode', '630101')->first();
         }
@@ -46,12 +44,12 @@ class LhpdController extends Controller
         try {
             $query = Lhpd::with(['daerahTujuan', 'tempatDikeluarkan']);
 
-            // Search
+            // Search (termasuk pencarian di JSON dasar dan hasil)
             if ($request->has('search') && $request->search != '') {
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
                     $q->where('tujuan', 'like', "%{$search}%")
-                      ->orWhere('hasil', 'like', "%{$search}%")
+                      ->orWhereJsonContains('hasil', $search)  // hasil JSON
                       ->orWhere('tempat_tujuan_snapshot', 'like', "%{$search}%")
                       ->orWhere('tempat_dikeluarkan_snapshot', 'like', "%{$search}%")
                       ->orWhereJsonContains('dasar', $search)
@@ -88,13 +86,10 @@ class LhpdController extends Controller
                 $query->where('tempat_dikeluarkan', $request->tempat_dikeluarkan);
             }
 
-            // Order by id_lhpd descending (terbaru)
             $query->orderBy('id_lhpd', 'desc');
 
-            // Paginate
             $lhpdList = $query->paginate(10);
 
-            // Data untuk filter dropdown (hanya kabupaten/kota di Kalsel)
             $daerahList = Daerah::where('tingkat', 'kabupaten')
                 ->orWhere('tingkat', 'kota')
                 ->orderBy('nama')
@@ -114,11 +109,11 @@ class LhpdController extends Controller
      */
     public function create()
     {
-        // Hanya ambil kabupaten/kota di Kalsel untuk tujuan
         $daerahList = Daerah::where('tingkat', 'kabupaten')
             ->orWhere('tingkat', 'kota')
             ->orderBy('nama')
             ->get();
+        
         $sptList = SPT::with(['pegawai_list'])->orderBy('id_spt', 'desc')->get();
         
         return view('admin.lhpd-create', compact('daerahList', 'sptList'));
@@ -131,9 +126,8 @@ class LhpdController extends Controller
     {
         $validated = $request->validate([
             'spt_id' => 'required|exists:spt,id_spt',
-            'dasar' => 'nullable|array',
-            'dasar.*' => 'nullable|string|max:500',
-            'hasil' => 'required|string',
+            'hasil' => 'required|array',  // hasil wajib array/JSON
+            'hasil.*' => 'nullable|string|max:500',
             'tanggal_lhpd' => 'required|date',
             'fotos' => 'nullable|array',
             'fotos.*' => 'image|mimes:jpeg,png,jpg|max:10240'
@@ -153,10 +147,11 @@ class LhpdController extends Controller
                 }
             }
 
-            // Ambil snapshot dari SPT
+            // DASAR DIAMBIL DARI SPT (snapshot)
+            $dasarSnapshot = $spt->dasar ?? [];
+
             $pegawaiSnapshot = $spt->pegawai_snapshot;
             
-            // Fallback untuk data lama jika SPT tidak punya snapshot
             if (empty($pegawaiSnapshot)) {
                 $pegawaiSnapshot = $this->createPegawaiSnapshot($spt->pegawai);
             }
@@ -166,20 +161,19 @@ class LhpdController extends Controller
                 $tempatTujuanSnapshot = $spd->tempatTujuan->nama;
             }
             
-            // Ambil data Pelaihari dari database
             $pelaihari = $this->getPelaihari();
             $tempatDikeluarkanId = $pelaihari ? $pelaihari->id : null;
             $tempatDikeluarkanSnapshot = $pelaihari ? $pelaihari->nama : 'Pelaihari';
 
             $data = [
                 'spt_id' => $spt->id_spt,
-                'dasar' => $request->dasar ?? [],
+                'dasar' => $dasarSnapshot,  // LANGSUNG DARI SPT
                 'tujuan' => $spt->tujuan,
                 'pegawai_snapshot' => $pegawaiSnapshot,
                 'tanggal_berangkat' => $spd ? $spd->tanggal_berangkat : $spt->tanggal,
                 'id_daerah' => $spd ? $spd->tempat_tujuan : null,
                 'tempat_tujuan_snapshot' => $tempatTujuanSnapshot,
-                'hasil' => $validated['hasil'],
+                'hasil' => $validated['hasil'],  // JSON ARRAY
                 'tempat_dikeluarkan' => $tempatDikeluarkanId,
                 'tempat_dikeluarkan_snapshot' => $tempatDikeluarkanSnapshot,
                 'tanggal_lhpd' => $validated['tanggal_lhpd'],
@@ -189,7 +183,7 @@ class LhpdController extends Controller
                 'total_biaya_snapshot' => ($spd->uang_harian ?? 0) + ($spd->uang_transport ?? 0)
             ];
 
-            $lhpd = Lhpd::create($data);
+            Lhpd::create($data);
             DB::commit();
 
             return redirect()->route('lhpd.index')
@@ -214,9 +208,10 @@ class LhpdController extends Controller
             
             $pegawaiList = $lhpd->pegawai_list;
             $dasarList = $lhpd->dasar_list;
+            $hasilList = $lhpd->hasil_list;  // HASIL LIST
             $fotoUrls = $lhpd->foto_urls;
             
-            return view('admin.lhpd-show', compact('lhpd', 'pegawaiList', 'dasarList', 'fotoUrls'));
+            return view('admin.lhpd-show', compact('lhpd', 'pegawaiList', 'dasarList', 'hasilList', 'fotoUrls'));
         } catch (\Exception $e) {
             return redirect()->route('lhpd.index')
                 ->with('error', 'Data LHPD tidak ditemukan.');
@@ -226,44 +221,43 @@ class LhpdController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-   public function edit($id)
-{
-    try {
-        $lhpd = Lhpd::findOrFail($id);
-        
-        // Hanya ambil kabupaten/kota di Kalsel untuk tujuan
-        $daerahList = Daerah::where('tingkat', 'kabupaten')
-            ->orWhere('tingkat', 'kota')
-            ->orderBy('nama')
-            ->get();
-        
-        $fotoUrls = $lhpd->foto_urls;
-        $existingFotos = is_array($lhpd->foto) ? $lhpd->foto : json_decode($lhpd->foto, true) ?? [];
-        $dasarList = $lhpd->dasar_list;
-        
-        // AMBIL ID PELAIHARI DARI DATABASE
-        $pelaihari = Daerah::where('nama', 'Pelaihari')
-            ->where('tingkat', 'kecamatan')
-            ->first();
-        
-        $pelaihariId = $pelaihari ? $pelaihari->id : null;
-        
-        return view('admin.lhpd-edit', compact('lhpd', 'daerahList', 'fotoUrls', 'existingFotos', 'dasarList', 'pelaihariId'));
-        
-    } catch (\Exception $e) {
-        return redirect()->route('lhpd.index')
-            ->with('error', 'Data LHPD tidak ditemukan.');
+    public function edit($id)
+    {
+        try {
+            $lhpd = Lhpd::findOrFail($id);
+            
+            $daerahList = Daerah::where('tingkat', 'kabupaten')
+                ->orWhere('tingkat', 'kota')
+                ->orderBy('nama')
+                ->get();
+            
+            $fotoUrls = $lhpd->foto_urls;
+            $existingFotos = is_array($lhpd->foto) ? $lhpd->foto : json_decode($lhpd->foto, true) ?? [];
+            $dasarList = $lhpd->dasar_list;
+            $hasilList = $lhpd->hasil_list;  // HASIL LIST EDIT
+            
+            $pelaihari = Daerah::where('nama', 'Pelaihari')
+                ->where('tingkat', 'kecamatan')
+                ->first();
+            
+            $pelaihariId = $pelaihari ? $pelaihari->id : null;
+            
+            return view('admin.lhpd-edit', compact('lhpd', 'daerahList', 'fotoUrls', 'existingFotos', 'dasarList', 'hasilList', 'pelaihariId'));
+            
+        } catch (\Exception $e) {
+            return redirect()->route('lhpd.index')
+                ->with('error', 'Data LHPD tidak ditemukan.');
+        }
     }
-}
+
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'dasar' => 'nullable|array',
-            'dasar.*' => 'nullable|string|max:500',
-            'hasil' => 'required|string',
+            'hasil' => 'required|array',  // hasil wajib array JSON
+            'hasil.*' => 'nullable|string|max:500',
             'tanggal_lhpd' => 'required|date',
             'fotos' => 'nullable|array',
             'fotos.*' => 'image|mimes:jpeg,png,jpg|max:10240',
@@ -274,6 +268,8 @@ class LhpdController extends Controller
             DB::beginTransaction();
 
             $lhpd = Lhpd::findOrFail($id);
+            
+            // DASAR TIDAK DIUPDATE (tetap dari SPT snapshot)
             
             $existingFotos = is_array($lhpd->foto) ? $lhpd->foto : json_decode($lhpd->foto, true) ?? [];
             
@@ -298,14 +294,12 @@ class LhpdController extends Controller
                 }
             }
 
-            // Ambil data Pelaihari dari database
             $pelaihari = $this->getPelaihari();
             $tempatDikeluarkanId = $pelaihari ? $pelaihari->id : null;
             $tempatDikeluarkanSnapshot = $pelaihari ? $pelaihari->nama : 'Pelaihari';
 
             $updateData = [
-                'dasar' => $request->dasar ?? [],
-                'hasil' => $validated['hasil'],
+                'hasil' => $validated['hasil'],  // UPDATE HASIL JSON
                 'tempat_dikeluarkan' => $tempatDikeluarkanId,
                 'tempat_dikeluarkan_snapshot' => $tempatDikeluarkanSnapshot,
                 'tanggal_lhpd' => $validated['tanggal_lhpd'],
@@ -398,7 +392,7 @@ class LhpdController extends Controller
     }
 
     /**
-     * Helper untuk membuat snapshot pegawai dari array ID pegawai (FALLBACK untuk data lama)
+     * Helper untuk membuat snapshot pegawai dari array ID pegawai (FALLBACK)
      */
     private function createPegawaiSnapshot($pegawaiIds)
     {
@@ -430,9 +424,7 @@ class LhpdController extends Controller
     }
 
     /**
-     * =============================================
      * OTOMATIS BUAT LHPD SAAT SPT DITAMBAH
-     * =============================================
      */
     public function createLhpdFromSpt(SPT $spt)
     {
@@ -445,6 +437,10 @@ class LhpdController extends Controller
             }
             
             $spd = SPD::where('spt_id', $spt->id_spt)->first();
+            
+            // DASAR LANGSUNG DARI SPT
+            $dasarSnapshot = $spt->dasar ?? [];
+            
             $pegawaiSnapshot = $spt->pegawai_snapshot;
             
             if (empty($pegawaiSnapshot)) {
@@ -456,14 +452,13 @@ class LhpdController extends Controller
                 $tempatTujuanSnapshot = $spd->tempatTujuan->nama;
             }
             
-            // Ambil data Pelaihari dari database
             $pelaihari = $this->getPelaihari();
             $tempatDikeluarkanId = $pelaihari ? $pelaihari->id : null;
             $tempatDikeluarkanSnapshot = $pelaihari ? $pelaihari->nama : 'Pelaihari';
             
             $data = [
                 'spt_id' => $spt->id_spt,
-                'dasar' => [],
+                'dasar' => $dasarSnapshot,  // DARI SPT
                 'tujuan' => $spt->tujuan,
                 'pegawai_snapshot' => $pegawaiSnapshot,
                 'tanggal_berangkat' => $spd ? $spd->tanggal_berangkat : $spt->tanggal,
@@ -492,9 +487,7 @@ class LhpdController extends Controller
     }
 
     /**
-     * =============================================
      * OTOMATIS UPDATE LHPD SAAT SPD DIUPDATE
-     * =============================================
      */
     public function updateLhpdFromSpd(SPD $spd)
     {
@@ -515,6 +508,12 @@ class LhpdController extends Controller
             $updateData = [];
             $isUpdated = false;
             
+            // Update DASAR dari SPT (bisa berubah)
+            if (json_encode($lhpd->dasar) != json_encode($spt->dasar)) {
+                $updateData['dasar'] = $spt->dasar ?? [];
+                $isUpdated = true;
+            }
+            
             if ($lhpd->tanggal_berangkat != $spd->tanggal_berangkat) {
                 $updateData['tanggal_berangkat'] = $spd->tanggal_berangkat;
                 $isUpdated = true;
@@ -533,12 +532,11 @@ class LhpdController extends Controller
                 $isUpdated = true;
             }
             
-            if ($lhpd->pegawai_snapshot != $spt->pegawai_snapshot) {
+            if (json_encode($lhpd->pegawai_snapshot) != json_encode($spt->pegawai_snapshot)) {
                 $updateData['pegawai_snapshot'] = $spt->pegawai_snapshot;
                 $isUpdated = true;
             }
             
-            // Update biaya snapshot dari SPD
             if ($lhpd->uang_harian_snapshot != ($spd->uang_harian ?? 0)) {
                 $updateData['uang_harian_snapshot'] = $spd->uang_harian ?? 0;
                 $isUpdated = true;
@@ -581,6 +579,7 @@ class LhpdController extends Controller
                     'success' => true,
                     'data' => $lhpd,
                     'dasar_list' => $lhpd->dasar_list,
+                    'hasil_list' => $lhpd->hasil_list,
                     'foto_urls' => $lhpd->foto_urls
                 ]);
             }
@@ -620,6 +619,7 @@ class LhpdController extends Controller
                     'success' => true,
                     'data' => $lhpd,
                     'dasar_list' => $lhpd->dasar_list,
+                    'hasil_list' => $lhpd->hasil_list,
                     'foto_urls' => $lhpd->foto_urls
                 ]);
             }
@@ -647,9 +647,10 @@ class LhpdController extends Controller
             
             $pegawaiList = $lhpd->pegawai_list;
             $dasarList = $lhpd->dasar_list;
+            $hasilList = $lhpd->hasil_list;
             $fotoUrls = $lhpd->foto_urls;
             
-            $pdf = Pdf::loadView('admin.lhpd-pdf', compact('lhpd', 'pegawaiList', 'dasarList', 'fotoUrls'));
+            $pdf = Pdf::loadView('admin.lhpd-pdf', compact('lhpd', 'pegawaiList', 'dasarList', 'hasilList', 'fotoUrls'));
             $pdf->setPaper('A4', 'portrait');
             
             $namaFile = $this->generatePdfFilename($lhpd, 'LHPD-', '.pdf');
@@ -672,9 +673,10 @@ class LhpdController extends Controller
             
             $pegawaiList = $lhpd->pegawai_list;
             $dasarList = $lhpd->dasar_list;
+            $hasilList = $lhpd->hasil_list;
             $fotoUrls = $lhpd->foto_urls;
             
-            $pdf = Pdf::loadView('admin.lhpd-pdf', compact('lhpd', 'pegawaiList', 'dasarList', 'fotoUrls'));
+            $pdf = Pdf::loadView('admin.lhpd-pdf', compact('lhpd', 'pegawaiList', 'dasarList', 'hasilList', 'fotoUrls'));
             $pdf->setPaper('A4', 'portrait');
             
             $namaFile = $this->generatePdfFilename($lhpd, 'LHPD-', '.pdf');
@@ -699,7 +701,7 @@ class LhpdController extends Controller
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
                     $q->where('tujuan', 'like', "%{$search}%")
-                      ->orWhere('hasil', 'like', "%{$search}%")
+                      ->orWhereJsonContains('hasil', $search)
                       ->orWhere('tempat_tujuan_snapshot', 'like', "%{$search}%")
                       ->orWhere('tempat_dikeluarkan_snapshot', 'like', "%{$search}%")
                       ->orWhereJsonContains('dasar', $search)
@@ -753,6 +755,7 @@ class LhpdController extends Controller
             $no = 1;
             foreach ($lhpdList as $lhpd) {
                 $dasarText = $lhpd->dasar_list->implode("\n");
+                $hasilText = $lhpd->hasil_list->implode("\n");
                 
                 $sheet->setCellValue('A' . $row, $no);
                 $sheet->setCellValue('B' . $row, $dasarText);
@@ -762,7 +765,7 @@ class LhpdController extends Controller
                 $daerahTujuan = $lhpd->tempat_tujuan_snapshot ?? ($lhpd->daerahTujuan?->nama ?? '-');
                 $sheet->setCellValue('E' . $row, $daerahTujuan);
                 
-                $sheet->setCellValue('F' . $row, $lhpd->hasil ?? '-');
+                $sheet->setCellValue('F' . $row, $hasilText);
                 
                 $tempatDikeluarkan = $lhpd->tempat_dikeluarkan_snapshot ?? 'Pelaihari';
                 $sheet->setCellValue('G' . $row, $tempatDikeluarkan);
@@ -771,6 +774,7 @@ class LhpdController extends Controller
                 $sheet->setCellValue('I' . $row, $lhpd->foto_count);
                 
                 $sheet->getStyle('B' . $row)->getAlignment()->setWrapText(true);
+                $sheet->getStyle('F' . $row)->getAlignment()->setWrapText(true);
                 $sheet->getStyle('A' . $row . ':I' . $row)->applyFromArray([
                     'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                     'alignment' => ['vertical' => Alignment::VERTICAL_TOP]
